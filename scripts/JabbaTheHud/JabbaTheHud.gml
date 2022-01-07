@@ -108,34 +108,28 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     	valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
     	
     	//DOESN'T WORK YET
-    	if value > quota {
-    		var _i=0; repeat(digitsLimit){
-    			array_set(digitsColor, _i, colorQuotaReached)
-    			array_set(matchingDigit, _i, true)
-    			_i++
+				if value > quota {
+					var _i=0; repeat(digitsLimit){
+						array_set(digitsColor, _i, colorQuotaReached)
+						array_set(matchingDigit, _i, true)
+						_i++
+					}
+					return
+				}
+				else{
+					var _i=0; repeat(digitsLimit){
+						var _iprev = _i - 1
+						if (_iprev >= 0){
+							matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev]
+						}
+						else{
+							matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i]
+						}
+						
+						digitsColor[_i] = matchingDigit[_i] = true ? colorQuotaReached : colorCounterDefault 
+						_i++
+					}
     		}
-    	}
-    	else{
-    		var _i=0; repeat(digitsLimit){
-    			
-    			if matchingDigit[_i] = false{
-    				if valueDigits[_i] >= quotaDigits[_i]{
-    					digitsColor[_i] = colorQuotaReached
-    					matchingDigit[_i] = true
-    					
-    				}
-    				
-    			}
-    			else{
-    				if valueDigits[_i] < quotaDigits[_i]{
-    					digitsColor[_i] = colorCounterDefault
-						matchingDigit[_i] = false
-    				}
-    			}
-    			
-    			_i++
-    		}
-    	
     	//var _q=0; repeat(digitsLimit){
         //	var _dl, _arrsum
 		//	
@@ -154,6 +148,10 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     SetCounterColor = function(_defaultColor, _reachColor ){
     	
     }
+		
+		IsReached = function(_callback = function(){}){
+			
+		}
     
     
     
