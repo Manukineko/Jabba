@@ -3,6 +3,7 @@
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":0,},
     {"id":{"name":"JabbaTheHud","path":"scripts/JabbaTheHud/JabbaTheHud.yy",},"order":0,},
     {"id":{"name":"oHUD","path":"objects/oHUD/oHUD.yy",},"order":0,},
+    {"id":{"name":"JabbaFont","path":"sprites/JabbaFont/JabbaFont.yy",},"order":0,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},
@@ -48,7 +49,9 @@
   "TextureGroups": [
     {"isScaled":true,"autocrop":true,"border":2,"mipsToGenerate":0,"groupParent":null,"targets":-1,"resourceVersion":"1.3","name":"Default","resourceType":"GMTextureGroup",},
   ],
-  "IncludedFiles": [],
+  "IncludedFiles": [
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"JabbaFont.png","resourceType":"GMIncludedFile",},
+  ],
   "MetaData": {
     "IDEVersion": "2.3.7.606",
   },

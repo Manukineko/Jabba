@@ -48,6 +48,7 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     value = 0
     valueLength = 0
     quota = 0
+    
     valueDigits = []
     quotaDigits = []
     digitsLimit = undefined
@@ -56,6 +57,9 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
 	colorQuotaReached = c_red
 	colorCounterDefault = c_white
 	matchingDigit = []
+	bitmapFont = JabbaFont
+	bitmapFrontFrame = []
+	letterSpacing = sprite_get_width(bitmapFont) + 2 //nope. Must find a better way to do that.
     
     
     
@@ -102,34 +106,35 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     	
     	//Clamp the value from 0 to the limit set for the counter.
     	value = clamp(_value, 0, counterValueLimit)
-    	valueLength = string_length(string(value))
+    	valueLength = CountDigit(value)//string_length(string(value))
     	
     	//Split the value by Units until we reach the limit and store it in an array
     	valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
+    	bitmapFrontFrame = SplitByDigitsToArray(value, digitsLimit)
     	
     	//DOESN'T WORK YET
-				if value > quota {
-					var _i=0; repeat(digitsLimit){
-						array_set(digitsColor, _i, colorQuotaReached)
-						array_set(matchingDigit, _i, true)
-						_i++
-					}
-					return
+		if value > quota {
+			var _i=0; repeat(digitsLimit){
+				array_set(digitsColor, _i, colorQuotaReached)
+				array_set(matchingDigit, _i, true)
+				_i++
+			}
+			return
+		}
+		else{
+			var _i=0; repeat(digitsLimit){
+				var _iprev = _i - 1
+				if (_iprev >= 0){
+					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev])
 				}
 				else{
-					var _i=0; repeat(digitsLimit){
-						var _iprev = _i - 1
-						if (_iprev >= 0){
-							matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev]
-						}
-						else{
-							matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i]
-						}
-						
-						digitsColor[_i] = matchingDigit[_i] = true ? colorQuotaReached : colorCounterDefault 
-						_i++
-					}
-    		}
+					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i])
+				}
+				
+				digitsColor[_i] = matchingDigit[_i] = true ? colorQuotaReached : colorCounterDefault 
+				_i++
+			}
+    	}
     	//var _q=0; repeat(digitsLimit){
         //	var _dl, _arrsum
 		//	
@@ -143,7 +148,7 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     	//}
     	}
     	
-    }
+    
     
     SetCounterColor = function(_defaultColor, _reachColor ){
     	
@@ -157,7 +162,11 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     
     
     Draw = method(self, function(){
-        draw_text_color(x,y,string(value),digitsColor[0],digitsColor[0],digitsColor[0],digitsColor[0],1)
+       //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
+        var _i=digitsLimit-1; repeat(valueLength){
+        	draw_sprite_ext(bitmapFont, bitmapFrontFrame[_i], x+(letterSpacing*_i), y, 1, 1, 0, digitsColor[_i], 1 )
+        	_i--
+        }
         //draw_sprite_ext(fntDefault, )
     })
     
@@ -181,21 +190,17 @@ function JabbaTimerElement() : __hudelement__() constructor{
 /// @func ArraySum
 /// @desc add all value of an array.
 function ArraySum(_array){
-    var _i, _sum = 0, _l, _a
-    
-    _l = array_length(_array)
+    var _i, _sum = 0, _l = array_length(_array),
     
     _i = 0; repeat(_l){
-         _a = _array[_i]
-        if (is_numeric(_a)){
-        _sum += _a
+        if (is_real(_array[_i])){
+        _sum += _array[_i]
         }
         else show_error("[ArraySum] the value at index "+string(_i)+" in Array "+string(_array)+ " is not a NUMERIC value", true)
         
         _i++
     }
     return _sum
-    
 }
 
 ///@func SplitPowerOfTenToArray
@@ -203,53 +208,65 @@ function ArraySum(_array){
 ///@param {int} Value
 ///@param {int} [DigitNumber] //The number of Unit type to go to eg(1=1, 2=10, 3=100, etc) - default = value length (0)
 ///@returns {array}
-function SplitPowerOfTenToArray(_value, _digitsSize = 0){
+function SplitPowerOfTenToArray(_value, _arraySize = 0){
         	
-	var _size, _array, _div, _sum
-	_size = (_digitsSize <= 0) ? string_length(string(_value)) : _digitsSize
+	var _i, _a = [], _div, _sum
 	
-	_array = array_create(_size, 0)
-	//_div = power(10, _size-1)
-	
-	var _i=0; repeat(_size){
+	if _arraySize <=0 {
+		_arraySize = CountDigit(_value)
+	}
+	var _i=0; repeat(_arraySize){
 		
-		_sum = ArraySum(_array);
-		_div = power(10, _size-_i-1)
-	    _array[_i] = ((_value - _sum) div _div) * _div;
+		_sum = ArraySum(_a);
+		_div = power(10, _arraySize-_i-1)
+	    _a[_i] = ((_value - _sum) div _div) * _div;
 		
 		//_div = _div / 10
 		_i++
 	}
-	return _array
+	return _a
 }
 
 /// @func SplitByDigitsToArray
 /// @desc Put each digit of the value in an array
-function SplitByDigitsToArray(_value){
+function SplitByDigitsToArray(_value, _arraySize = 0){
+   	var _a = []
+	if _arraySize <= 0{
+		//we count the number of digit
+		_arraySize = CountDigit(_value)
+	}
+	
+	repeat(_arraySize){
+		
+		_value = _value / 10
+		_a[_arraySize-1] = floor(frac(_value) * 10)
+		_arraySize--
+	}
+	return _a	
+}
+
+/// @func StripPowerOfTensToArray
+/// @desc Remove each Tens of a value and store the remaining in an array
+function StripPowerOfTensToArray(_value){
    	var _l, _a 
-   	_l = string_length(string(_value))
-   	
-   	var _i = _l-1; repeat(_l){
+   	_l = CountDigit(_value)
+	
+	repeat(_l){
    		
    		_value = _value / 10
-   		_a[_i] = frac(_value) * 10
-		_i--
+   		_a[_l-1] = floor(_value)
+		_l--
    	}
 	return _a
 }
 
-/// @func StripPowerOfTensToArray
-/// @desc Remove a Tens of a value and store the result of each strip in an array
-function StripPowerOfTensToArray(_value){
-   	var _l, _a 
-   	_l = string_length(string(_value))
-   	
-   	var _i = _l-1; repeat(_l){
-   		
-   		_value = _value / 10
-   		_a[_i] = floor(_value)
-		_i--
-   	}
-	return _a
+function CountDigit (_value){
+	var _n = 0
+	while(floor(_value) > 0){
+		_value = _value / 10
+		_n++
+	}
+	
+	return _n = 0 ? 1 : _n
 }
 
