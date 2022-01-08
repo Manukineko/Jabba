@@ -3,12 +3,35 @@
 function Jabba(_viewport = 0) constructor {
 	x = 0
 	y = 0
-	var _owner = other.id;
+	//[TEST] tentative to understand scoping while using "private" functions & variablesp
+	elementsList = [];
+	//
+	var _owner = other;
 	__theHud = {};
 	with (__theHud){
 		owner = _owner;
 		viewport = _viewport
+	
 		elementsList = [];
+		//[TEST] tentative to understand scoping while using "private" functions & variablesp
+		__addElement__ = method(other, function(_element){
+			var _list = elementList
+			with (__theHud){
+				array_push(_list, _element)
+				return _element
+			}
+		})
+		
+		//MAYBE LATER if perf are shiesse
+		//__buildDrawList = method(other, function(){
+		//	var _list = elementList
+		//	with(__theHud){
+		//		var _i = 0; repeat(array_length(_list)){
+		//			if _list[_i].isHidden = false
+		//		}
+		//	}
+		//})
+		//
 	}
 	
 	CreateQuotaCounterElement = function(){
@@ -19,6 +42,12 @@ function Jabba(_viewport = 0) constructor {
 			_as = array_length(elementsList)
 			return elementsList[_as-1]
 		}
+		//[TEST] tentative to understand scoping while using "private" functions & variables
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+		//
 	}
 	
 	draw = method(self, function(){
@@ -37,10 +66,16 @@ function Jabba(_viewport = 0) constructor {
 function __hudelement__(/*_hud = undefined*/) constructor{
 	x = other.x
 	y = other.y
+	isHidden = false
 	
 	SetPosition = function(_x, _y){
 	    x = _x;
 	    y = _y;
+	}
+	
+	ToogleHide = function(){
+		
+		isHidden != isHidden
 	}
 }
 
@@ -54,14 +89,23 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     digitsLimit = undefined
     counterValueLimit = undefined
     digitsColor = []
-	colorQuotaReached = c_red
-	colorCounterDefault = c_white
-	matchingDigit = []
-	bitmapFont = JabbaFont
-	bitmapFrontFrame = []
-	letterSpacing = sprite_get_width(bitmapFont) + 2 //nope. Must find a better way to do that.
+		colorQuotaReached = c_red
+		colorCounterDefault = c_white
+		matchingDigit = []
+		spriteFont = JabbaFont
+		spriteFrontFrame = []
+		spriteFontWidth = sprite_get_width(bitmapFont)
+		letterSpacing = 2 //nope. Must find a better way to do that.
     
-    
+    SetSpriteFont = function(_sprite){
+			spriteFont = _sprite
+			
+			spriteFontWidth = sprite_get_width(spriteFont)
+    }
+		
+		SetCounterColor = function(_defaultColor, _reachColor ){
+    	__setElementColor
+		}
     
     SetQuota = function(_quota = 1000, _limit = 9){
     	//quota to reach
@@ -110,16 +154,15 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     	
     	//Split the value by Units until we reach the limit and store it in an array
     	valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
-    	bitmapFrontFrame = SplitByDigitsToArray(value, digitsLimit)
+    	spriteFontFrame = SplitByDigitsToArray(value, digitsLimit)
     	
-    	//DOESN'T WORK YET
 		if value > quota {
 			var _i=0; repeat(digitsLimit){
 				array_set(digitsColor, _i, colorQuotaReached)
 				array_set(matchingDigit, _i, true)
 				_i++
 			}
-			return
+			if !isReach isReach = true
 		}
 		else{
 			var _i=0; repeat(digitsLimit){
@@ -134,25 +177,15 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
 				digitsColor[_i] = matchingDigit[_i] = true ? colorQuotaReached : colorCounterDefault 
 				_i++
 			}
-    	}
-    	//var _q=0; repeat(digitsLimit){
-        //	var _dl, _arrsum
-		//	
-		//	_arrsum = ArraySum(valueDigits);
-        //    _dl = string_repeat("0", (digitsLimit-_q)-1);
-        //    divLimit = string_insert("1", _dl, 1);
-		//	
-        //    valueDigits[_q] = ((value - _arrsum) div real(divLimit)) * real(divLimit);
-		//	
-        //    _q++
-    	//}
-    	}
-    	
-    
-    
-    SetCounterColor = function(_defaultColor, _reachColor ){
-    	
+			
+			if isReach isReach = false
     }
+			
+	}
+    	
+    
+    
+	
 		
 		IsReached = function(_callback = function(){}){
 			
@@ -163,11 +196,12 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     
     Draw = method(self, function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
+			if !isHidden{
         var _i=digitsLimit-1; repeat(valueLength){
-        	draw_sprite_ext(bitmapFont, bitmapFrontFrame[_i], x+(letterSpacing*_i), y, 1, 1, 0, digitsColor[_i], 1 )
+        	draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+(letterSpacing*_i), y, 1, 1, 0, digitsColor[_i], 1 )
         	_i--
         }
-        //draw_sprite_ext(fntDefault, )
+			}
     })
     
 	//if is_struct(_hud) && variable_struct_exists(_hud, "__theHud"){
