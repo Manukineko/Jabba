@@ -12,10 +12,10 @@ function Jabba(_viewport = 0) constructor {
 		owner = _owner;
 		viewport = _viewport
 	
-		elementsList = [];
+		//elementsList = [];
 		//[TEST] tentative to understand scoping while using "private" functions & variablesp
-		__addElement__ = method(other, function(_element){
-			var _list = elementList
+		__addElement = method(other, function(_element){
+			var _list = elementsList
 			with (__theHud){
 				array_push(_list, _element)
 				return _element
@@ -37,11 +37,11 @@ function Jabba(_viewport = 0) constructor {
 	CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
 		var _as
-		with (__theHud){
-			array_push(elementsList, _element)
-			_as = array_length(elementsList)
-			return elementsList[_as-1]
-		}
+		//with (__theHud){
+		//	array_push(elementsList, _element)
+		//	_as = array_length(elementsList)
+		//	return elementsList[_as-1]
+		//}
 		//[TEST] tentative to understand scoping while using "private" functions & variables
 		with(__theHud){
 			__addElement(_element)
@@ -50,13 +50,13 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	draw = method(self, function(){
-		with(__theHud){
+	Draw = method(self, function(){
+		//with(__theHud){
 			var _i=0;repeat(array_length(elementsList)){
 				elementsList[_i].Draw()
 				_i++
 			}
-		}
+		//}
 		
 	})
 	
@@ -67,15 +67,16 @@ function __hudelement__(/*_hud = undefined*/) constructor{
 	x = other.x
 	y = other.y
 	isHidden = false
+	isReach = false
 	
 	SetPosition = function(_x, _y){
 	    x = _x;
 	    y = _y;
 	}
 	
-	ToogleHide = function(){
+	ToggleHide = function(){
 		
-		isHidden != isHidden
+		isHidden = !isHidden
 	}
 }
 
@@ -89,13 +90,13 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     digitsLimit = undefined
     counterValueLimit = undefined
     digitsColor = []
-		colorQuotaReached = c_red
-		colorCounterDefault = c_white
-		matchingDigit = []
-		spriteFont = JabbaFont
-		spriteFrontFrame = []
-		spriteFontWidth = sprite_get_width(bitmapFont)
-		letterSpacing = 2 //nope. Must find a better way to do that.
+	colorQuotaReached = c_red
+	colorCounterDefault = c_white
+	matchingDigit = []
+	spriteFont = JabbaFont
+	spriteFontFrame = []
+	spriteFontWidth = sprite_get_width(spriteFont)
+	letterSpacing = 2 //nope. Must find a better way to do that.
     
     SetSpriteFont = function(_sprite){
 			spriteFont = _sprite
@@ -104,7 +105,7 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     }
 		
 		SetCounterColor = function(_defaultColor, _reachColor ){
-    	__setElementColor
+    	
 		}
     
     SetQuota = function(_quota = 1000, _limit = 9){
@@ -133,17 +134,7 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
         
         //Build the quota Array to be compared with the value
         quotaDigits = SplitPowerOfTenToArray(quota, digitsLimit)
-        //var _q=0; repeat(digitsLimit){
-        //	var _dl, _arrsum
-		//	
-		//	_arrsum = ArraySum(quotaDigits);
-        //    _dl = string_repeat("0", (digitsLimit-_q)-1);
-        //    divLimit = string_insert("1", _dl, 1);
-		//	
-        //    quotaDigits[_q] = ((quota - _arrsum) div real(divLimit)) * real(divLimit);
-		//	
-        //    _q++
-        //}
+        
     }
     
     SetValue = function(_value){
@@ -196,12 +187,12 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     
     Draw = method(self, function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
-			if !isHidden{
-        var _i=digitsLimit-1; repeat(valueLength){
-        	draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+(letterSpacing*_i), y, 1, 1, 0, digitsColor[_i], 1 )
-        	_i--
-        }
-			}
+		if !isHidden{
+        	var _i=digitsLimit-1; repeat(valueLength){
+        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, 1, 1, 0, digitsColor[_i], 1 )
+        		_i--
+        	}
+		}
     })
     
 	//if is_struct(_hud) && variable_struct_exists(_hud, "__theHud"){

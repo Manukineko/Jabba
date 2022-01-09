@@ -1,1 +1,1 @@
-hud.draw()
+hud.Draw()

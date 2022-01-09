@@ -10,4 +10,9 @@ if keyboard_check(vk_up){
 if keyboard_check(vk_down){
     value--
 }
+if keyboard_check_pressed(ord("H")){
+    element.ToggleHide()
+    show_debug_message("hide:"+string(element.isHidden))
+}
+
 element.SetValue(value)
