@@ -201,8 +201,58 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
 }
 
 function JabbaTimerElement() : __hudelement__() constructor{
+	
+	#macro tHundreds (time div 10) mod 100
+	#macro tSeconds  (time div 1000) mod 60
+	#macro tMinutes  (time div 60000) mod 60
+
+	enum JABBA{
+		MINUTES,
+		SECONDS,
+		HUNDREDTH
+	}
+	
+	time = 568954
 	timeLimit = 0
 	timeSeparator = ";"
+	precision = [0,1]
+	hundredth = 0
+	seconds = 0
+	minutes = 0
+	hours = 0
+	days = 0
+	timeFormat = [tMinutes, tSeconds, tHundreds]
+	timeDigits = []
+	precision = [0,1]
+	var _owner = other
+	__private = {}
+	with (__private){
+		owner = _owner
+		
+		__update = method(other, function(_time){
+			
+		})
+		
+		
+		
+		
+		
+	}
+	
+	UpdateTime = function(_time = time){
+			time = _time
+			var _i = precision[0]; repeat(precision[1]){
+				timeDigits[_i] = timeFormat[_i]
+			}
+		
+	}
+	
+	//
+	
+	
+	SetPrecision = function(_start, _end){
+		precision = [_start, _end]
+	}
 	
 }
 
