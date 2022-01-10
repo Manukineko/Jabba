@@ -173,14 +173,6 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
     }
 			
 	}
-    	
-    
-    
-	
-		
-		IsReached = function(_callback = function(){}){
-			
-		}
     
     
     
@@ -209,6 +201,8 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
 }
 
 function JabbaTimerElement() : __hudelement__() constructor{
+	timeLimit = 0
+	timeSeparator = ";"
 	
 }
 
