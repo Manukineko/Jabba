@@ -202,57 +202,121 @@ function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() const
 
 function JabbaTimerElement() : __hudelement__() constructor{
 	
-	#macro tHundreds (time div 10) mod 100
-	#macro tSeconds  (time div 1000) mod 60
-	#macro tMinutes  (time div 60000) mod 60
-
-	enum JABBA{
-		MINUTES,
-		SECONDS,
-		HUNDREDTH
+	enum JT{
+		DAYS,
+		HOURS,
+		MIN,
+		SEC,
+		HUN
 	}
 	
-	time = 568954
+	//time = 568954
 	timeLimit = 0
 	timeSeparator = ";"
-	precision = [0,1]
-	hundredth = 0
-	seconds = 0
-	minutes = 0
-	hours = 0
-	days = 0
-	timeFormat = [tMinutes, tSeconds, tHundreds]
-	timeDigits = []
-	precision = [0,1]
-	var _owner = other
-	__private = {}
-	with (__private){
-		owner = _owner
+	
+	timeUnit = []
+	timeDigit = []
+	timeFormat = []
+	__getFormat = undefined
+	
+	timeUnit[JT.DAYS] = function(_time){
+	  return (_time div 86400000) mod 60
+	}
+	timeUnit[JT.HOURS] = function(_time){
+	  return (_time div 3600000) mod 60
+	}
+	timeUnit[JT.MIN] = function(_time){
+	  return (_time div 60000) mod 60
+	}
+	timeUnit[JT.SEC] = function(_time){
+	  return (_time div 1000) mod 60
+	}
+	timeUnit[JT.HUN] = function(_time){
+	  return (_time div 10) mod 100
+	}
+	
+	
+	
+	
+	SetFormat = function(_array){
+		timeFormat = _array
+		var _func
 		
-		__update = method(other, function(_time){
-			
-		})
+		switch(array_length(_array)){
+			case 1 : _func = function(_time){
+		    			//return [timeUnit[timeFormat[0]](_time)]
+		    			var _a = []
+						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
+						return _a
+					}
+			break
+			case 2 : _func = function(_time){
+					    //return [timeUnit[timeFormat[0]](_time),
+						//		timeUnit[timeFormat[1]](_time)]
+						var _a = []
+						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
+						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
+						return _a
+					}
+			break;
+			case 3 : _func = function(_time){
+		    			//return [timeUnit[timeFormat[0]](_time),
+						//		timeUnit[timeFormat[1]](_time),
+						//		timeUnit[timeFormat[2]](_time)]
+						var _a = []
+						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
+						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
+						array_set(_a, timeFormat[2], timeUnit[timeFormat[2]](_time))
+						return _a
+					}
+			break
+			case 4 : _func = function(_time){
+		    			//return [timeUnit[timeFormat[0]](_time),
+						//		timeUnit[timeFormat[1]](_time),
+						//		timeUnit[timeFormat[2]](_time)]
+						var _a = []
+						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
+						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
+						array_set(_a, timeFormat[2], timeUnit[timeFormat[2]](_time))
+						array_set(_a, timeFormat[3], timeUnit[timeFormat[3]](_time))
+						return _a
+					}
+			break
+			case 5 : _func = function(_time){
+		    			//return [timeUnit[timeFormat[0]](_time),
+						//		timeUnit[timeFormat[1]](_time),
+						//		timeUnit[timeFormat[2]](_time)]
+						var _a = []
+						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
+						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
+						array_set(_a, timeFormat[2], timeUnit[timeFormat[2]](_time))
+						array_set(_a, timeFormat[3], timeUnit[timeFormat[3]](_time))
+						array_set(_a, timeFormat[4], timeUnit[timeFormat[4]](_time))
+						return _a
+					}
+			break
+		}
 		
+		return _func //Find a way to set the draw function with this
 		
-		
-		
+		__getFormat = method(other,_func)
 		
 	}
 	
-	UpdateTime = function(_time = time){
-			time = _time
-			var _i = precision[0]; repeat(precision[1]){
-				timeDigits[_i] = timeFormat[_i]
-			}
+	SetTimerString = function(_string){
 		
 	}
 	
-	//
-	
-	
-	SetPrecision = function(_start, _end){
-		precision = [_start, _end]
+	UpdateTime = function(_time){
+		timeDigit = __getFormat(_time)
 	}
+	
+	Draw = function(){
+		draw_text(x,y, "")
+	}
+	
+	function(_string)
+	_text = function(){return "test"+t[JT.MIN]}
 	
 }
 
