@@ -219,6 +219,15 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	timeFormat = []
 	__getFormat = undefined
 	
+	//not used ... yet ?
+	__private = {}
+	with(__private){
+		format = {
+			defaut: timeFormat
+		}
+	}
+	//Create an array of function to convert time from
+	//milliseconde to every time units
 	timeUnit[JT.DAYS] = function(_time){
 	  return (_time div 86400000) mod 60
 	}
@@ -237,8 +246,16 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	
 	
 	
-	
-	SetFormat = function(_array){
+	//This is to set the Unit we need to display.
+	//The goal would be to :
+	//1. build a function which'll then return itself an array populated with the
+	//corresponding timeconverter function (above) to be use efficiently without the
+	//need of a for loop
+	//2. automatic mode, where the returned function would be store
+	//internally in Jabba and then use in the update function.
+	//3. custom mide, allow to build a set of different format (sot it means being able to
+	//return the func to an instance variable)
+	SetTimeFormat = function(_array){
 		timeFormat = _array
 		var _func
 		
@@ -303,20 +320,18 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 	}
 	
-	SetTimerString = function(_string){
-		
-	}
+	CreateTimerText = function(_text = "test Minutes : "+string(timeDigit[JT.MIN]) ){
+			__creatText = function(){return _text}
+		}
 	
 	UpdateTime = function(_time){
 		timeDigit = __getFormat(_time)
+		__string = __createText()
 	}
 	
 	Draw = function(){
-		draw_text(x,y, "")
+		draw_text(x,y, __string)
 	}
-	
-	function(_string)
-	_text = function(){return "test"+t[JT.MIN]}
 	
 }
 
