@@ -212,20 +212,22 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	
 	//time = 568954
 	timeLimit = 0
-	timeSeparator = ";"
+	timeSeparator = ":"
 	
 	timeUnit = []
-	timeDigit = []
+	timeDigit = [0,0,0,0,0]
 	timeFormat = []
 	__getFormat = undefined
+	__createText = undefined
+	__string = undefined
 	
 	//not used ... yet ?
-	__private = {}
-	with(__private){
-		format = {
-			defaut: timeFormat
-		}
-	}
+	//__private = {}
+	//with(__private){
+	//	format = {
+	//		defaut: 
+	//	}
+	//}
 	//Create an array of function to convert time from
 	//milliseconde to every time units
 	timeUnit[JT.DAYS] = function(_time){
@@ -276,7 +278,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 						return _a
 					}
 			break;
-			case 3 : _func = function(_time){
+			case 3 : _func = method(self, function(_time){
 		    			//return [timeUnit[timeFormat[0]](_time),
 						//		timeUnit[timeFormat[1]](_time),
 						//		timeUnit[timeFormat[2]](_time)]
@@ -285,7 +287,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
 						array_set(_a, timeFormat[2], timeUnit[timeFormat[2]](_time))
 						return _a
-					}
+					})
 			break
 			case 4 : _func = function(_time){
 		    			//return [timeUnit[timeFormat[0]](_time),
@@ -314,23 +316,32 @@ function JabbaTimerElement() : __hudelement__() constructor{
 			break
 		}
 		
-		return _func //Find a way to set the draw function with this
+		//return _func //Find a way to set the draw function with this
 		
-		__getFormat = method(other,_func)
+		__getFormat = _func
 		
 	}
-	
-	CreateTimerText = function(_text = "test Minutes : "+string(timeDigit[JT.MIN]) ){
-			__creatText = function(){return _text}
-		}
 	
 	UpdateTime = function(_time){
 		timeDigit = __getFormat(_time)
-		__string = __createText()
+		var _leadingZero, _str ="", _l = array_length(timeFormat)
+		var _i =0; repeat(_l){
+			_leadingZero = timeDigit[timeFormat[_i]] < 10 ? "0" : ""
+			_str = _str+_leadingZero
+			_str = _str+string(timeDigit[timeFormat[_i]])
+			if (_i = _l-1) {
+				__string = _str; 
+				return
+			}
+			_str = _str+timeSeparator
+			_i++
+		}
+		
+		
 	}
 	
-	Draw = function(){
-		draw_text(x,y, __string)
+	Draw = function(_x,_y){
+		draw_text(_x,_y, __string)
 	}
 	
 }

@@ -16,7 +16,7 @@ if keyboard_check_pressed(ord("H")){
 }
 
 element.SetValue(value)
-
+timer.UpdateTime(get_timer()/1000)
 
 //currentTime = get_timer()
 //elapsedTime = (currentTime - previousTime) / 1000
