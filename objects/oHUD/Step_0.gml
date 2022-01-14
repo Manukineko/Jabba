@@ -1,6 +1,7 @@
 
 if keyboard_check_pressed(vk_space){
     value += 1000
+    counter.SetValue(1)
     //value = clamp(value, 0, 9999)
     
 }
@@ -21,3 +22,5 @@ timer.UpdateTime(get_timer()/1000)
 //currentTime = get_timer()
 //elapsedTime = (currentTime - previousTime) / 1000
 //timer.UpdateTime(currentTime)
+
+hud.FeedbackPlayer()

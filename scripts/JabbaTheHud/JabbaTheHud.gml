@@ -34,6 +34,22 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
+	CreateCounterElement = function(){
+		var _element = new JabbaCounterElement()
+		var _as
+		//with (__theHud){
+		//	array_push(elementsList, _element)
+		//	_as = array_length(elementsList)
+		//	return elementsList[_as-1]
+		//}
+		//[TEST] tentative to understand scoping while using "private" functions & variables
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+		//
+	}
+	
 	CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
 		var _as
@@ -50,7 +66,15 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	Draw = method(self, function(){
+	CreateTimerElement = function(){
+		var _element = new JabbaTimerElement()
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+	}
+	
+	Draw = function(){
 		//with(__theHud){
 			var _i=0;repeat(array_length(elementsList)){
 				elementsList[_i].Draw()
@@ -58,16 +82,54 @@ function Jabba(_viewport = 0) constructor {
 			}
 		//}
 		
-	})
+	}
+	
+	FeedbackPlayer = function(){
+		var _i=0;repeat(array_length(elementsList)){
+			elementsList[_i].feedback()
+			_i++
+		}
+	}
 	
 	
 }
 
-function __hudelement__(/*_hud = undefined*/) constructor{
+function __hudelement__() constructor{
 	x = other.x
 	y = other.y
+	xscale = 1
+	yscale = 1
+	scale = 1
+	angle = 0
+	color = c_white
+	alpha = 1
+	value = undefined
 	isHidden = false
 	isReach = false
+	isFeedbackOn = true
+	feedback = function(){}
+	
+	
+	__feedbacks = {}
+	with(__feedbacks){
+		none = function(){}
+		popout = method(other, function(){
+			
+			if isFeedbackOn{	
+				scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
+				xscale = scale; yscale = scale
+			}
+		})
+	}
+	
+	__tweenFunctions = {
+		Tween_LerpTime : method(other,function(_originalValue, _targetValue, _lerpAmount, _timeFactor) {
+	
+			var _val = lerp( _originalValue, _targetValue, 1 - power( 1 -_lerpAmount, _timeFactor));
+			return _val;
+	
+		}),
+	}
 	
 	SetPosition = function(_x, _y){
 	    x = _x;
@@ -80,8 +142,28 @@ function __hudelement__(/*_hud = undefined*/) constructor{
 	}
 }
 
-function JabbaQuotaCounterElement(/*_hud = undefined*/) : __hudelement__() constructor{
-    value = 0
+function JabbaCounterElement() : __hudelement__() constructor{
+	value = 0
+	feedback = __feedbacks.popout
+	
+	SetValue = function(_value, _triggerFeedback = true){
+		value = _value
+		isFeedbackOn = _triggerFeedback
+	}
+	
+	SetFeedback = function(_effect){
+		feedback = variable_struct_get(__feedbacks, _effect)
+	}
+	
+	Draw = function(){
+		if !isHidden{
+			draw_text_transformed_color(x,y, value, xscale, yscale, angle, color, color, color, color, alpha )
+		}
+	}
+}
+
+function JabbaQuotaCounterElement() : __hudelement__() constructor{
+  
     valueLength = 0
     quota = 0
     
@@ -323,6 +405,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	}
 	
 	UpdateTime = function(_time){
+		value = _time
 		timeDigit = __getFormat(_time)
 		var _leadingZero, _str ="", _l = array_length(timeFormat)
 		var _i =0; repeat(_l){
@@ -340,8 +423,10 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 	}
 	
-	Draw = function(_x,_y){
-		draw_text(_x,_y, __string)
+	Draw = function(){
+		if !isHidden{
+			draw_text(x,y, __string)
+		}
 	}
 	
 }
