@@ -1,5 +1,8 @@
 #macro JabbaTheHud _hud.__theHud
 
+/// @func Jabba
+/// @desc Constructor for the HUD container. This is completly optional if you want to manage yours youself
+/// @params {Int} viewport the viewport to assign the HUD to (in case of splitscreen) - Dafault: viewport[0]
 function Jabba(_viewport = 0) constructor {
 	x = 0
 	y = 0
@@ -13,7 +16,8 @@ function Jabba(_viewport = 0) constructor {
 		viewport = _viewport
 	
 		//elementsList = [];
-		//[TEST] tentative to understand scoping while using "private" functions & variablesp
+		//[TEST] tentative to understand scoping while using "private" functions & variables
+		// Internal fuction to add an element in Jabba's elements list
 		__addElement = method(other, function(_element){
 			var _list = elementsList
 			with (__theHud){
@@ -33,7 +37,8 @@ function Jabba(_viewport = 0) constructor {
 		//})
 		//
 	}
-	
+	/// @func CreateCounterElement
+	/// @desc create a Count element constructor and store it in the HUD
 	CreateCounterElement = function(){
 		var _element = new JabbaCounterElement()
 		var _as
@@ -50,6 +55,8 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
+	/// @func CreateQuotaCounterElementExt
+	/// @desc create an Extended Quota element constructor and store it in the HUD	
 	CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
 		var _as
@@ -66,6 +73,8 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
+	/// @func CreateTimerElement
+	/// @desc create a Timer element constructor and store it in the HUD	
 	CreateTimerElement = function(){
 		var _element = new JabbaTimerElement()
 		with(__theHud){
@@ -83,7 +92,9 @@ function Jabba(_viewport = 0) constructor {
 		//}
 		
 	}
-	
+
+		/// @func FeedbackPlayer
+		/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
 	FeedbackPlayer = function(){
 		var _i=0;repeat(array_length(elementsList)){
 			elementsList[_i].feedback()
@@ -94,6 +105,7 @@ function Jabba(_viewport = 0) constructor {
 	
 }
 
+//the base constructor for all elements
 function __hudelement__() constructor{
 	x = other.x
 	y = other.y
@@ -110,6 +122,7 @@ function __hudelement__() constructor{
 	feedback = function(){}
 	
 	
+	//A list of built-in feedback. I plan to allow the user to add custom one.
 	__feedbacks = {}
 	with(__feedbacks){
 		none = function(){}
@@ -122,6 +135,7 @@ function __hudelement__() constructor{
 		})
 	}
 	
+	//Internal tween functions shamelessly taken from Simon Milfred's (awesome) Bless Hay Gaming Utils pack (https://blesshaygaming.itch.io/bhg-utils). seriously, check it out.
 	__tweenFunctions = {
 		Tween_LerpTime : method(other,function(_originalValue, _targetValue, _lerpAmount, _timeFactor) {
 	
@@ -131,26 +145,42 @@ function __hudelement__() constructor{
 		}),
 	}
 	
+	/// @func SetPosition
+	/// @desc set the position.
+	/// @params {real} x
+	/// @params {real} y
+	/// [NOTE] Could set a way to choose between SET and ADD ?
 	SetPosition = function(_x, _y){
 	    x = _x;
 	    y = _y;
 	}
 	
+	/// @func ToggleHide
+	/// @desc toggle the element's isHidden variable to bypass drawing
 	ToggleHide = function(){
 		
 		isHidden = !isHidden
 	}
 }
 
+/// @func JabbaCounter
+/// @desc a simple counter. it will display the value with a feedback when it changes.
 function JabbaCounterElement() : __hudelement__() constructor{
 	value = 0
 	feedback = __feedbacks.popout
 	
+	/// @func SetValue
+	/// @desc set the value to read from
+	/// @params {real} value the value to read
+	/// @params {bool} play a feedback (default : true)
 	SetValue = function(_value, _triggerFeedback = true){
 		value = _value
 		isFeedbackOn = _triggerFeedback
 	}
 	
+	/// @func SetFeedback
+	/// @desc set the feedback that will be played when the value changes
+	/// @params {string} feedback name of the feedback as a steing (default : popout)
 	SetFeedback = function(_effect){
 		feedback = variable_struct_get(__feedbacks, _effect)
 	}
@@ -282,6 +312,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	//}
 }
 
+/// @desc a timer element that will split and display the time .
 function JabbaTimerElement() : __hudelement__() constructor{
 	
 	enum JT{
