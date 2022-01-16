@@ -116,6 +116,7 @@ function __hudelement__() constructor{
 	color = c_white
 	alpha = 1
 	value = undefined
+	
 	isHidden = false
 	isReach = false
 	isFeedbackOn = true
@@ -127,9 +128,8 @@ function __hudelement__() constructor{
 	with(__feedbacks){
 		none = function(){}
 		popout = method(other, function(){
-			
 			if isFeedbackOn{	
-				scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
+				scale = _arg > 1 ? __tweenFunctions.Tween_LerpTime(_arg, 1, 0.1, 1) : 1
 				xscale = scale; yscale = scale
 			}
 		})
@@ -151,6 +151,7 @@ function __hudelement__() constructor{
 	/// @params {real} y
 	/// [NOTE] Could set a way to choose between SET and ADD ?
 	SetPosition = function(_x, _y){
+
 	    x = _x;
 	    y = _y;
 	}
@@ -168,6 +169,13 @@ function __hudelement__() constructor{
 function JabbaCounterElement() : __hudelement__() constructor{
 	value = 0
 	feedback = __feedbacks.popout
+	halign = fa_center
+	valign = fa_middle
+	
+	SetTextAlign = function(_halign, _valign){
+		halign = _halign
+		valign = _valign
+	}
 	
 	/// @func SetValue
 	/// @desc set the value to read from
@@ -187,11 +195,17 @@ function JabbaCounterElement() : __hudelement__() constructor{
 	
 	Draw = function(){
 		if !isHidden{
+			draw_set_halign(halign)
+			draw_set_valign(valign)
 			draw_text_transformed_color(x,y, value, xscale, yscale, angle, color, color, color, color, alpha )
+			draw_set_halign(-1)
+			draw_set_valign(-1)
 		}
 	}
 }
 
+/// @func JabbaQuotaCounterExtElement
+/// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
 function JabbaQuotaCounterElement() : __hudelement__() constructor{
   
     valueLength = 0
@@ -210,16 +224,27 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	spriteFontWidth = sprite_get_width(spriteFont)
 	letterSpacing = 2 //nope. Must find a better way to do that.
     
+    /// @func SetSpriteFont
+    /// @desc The spritesheet used for the font
+    /// @params {sprite} sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
     SetSpriteFont = function(_sprite){
 			spriteFont = _sprite
 			
 			spriteFontWidth = sprite_get_width(spriteFont)
     }
-		
-		SetCounterColor = function(_defaultColor, _reachColor ){
-    	
-		}
+	
+	/// @func SetTextColor
+	/// @desc Set the regular color and the color for when the quota is reached
+	/// @params {color} defaulColor
+	/// @params {color} goalColor
+	SetTextColor = function(_defaultColor, _goalColor ){
     
+	}
+    
+    /// @func SetQuota
+    /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
+    /// @params {Int} quota the quota value to reach
+    /// @params {Int} The Digit limit to display (default : 9 (100 000 000) )
     SetQuota = function(_quota = 1000, _limit = 9){
     	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
@@ -249,6 +274,11 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
         
     }
     
+    
+   /// @func SetValue
+   /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
+   /// @params {int} value
+   /// [TODO] play a feedback when the quota is reached
     SetValue = function(_value){
     	
     	//Clamp the value from 0 to the limit set for the counter.
@@ -312,9 +342,11 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	//}
 }
 
-/// @desc a timer element that will split and display the time .
+/// @func JabbaTimerElement
+/// @desc a timer element that will split and display the time.
 function JabbaTimerElement() : __hudelement__() constructor{
 	
+	//Time Unit to use to set the time format
 	enum JT{
 		DAYS,
 		HOURS,
@@ -370,6 +402,10 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	//internally in Jabba and then use in the update function.
 	//3. custom mide, allow to build a set of different format (sot it means being able to
 	//return the func to an instance variable)
+	
+	/// @func SetTimeFormat
+	/// @desc Set the time format. Each Unit to use is store in an array. The display order will match the input order
+	/// @params an array of time unit to use (Use the enum provided above)
 	SetTimeFormat = function(_array){
 		timeFormat = _array
 		var _func
@@ -435,6 +471,9 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 	}
 	
+	/// @func UpdateTime
+	/// @desc The fonction to use to upadate and format the time into a string that will be display
+	/// @param {Int} Time in millisecondes
 	UpdateTime = function(_time){
 		value = _time
 		timeDigit = __getFormat(_time)
@@ -521,7 +560,7 @@ function SplitByDigitsToArray(_value, _arraySize = 0){
 }
 
 /// @func StripPowerOfTensToArray
-/// @desc Remove each Tens of a value and store the remaining in an array
+/// @desc Remove each Tens of a value and store the each remaining in an array
 function StripPowerOfTensToArray(_value){
    	var _l, _a 
    	_l = CountDigit(_value)
