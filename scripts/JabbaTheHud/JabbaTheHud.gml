@@ -121,18 +121,33 @@ function __hudelement__() constructor{
 	isReach = false
 	isFeedbackOn = true
 	feedback = function(){}
+	activeFeedback = ""
 	
 	
 	//A list of built-in feedback. I plan to allow the user to add custom one.
 	__feedbacks = {}
 	with(__feedbacks){
+		//I really have trouble with scoping :/
+		
+		//__getParams = method(other,function(){
+		//	
+		//	var _params = self[$ activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
+		//	var _i=0; repeat(array_length(_params)/2){
+		//		variable_struct_set(self, _params[_i], _params[_i+1])
+		//		_i += 2
+		//	}
+		//	
+		//})
 		none = function(){}
-		popout = method(other, function(){
-			if isFeedbackOn{	
-				scale = _arg > 1 ? __tweenFunctions.Tween_LerpTime(_arg, 1, 0.1, 1) : 1
-				xscale = scale; yscale = scale
-			}
-		})
+		popout = {
+			func : method(other, function(){
+				if isFeedbackOn{	
+					scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
+					xscale = scale; yscale = scale
+				}
+			}),
+			params : ["scale", 2]
+		}
 	}
 	
 	//Internal tween functions shamelessly taken from Simon Milfred's (awesome) Bless Hay Gaming Utils pack (https://blesshaygaming.itch.io/bhg-utils). seriously, check it out.
@@ -168,7 +183,8 @@ function __hudelement__() constructor{
 /// @desc a simple counter. it will display the value with a feedback when it changes.
 function JabbaCounterElement() : __hudelement__() constructor{
 	value = 0
-	feedback = __feedbacks.popout
+	feedback = __feedbacks.popout.func
+	activeFeedback = "popout"
 	halign = fa_center
 	valign = fa_middle
 	
@@ -184,13 +200,31 @@ function JabbaCounterElement() : __hudelement__() constructor{
 	SetValue = function(_value, _triggerFeedback = true){
 		value = _value
 		isFeedbackOn = _triggerFeedback
+		//if isFeedbackOn{
+		//	__feedbacks.__getParams()
+		//}
+		if isFeedbackOn{
+			var _params
+			with(__feedbacks){
+				_params = self[$ other.activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
+			}
+			var _i=0; repeat(array_length(_params)/2){
+				variable_struct_set(self, _params[_i], _params[_i+1])
+				_i += 2
+				
+			}
+			
+		}
 	}
 	
 	/// @func SetFeedback
 	/// @desc set the feedback that will be played when the value changes
 	/// @params {string} feedback name of the feedback as a steing (default : popout)
 	SetFeedback = function(_effect){
-		feedback = variable_struct_get(__feedbacks, _effect)
+		var _feedback = variable_struct_get(__feedbacks, _effect)
+		feedback = _feedback.func
+		activeFeedback = _effect
+		
 	}
 	
 	Draw = function(){
@@ -222,7 +256,10 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	spriteFont = JabbaFont
 	spriteFontFrame = []
 	spriteFontWidth = sprite_get_width(spriteFont)
-	letterSpacing = 2 //nope. Must find a better way to do that.
+	letterSpacing = 2 
+	
+	//feedback = __feedbacks.popout.func
+	//activeFeedback = "popout"
     
     /// @func SetSpriteFont
     /// @desc The spritesheet used for the font
@@ -302,6 +339,19 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 				var _iprev = _i - 1
 				if (_iprev >= 0){
 					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev])
+					
+					//[TODO] Add feedback system
+					//if isFeedbackOn{
+					//	var _params
+					//	with(__feedbacks){
+					//		_params = self[$ other.activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
+					//	}
+					//	var _i=0; repeat(array_length(_params)/2){
+					//		variable_struct_set(self, _params[_i], _params[_i+1])
+					//		_i += 2
+					//		
+					//	}
+					//}
 				}
 				else{
 					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i])
@@ -323,7 +373,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
         	var _i=digitsLimit-1; repeat(valueLength){
-        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, 1, 1, 0, digitsColor[_i], 1 )
+        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xscale, yscale, 0, digitsColor[_i], 1 )
         		_i--
         	}
 		}
