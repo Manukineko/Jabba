@@ -39,14 +39,8 @@ function Jabba(_viewport = 0) constructor {
 	}
 	/// @func CreateCounterElement
 	/// @desc create a Count element constructor and store it in the HUD
-	CreateCounterElement = function(){
+	static CreateCounterElement = function(){
 		var _element = new JabbaCounterElement()
-		var _as
-		//with (__theHud){
-		//	array_push(elementsList, _element)
-		//	_as = array_length(elementsList)
-		//	return elementsList[_as-1]
-		//}
 		//[TEST] tentative to understand scoping while using "private" functions & variables
 		with(__theHud){
 			__addElement(_element)
@@ -55,10 +49,22 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	/// @func CreateQuotaCounterElementExt
+	/// @func CreateQuotaCounterElement
 	/// @desc create an Extended Quota element constructor and store it in the HUD	
-	CreateQuotaCounterElement = function(){
+	static CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
+		//[TEST] tentative to understand scoping while using "private" functions & variables
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+		//
+	}
+	
+	/// @func CreateQuotaCounterExtElement
+	/// @desc create an Extended Quota element constructor and store it in the HUD	
+	static CreateQuotaCounterExtElement = function(){
+		var _element = new JabbaQuotaCounterExtElement()
 		var _as
 		//with (__theHud){
 		//	array_push(elementsList, _element)
@@ -75,7 +81,7 @@ function Jabba(_viewport = 0) constructor {
 	
 	/// @func CreateTimerElement
 	/// @desc create a Timer element constructor and store it in the HUD	
-	CreateTimerElement = function(){
+	static CreateTimerElement = function(){
 		var _element = new JabbaTimerElement()
 		with(__theHud){
 			__addElement(_element)
@@ -83,7 +89,7 @@ function Jabba(_viewport = 0) constructor {
 		return _element
 	}
 	
-	Draw = function(){
+	static Draw = function(){
 		//with(__theHud){
 			var _i=0;repeat(array_length(elementsList)){
 				elementsList[_i].Draw()
@@ -95,7 +101,7 @@ function Jabba(_viewport = 0) constructor {
 
 		/// @func FeedbackPlayer
 		/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
-	FeedbackPlayer = function(){
+	static FeedbackPlayer = function(){
 		var _i=0;repeat(array_length(elementsList)){
 			elementsList[_i].feedback()
 			_i++
@@ -121,23 +127,13 @@ function __hudelement__() constructor{
 	isReach = false
 	isFeedbackOn = true
 	feedback = function(){}
-	activeFeedback = ""
+	__activeFeedback = ""
 	
 	
 	//A list of built-in feedback. I plan to allow the user to add custom one.
 	__feedbacks = {}
 	with(__feedbacks){
-		//I really have trouble with scoping :/
-		
-		//__getParams = method(other,function(){
-		//	
-		//	var _params = self[$ activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
-		//	var _i=0; repeat(array_length(_params)/2){
-		//		variable_struct_set(self, _params[_i], _params[_i+1])
-		//		_i += 2
-		//	}
-		//	
-		//})
+
 		none = function(){}
 		popout = {
 			func : method(other, function(){
@@ -165,7 +161,7 @@ function __hudelement__() constructor{
 	/// @params {real} x
 	/// @params {real} y
 	/// [NOTE] Could set a way to choose between SET and ADD ?
-	SetPosition = function(_x, _y){
+	static SetPosition = function(_x, _y){
 
 	    x = _x;
 	    y = _y;
@@ -173,10 +169,20 @@ function __hudelement__() constructor{
 	
 	/// @func ToggleHide
 	/// @desc toggle the element's isHidden variable to bypass drawing
-	ToggleHide = function(){
+	static ToggleHide = function(){
 		
 		isHidden = !isHidden
 	}
+	
+	__feedbackGetParams = method(other,function(){
+		
+		var _params = self[$ __activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
+		var _i=0; repeat(array_length(_params)/2){
+			variable_struct_set(self, _params[_i], _params[_i+1])
+			_i += 2
+		}
+		
+	})
 }
 
 /// @func JabbaCounter
@@ -184,50 +190,54 @@ function __hudelement__() constructor{
 function JabbaCounterElement() : __hudelement__() constructor{
 	value = 0
 	feedback = __feedbacks.popout.func
-	activeFeedback = "popout"
+	__activeFeedback = "popout"
 	halign = fa_center
 	valign = fa_middle
 	
-	SetTextAlign = function(_halign, _valign){
+	static SetTextAlign = function(_halign, _valign){
 		halign = _halign
 		valign = _valign
+		
+		return self
 	}
 	
 	/// @func SetValue
 	/// @desc set the value to read from
 	/// @params {real} value the value to read
 	/// @params {bool} play a feedback (default : true)
-	SetValue = function(_value, _triggerFeedback = true){
+	static SetValue = function(_value, _triggerFeedback = true){
 		value = _value
 		isFeedbackOn = _triggerFeedback
-		//if isFeedbackOn{
-		//	__feedbacks.__getParams()
-		//}
 		if isFeedbackOn{
-			var _params
-			with(__feedbacks){
-				_params = self[$ other.activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
-			}
-			var _i=0; repeat(array_length(_params)/2){
-				variable_struct_set(self, _params[_i], _params[_i+1])
-				_i += 2
-				
-			}
-			
+			__feedbackGetParams()
 		}
+		//if isFeedbackOn{
+		//	var _params
+		//	with(__feedbacks){
+		//		_params = self[$ other.__activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
+		//	}
+		//	var _i=0; repeat(array_length(_params)/2){
+		//		variable_struct_set(self, _params[_i], _params[_i+1])
+		//		_i += 2
+		//		
+		//	}
+		//	
+		//}
 	}
 	
 	/// @func SetFeedback
 	/// @desc set the feedback that will be played when the value changes
 	/// @params {string} feedback name of the feedback as a steing (default : popout)
-	SetFeedback = function(_effect){
+	static SetFeedback = function(_effect){
 		var _feedback = variable_struct_get(__feedbacks, _effect)
 		feedback = _feedback.func
-		activeFeedback = _effect
+		__activeFeedback = _effect
+		
+		return self
 		
 	}
 	
-	Draw = function(){
+	static Draw = function(){
 		if !isHidden{
 			draw_set_halign(halign)
 			draw_set_valign(valign)
@@ -238,9 +248,53 @@ function JabbaCounterElement() : __hudelement__() constructor{
 	}
 }
 
+function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
+	
+	quota = 0
+	digitsLimit = 9
+	counterValueLimit = (power(10, digitsLimit)) - 1
+	colorQuotaReached = c_red
+	colorCounterDefault = c_white
+	
+	static SetQuota = function(_quota = 1000, _limit = 9){
+    	//quota to reach
+    	//counter internal unit limit (it won't count past the number of unit)
+        quota = _quota;
+        digitsLimit = _limit
+        
+        //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
+        var _cvl = (power(10, digitsLimit)) - 1//string_repeat("9", digitsLimit)
+        counterValueLimit = _cvl
+        
+        return self
+    }
+    
+    
+    
+    static SetValue = function(_value){
+    	value = _value
+    	
+    	if value >= quota{
+    		if !isReach{
+    			if isFeedbackOn{
+    				__feedbackGetParams()
+    			}
+    			isReach = true
+    		}
+    	}
+    	else{
+    		if (isReach) isReach = false
+    	}
+    	
+    	color = value >= quota ? colorQuotaReached : colorCounterDefault
+    	
+    	return self
+    }
+}
+
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
-function JabbaQuotaCounterElement() : __hudelement__() constructor{
+function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
   
     valueLength = 0
     quota = 0
@@ -259,12 +313,12 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	letterSpacing = 2 
 	
 	//feedback = __feedbacks.popout.func
-	//activeFeedback = "popout"
+	//__activeFeedback = "popout"
     
     /// @func SetSpriteFont
     /// @desc The spritesheet used for the font
     /// @params {sprite} sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
-    SetSpriteFont = function(_sprite){
+    static SetSpriteFont = function(_sprite){
 			spriteFont = _sprite
 			
 			spriteFontWidth = sprite_get_width(spriteFont)
@@ -274,7 +328,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 	/// @desc Set the regular color and the color for when the quota is reached
 	/// @params {color} defaulColor
 	/// @params {color} goalColor
-	SetTextColor = function(_defaultColor, _goalColor ){
+	static SetTextColor = function(_defaultColor, _goalColor ){
     
 	}
     
@@ -282,7 +336,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
     /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
     /// @params {Int} quota the quota value to reach
     /// @params {Int} The Digit limit to display (default : 9 (100 000 000) )
-    SetQuota = function(_quota = 1000, _limit = 9){
+    static SetQuota = function(_quota = 1000, _limit = 9){
     	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
         quota = _quota;
@@ -316,7 +370,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
    /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
    /// @params {int} value
    /// [TODO] play a feedback when the quota is reached
-    SetValue = function(_value){
+    static SetValue = function(_value){
     	
     	//Clamp the value from 0 to the limit set for the counter.
     	value = clamp(_value, 0, counterValueLimit)
@@ -344,7 +398,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
 					//if isFeedbackOn{
 					//	var _params
 					//	with(__feedbacks){
-					//		_params = self[$ other.activeFeedback][$ "params"] //variable_struct_get(self, activeFeedback)
+					//		_params = self[$ other.__activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
 					//	}
 					//	var _i=0; repeat(array_length(_params)/2){
 					//		variable_struct_set(self, _params[_i], _params[_i+1])
@@ -369,7 +423,7 @@ function JabbaQuotaCounterElement() : __hudelement__() constructor{
     
     
     
-    Draw = method(self, function(){
+    static Draw = method(self, function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
         	var _i=digitsLimit-1; repeat(valueLength){
@@ -456,7 +510,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	/// @func SetTimeFormat
 	/// @desc Set the time format. Each Unit to use is store in an array. The display order will match the input order
 	/// @params an array of time unit to use (Use the enum provided above)
-	SetTimeFormat = function(_array){
+	static SetTimeFormat = function(_array){
 		timeFormat = _array
 		var _func
 		
@@ -524,7 +578,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	/// @func UpdateTime
 	/// @desc The fonction to use to upadate and format the time into a string that will be display
 	/// @param {Int} Time in millisecondes
-	UpdateTime = function(_time){
+	static UpdateTime = function(_time){
 		value = _time
 		timeDigit = __getFormat(_time)
 		var _leadingZero, _str ="", _l = array_length(timeFormat)
@@ -543,7 +597,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 	}
 	
-	Draw = function(){
+	static Draw = function(){
 		if !isHidden{
 			draw_text(x,y, __string)
 		}

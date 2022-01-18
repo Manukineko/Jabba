@@ -17,6 +17,7 @@ if keyboard_check_pressed(ord("H")){
 }
 
 element.SetValue(value)
+quotaExt.SetValue(value)
 timer.UpdateTime(get_timer()/1000)
 
 //currentTime = get_timer()
