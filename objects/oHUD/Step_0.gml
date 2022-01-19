@@ -12,11 +12,11 @@ if keyboard_check(vk_down){
     value--
 }
 if keyboard_check_pressed(ord("H")){
-    element.ToggleHide()
-    show_debug_message("hide:"+string(element.isHidden))
+    quotaSimple.ToggleHide()
+    show_debug_message("hide:"+string(quotaSimple.isHidden))
 }
 
-element.SetValue(value)
+quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
 timer.UpdateTime(get_timer()/1000)
 

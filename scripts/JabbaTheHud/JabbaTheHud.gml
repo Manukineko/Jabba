@@ -1,8 +1,11 @@
 #macro JabbaTheHud _hud.__theHud
 
+#region JABBA CONTAINER
 /// @func Jabba
 /// @desc Constructor for the HUD container. This is completly optional if you want to manage yours youself
 /// @params {Int} viewport the viewport to assign the HUD to (in case of splitscreen) - Dafault: viewport[0]
+/// [TODO] anchor system as well as custom attach points
+/// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
 function Jabba(_viewport = 0) constructor {
 	x = 0
 	y = 0
@@ -110,8 +113,10 @@ function Jabba(_viewport = 0) constructor {
 	
 	
 }
+#endregion
 
-//the base constructor for all elements
+#region HUDELEMENT - the base constructor for all elements
+
 function __hudelement__() constructor{
 	x = other.x
 	y = other.y
@@ -127,7 +132,7 @@ function __hudelement__() constructor{
 	isReach = false
 	isFeedbackOn = true
 	feedback = function(){}
-	__activeFeedback = ""
+	__activeFeedback = "popout"
 	
 	
 	//A list of built-in feedback. I plan to allow the user to add custom one.
@@ -165,6 +170,8 @@ function __hudelement__() constructor{
 
 	    x = _x;
 	    y = _y;
+	    
+	    return self
 	}
 	
 	/// @func ToggleHide
@@ -174,17 +181,20 @@ function __hudelement__() constructor{
 		isHidden = !isHidden
 	}
 	
-	__feedbackGetParams = method(other,function(){
+	__feedbackGetParams = function(){
 		
-		var _params = self[$ __activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
+		var _params = __feedbacks[$ __activeFeedback][$ "params"]
 		var _i=0; repeat(array_length(_params)/2){
 			variable_struct_set(self, _params[_i], _params[_i+1])
 			_i += 2
 		}
 		
-	})
+	}
 }
 
+#endregion
+
+#region COUNTER ELEMENT
 /// @func JabbaCounter
 /// @desc a simple counter. it will display the value with a feedback when it changes.
 function JabbaCounterElement() : __hudelement__() constructor{
@@ -211,18 +221,6 @@ function JabbaCounterElement() : __hudelement__() constructor{
 		if isFeedbackOn{
 			__feedbackGetParams()
 		}
-		//if isFeedbackOn{
-		//	var _params
-		//	with(__feedbacks){
-		//		_params = self[$ other.__activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
-		//	}
-		//	var _i=0; repeat(array_length(_params)/2){
-		//		variable_struct_set(self, _params[_i], _params[_i+1])
-		//		_i += 2
-		//		
-		//	}
-		//	
-		//}
 	}
 	
 	/// @func SetFeedback
@@ -247,7 +245,9 @@ function JabbaCounterElement() : __hudelement__() constructor{
 		}
 	}
 }
+#endregion
 
+#region QUOTA COUNTER
 function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
 	
 	quota = 0
@@ -291,7 +291,9 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
     	return self
     }
 }
+#endregion
 
+#region QUOTA COUNTER EXT
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
 function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
@@ -312,7 +314,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 	spriteFontWidth = sprite_get_width(spriteFont)
 	letterSpacing = 2 
 	
-	//feedback = __feedbacks.popout.func
+	feedback = __feedbacks.popout.func
 	//__activeFeedback = "popout"
     
     /// @func SetSpriteFont
@@ -322,6 +324,8 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 			spriteFont = _sprite
 			
 			spriteFontWidth = sprite_get_width(spriteFont)
+			
+			return self
     }
 	
 	/// @func SetTextColor
@@ -329,7 +333,10 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 	/// @params {color} defaulColor
 	/// @params {color} goalColor
 	static SetTextColor = function(_defaultColor, _goalColor ){
-    
+    	
+    	colorCounterDefault = _defaultColor
+    	colorQuotaReached = _goalColor
+		
 	}
     
     /// @func SetQuota
@@ -363,13 +370,14 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
         //Build the quota Array to be compared with the value
         quotaDigits = SplitPowerOfTenToArray(quota, digitsLimit)
         
+        return self
+        
     }
-    
     
    /// @func SetValue
    /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
    /// @params {int} value
-   /// [TODO] play a feedback when the quota is reached
+   /// //[TODO] Add feedback system per DIGITS
     static SetValue = function(_value){
     	
     	//Clamp the value from 0 to the limit set for the counter.
@@ -386,7 +394,12 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 				array_set(matchingDigit, _i, true)
 				_i++
 			}
-			if !isReach isReach = true
+			if !isReach{
+    			if isFeedbackOn{
+    				__feedbackGetParams()
+    			}
+    			isReach = true
+    		}
 		}
 		else{
 			var _i=0; repeat(digitsLimit){
@@ -394,18 +407,6 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 				if (_iprev >= 0){
 					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev])
 					
-					//[TODO] Add feedback system
-					//if isFeedbackOn{
-					//	var _params
-					//	with(__feedbacks){
-					//		_params = self[$ other.__activeFeedback][$ "params"] //variable_struct_get(self, __activeFeedback)
-					//	}
-					//	var _i=0; repeat(array_length(_params)/2){
-					//		variable_struct_set(self, _params[_i], _params[_i+1])
-					//		_i += 2
-					//		
-					//	}
-					//}
 				}
 				else{
 					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i])
@@ -420,9 +421,6 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 			
 	}
     
-    
-    
-    
     static Draw = method(self, function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
@@ -432,20 +430,10 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
         	}
 		}
     })
-    
-	//if is_struct(_hud) && variable_struct_exists(_hud, "__theHud"){
-	//	
-	//	with(JabbaTheHud){
-	//	    array_push(elements, other)
-	//	}
-	//    show_debug_message("Ca marche (et y'a JABBA)")
-	//}
-	//else{
-	//	owner = other
-	//    show_debug_message("Ca marche (mais ya pas JABBA)")
-	//}
 }
+#endregion
 
+#region TIMER ELEMENT
 /// @func JabbaTimerElement
 /// @desc a timer element that will split and display the time.
 function JabbaTimerElement() : __hudelement__() constructor{
@@ -494,8 +482,6 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	timeUnit[JT.HUN] = function(_time){
 	  return (_time div 10) mod 100
 	}
-	
-	
 	
 	//This is to set the Unit we need to display.
 	//The goal would be to :
@@ -569,9 +555,9 @@ function JabbaTimerElement() : __hudelement__() constructor{
 			break
 		}
 		
-		//return _func //Find a way to set the draw function with this
-		
 		__getFormat = _func
+		
+		return self
 		
 	}
 	
@@ -604,6 +590,21 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	}
 	
 }
+
+#endregion
+
+#region GAUGE ELEMENT
+
+function JabbaGaugeBarElement() : __hudelement__() constructor{
+	
+	
+	
+	
+}
+
+#endregion
+
+#region MISC FUNCTIONS
 
 /// @func ArraySum
 /// @desc add all value of an array.
@@ -687,4 +688,6 @@ function CountDigit (_value){
 	
 	return _n = 0 ? 1 : _n
 }
+
+#endregion
 
