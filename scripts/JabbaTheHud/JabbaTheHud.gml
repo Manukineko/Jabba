@@ -595,8 +595,24 @@ function JabbaTimerElement() : __hudelement__() constructor{
 
 #region GAUGE ELEMENT
 
-function JabbaGaugeBarElement() : __hudelement__() constructor{
+function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	
+	sprite = undefined
+	mask = undefined
+	maxValue = _maxValue
+	
+	SetValue = function(_value, _feedbackTrigger){
+		value = _value/maxValue
+		hasFeedback = _feedbackTrigger
+		
+		if hasFeedback && !feedbackRun{
+			if value => maxValue{
+				value = maxValue
+				__feedbackGetParams()
+				feedbackRun = true
+			}
+		}
+	}
 	
 	
 	
