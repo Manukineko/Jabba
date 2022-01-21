@@ -14,3 +14,6 @@ timer.SetTimeFormat([JT.DAYS,JT.HOURS,JT.MIN, JT.SEC, JT.HUN]).SetPosition(view_
 
 counter = hud.CreateCounterElement()
 counter.SetPosition(view_wport[0]/2, view_hport[0]-32).SetFeedback("popout", ["scale", 2])
+
+gaugeBar = hud.CreateGaugeBarElement(100)
+gaugeBar.SetPosition(view_wport[0]/2, view_hport[0]-64)

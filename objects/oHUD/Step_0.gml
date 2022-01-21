@@ -18,6 +18,7 @@ if keyboard_check_pressed(ord("H")){
 
 quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
+gaugeBar.SetValue(value)
 timer.UpdateTime(get_timer()/1000)
 
 //currentTime = get_timer()

@@ -4,6 +4,9 @@
     {"id":{"name":"JabbaTheHud","path":"scripts/JabbaTheHud/JabbaTheHud.yy",},"order":0,},
     {"id":{"name":"oHUD","path":"objects/oHUD/oHUD.yy",},"order":0,},
     {"id":{"name":"JabbaFont","path":"sprites/JabbaFont/JabbaFont.yy",},"order":0,},
+    {"id":{"name":"jabbaShaderDissolve","path":"shaders/jabbaShaderDissolve/jabbaShaderDissolve.yy",},"order":0,},
+    {"id":{"name":"sJabbaGaugeBar","path":"sprites/sJabbaGaugeBar/sJabbaGaugeBar.yy",},"order":1,},
+    {"id":{"name":"sJabbaGaugeBarMask","path":"sprites/sJabbaGaugeBarMask/sJabbaGaugeBarMask.yy",},"order":2,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},

@@ -91,6 +91,15 @@ function Jabba(_viewport = 0) constructor {
 		}
 		return _element
 	}
+	/// @func CreateTimerElement
+	/// @desc create a Timer element constructor
+	static CreateGaugeBarElement = function(_maxValue){
+		var _element = new JabbaGaugeBarElement(_maxValue)
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+	}
 	
 	static Draw = function(){
 		//with(__theHud){
@@ -126,11 +135,13 @@ function __hudelement__() constructor{
 	angle = 0
 	color = c_white
 	alpha = 1
-	value = undefined
+	frame = 0
+	value = 0
 	
 	isHidden = false
 	isReach = false
-	isFeedbackOn = true
+	hasFeedback = true
+	runFeedback = true
 	feedback = function(){}
 	__activeFeedback = "popout"
 	
@@ -142,7 +153,7 @@ function __hudelement__() constructor{
 		none = function(){}
 		popout = {
 			func : method(other, function(){
-				if isFeedbackOn{	
+				if hasFeedback{	
 					scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
 					xscale = scale; yscale = scale
 				}
@@ -217,8 +228,8 @@ function JabbaCounterElement() : __hudelement__() constructor{
 	/// @params {bool} play a feedback (default : true)
 	static SetValue = function(_value, _triggerFeedback = true){
 		value = _value
-		isFeedbackOn = _triggerFeedback
-		if isFeedbackOn{
+		hasFeedback = _triggerFeedback
+		if hasFeedback{
 			__feedbackGetParams()
 		}
 	}
@@ -276,7 +287,7 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
     	
     	if value >= quota{
     		if !isReach{
-    			if isFeedbackOn{
+    			if hasFeedback{
     				__feedbackGetParams()
     			}
     			isReach = true
@@ -395,7 +406,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 				_i++
 			}
 			if !isReach{
-    			if isFeedbackOn{
+    			if hasFeedback{
     				__feedbackGetParams()
     			}
     			isReach = true
@@ -597,20 +608,73 @@ function JabbaTimerElement() : __hudelement__() constructor{
 
 function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	
-	sprite = undefined
-	mask = undefined
+	shader = jabbaShaderDissolve
+	sprite = sJabbaGaugeBar
+	mask = sJabbaGaugeBarMask
 	maxValue = _maxValue
+	tolerance = 0
+	inverse = 0
+	xFlip = 1
+	yFlip = 1
+	
+	__shaderParams = {}
+	with(__shaderParams){
+		
+		mask_tex = sprite_get_texture(other.mask,0)
+		u_mask_tex = shader_get_sampler_index(other.shader, "mask_tex")
+		u_time = shader_get_uniform(other.shader, "time")
+		u_tolerance = shader_get_uniform(other.shader, "tolerance")
+		u_inverse = shader_get_uniform(other.shader, "inverse")
+	}
+	
 	
 	SetValue = function(_value, _feedbackTrigger){
 		value = _value/maxValue
 		hasFeedback = _feedbackTrigger
 		
-		if hasFeedback && !feedbackRun{
-			if value => maxValue{
+		if hasFeedback && runFeedback{
+			if value >= maxValue{
 				value = maxValue
 				__feedbackGetParams()
-				feedbackRun = true
+				runFeedback = false
 			}
+			else runFeedback = true
+		}
+	}
+	
+	SetFlip = function(_xFlip = false, _yFlip = false){
+		xFlip = _xFlip = true ? -1 : 1;
+		yFlip = _yFlip = true ? -1 : 1;
+		
+	}
+	
+	SetAngle = function(_angle){
+		angle = _angle
+	}
+	
+	SetShaderDissolve = function (_shader = jabbaShaderDissolve , _sprite, _mask){
+		shader = _shader
+		sprite = _sprite
+		mask = _mask
+		with(__shaderParams){
+			mask_tex = sprite_get_texture(other.mask,0)
+			u_mask_tex = shader_get_sampler_index(other.shader, "mask_tex")
+			u_time = shader_get_uniform(other.shader, "value")
+			u_tolerance = shader_get_uniform(other.shader, "tolerance")
+			u_inverse = shader_get_uniform(other.shader, "inverse")
+		}
+		
+	}
+	
+	Draw = function(){
+		if !isHidden{
+			shader_set(shader)
+			texture_set_stage(__shaderParams.u_mask_tex, __shaderParams.mask_tex)
+			shader_set_uniform_f(__shaderParams.u_time, value)
+			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
+			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
+			draw_sprite_ext(sprite,frame,x,y,xscale,yscale,angle,color,alpha)
+			shader_reset();
 		}
 	}
 	
@@ -704,6 +768,5 @@ function CountDigit (_value){
 	
 	return _n = 0 ? 1 : _n
 }
-
 #endregion
 
