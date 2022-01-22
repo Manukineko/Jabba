@@ -684,6 +684,37 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 
 #endregion
 
+#region CAROUSSEL ELEMENT
+
+function JabbaCarousselElement() constructor {
+	
+	itemsList = []
+	size = 0
+	
+	__items = {}
+	with(__items){
+		
+		add = function(_name, _sprite){
+			var _item = new __carrouselItem(_sprite)
+			with(other){
+				itemsList[size] = _item
+			}
+			
+		}
+	}
+	
+}
+
+function __carousselItem(_name, _sprite) constructor{
+	
+	name = _name
+	sprite = _sprite
+	
+	
+}
+
+#endregion
+
 #region MISC FUNCTIONS
 
 /// @func ArraySum
