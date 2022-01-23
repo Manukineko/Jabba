@@ -101,6 +101,14 @@ function Jabba(_viewport = 0) constructor {
 		return _element
 	}
 	
+	static CreateCarrouselElement = function(_maxValue){
+		var _element = new JabbaCarousselElement()
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+	}
+	
 	static Draw = function(){
 		//with(__theHud){
 			var _i=0;repeat(array_length(elementsList)){
@@ -127,8 +135,8 @@ function Jabba(_viewport = 0) constructor {
 #region HUDELEMENT - the base constructor for all elements
 
 function __hudelement__() constructor{
-	x = other.x
-	y = other.y
+	x = 0
+	y = 0
 	xscale = 1
 	yscale = 1
 	scale = 1
@@ -686,31 +694,69 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 
 #region CAROUSSEL ELEMENT
 
-function JabbaCarousselElement() constructor {
+function JabbaCarousselElement() : __hudelement__() constructor {
 	
 	itemsList = []
 	size = 0
+	wRadius = 128
+	hRadius = 128
+	orderList = ds_priority_create()
 	
 	__items = {}
 	with(__items){
 		
-		add = function(_name, _sprite){
-			var _item = new __carrouselItem(_sprite)
+		add = function(_name, _sprite, _pos){
+			var _item = new JabbaGraphicElement(_sprite)
+			_item.SetPosition(other.x,other.y)
+			
 			with(other){
-				itemsList[size] = _item
+				var _itemStruct = {
+					ID : _pos,
+					name : _name,
+					item : _item
+				}
+				if _pos = undefined{
+					array_push(itemsList,_itemStruct)
+					return
+				}
+				itemsList[_pos] = _itemStruct
 			}
+			
+		}
+		
+		dispatch = function(){
 			
 		}
 	}
 	
+	addItem = function(_name, _sprite, _pos = undefined){
+		with(__items){
+			add(_name, _sprite, _pos)
+		}
+		
+		return undefined
+	}
+	
+	Draw = function(){
+		var _i=0;repeat(array_length(itemsList)){
+				if itemsList[_i] != 0 itemsList[_i][$ "item"].Draw()
+				_i++
+			}
+	}
+	
 }
 
-function __carousselItem(_name, _sprite) constructor{
-	
-	name = _name
+#endregion
+
+#region SPRITE ELEMENT
+
+function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
+
 	sprite = _sprite
 	
-	
+	Draw = function(){
+		draw_sprite_ext(sprite, frame, x, y, xscale, yscale, angle, color, alpha)
+	}
 }
 
 #endregion

@@ -17,3 +17,10 @@ counter.SetPosition(view_wport[0]/2, view_hport[0]-32).SetFeedback("popout", ["s
 
 gaugeBar = hud.CreateGaugeBarElement(100)
 gaugeBar.SetPosition(view_wport[0]/2, view_hport[0]-64)
+
+caroussel = hud.CreateCarrouselElement()
+caroussel.SetPosition(200,200).addItem("item 1", sItem1)
+caroussel.addItem("item 2", sItem2)
+caroussel.addItem("item 3", sItem3)
+caroussel.addItem("item 4", sItem4)
+caroussel.addItem("item 5", sItem5)

@@ -7,6 +7,11 @@
     {"id":{"name":"jabbaShaderDissolve","path":"shaders/jabbaShaderDissolve/jabbaShaderDissolve.yy",},"order":0,},
     {"id":{"name":"sJabbaGaugeBar","path":"sprites/sJabbaGaugeBar/sJabbaGaugeBar.yy",},"order":1,},
     {"id":{"name":"sJabbaGaugeBarMask","path":"sprites/sJabbaGaugeBarMask/sJabbaGaugeBarMask.yy",},"order":2,},
+    {"id":{"name":"sItem1","path":"sprites/sItem1/sItem1.yy",},"order":3,},
+    {"id":{"name":"sItem2","path":"sprites/sItem2/sItem2.yy",},"order":4,},
+    {"id":{"name":"sItem3","path":"sprites/sItem3/sItem3.yy",},"order":5,},
+    {"id":{"name":"sItem4","path":"sprites/sItem4/sItem4.yy",},"order":6,},
+    {"id":{"name":"sItem5","path":"sprites/sItem5/sItem5.yy",},"order":7,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},
@@ -54,6 +59,13 @@
   ],
   "IncludedFiles": [
     {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"JabbaFont.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"sJabbaGaugeBarMask.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"sJabbaGaugeBar.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"Item1.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"Item4.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"Item3.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"Item5.png","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"Item2.png","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2.3.7.606",
