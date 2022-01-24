@@ -696,8 +696,11 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 
 function JabbaCarousselElement() : __hudelement__() constructor {
 	
+	
 	itemsList = []
-	size = 0
+	carousselSize = 0
+	rotation = 0
+	rotationSpeed = 0
 	wRadius = 128
 	hRadius = 128
 	orderList = ds_priority_create()
@@ -717,14 +720,21 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 				}
 				if _pos = undefined{
 					array_push(itemsList,_itemStruct)
+					carousselSize = array_length(itemsList)
 					return
 				}
 				itemsList[_pos] = _itemStruct
+				carousselSize = array_length(itemsList)
 			}
 			
 		}
 		
 		dispatch = function(){
+			rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
+			
+			var _i = 1; repeat(carousselSize){
+				ds_priority_add(orderList, _i, lengthdir_y(hRadius/2, (rotation-90) + i * (360/carousselSize) ))
+			}
 			
 		}
 	}
