@@ -703,7 +703,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	rotationSpeed = 0
 	wRadius = 128
 	hRadius = 128
-	orderList = ds_priority_create()
+	drawOrder = []//ds_priority_create()
 	
 	__items = {}
 	with(__items){
@@ -714,7 +714,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 			
 			with(other){
 				var _itemStruct = {
-					ID : _pos,
+					ID : carousselSize, //NO. Just testing purpose. To do better.
 					name : _name,
 					item : _item
 				}
@@ -730,11 +730,27 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		}
 		
 		dispatch = function(){
-			rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
-			
-			var _i = 1; repeat(carousselSize){
-				ds_priority_add(orderList, _i, lengthdir_y(hRadius/2, (rotation-90) + i * (360/carousselSize) ))
+			with(other){
+				rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
+				var _prio = ds_priority_create()
+				var _i = 0; repeat(carousselSize){
+					ds_priority_add(_prio, itemsList[_i], lengthdir_y(hRadius/2, (rotation-90) + _i * (360/carousselSize) ))
+					_i++
+					
+				}
+				var _x,_y
+				var _i = carousselSize-1; repeat(carousselSize){
+					drawOrder[_i] = ds_priority_delete_min(_prio)
+					_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
+					_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) ) 
+					drawOrder[_i][$ "item"].SetPosition(_x,_y)
+					_i--
+					
+				}
+				
+				ds_priority_destroy(_prio)
 			}
+			
 			
 		}
 	}
@@ -747,9 +763,15 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		return undefined
 	}
 	
+	Update = function(){
+		with(__items){
+			dispatch()
+		}
+	}
+	
 	Draw = function(){
 		var _i=0;repeat(array_length(itemsList)){
-				if itemsList[_i] != 0 itemsList[_i][$ "item"].Draw()
+				if drawOrder[_i] != 0 drawOrder[_i][$ "item"].Draw()
 				_i++
 			}
 	}
