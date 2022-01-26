@@ -1,3 +1,6 @@
+item = 0
+combo = 0
+life = 0
 
 hud = new Jabba()
 quotaSimple = hud.CreateQuotaCounterElement()
@@ -13,13 +16,13 @@ timer.SetTimeFormat([JT.DAYS,JT.HOURS,JT.MIN, JT.SEC, JT.HUN]).SetPosition(view_
 //timer.CreateTimerText()
 
 counter = hud.CreateCounterElement()
-counter.SetPosition(view_wport[0]/2, view_hport[0]-32).SetFeedback("popout", ["scale", 2])
+counter.SetPosition(view_wport[0]/2, view_hport[0]-128).SetFeedback("popout", ["scale", 2])
 
 gaugeBar = hud.CreateGaugeBarElement(100)
-gaugeBar.SetPosition(view_wport[0]/2, view_hport[0]-64)
+gaugeBar.SetPosition(32,64)
 
 caroussel = hud.CreateCarrouselElement()
-caroussel.SetPosition(200,200).addItem("item 1", sItem1)
+caroussel.SetPosition(view_wport[0]/2, view_hport[0]-128).addItem("item 1", sItem1)
 caroussel.addItem("item 2", sItem2)
 caroussel.addItem("item 3", sItem3)
 caroussel.addItem("item 4", sItem4)

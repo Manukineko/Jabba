@@ -7,8 +7,8 @@
 /// [TODO] anchor system as well as custom attach points
 /// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
 function Jabba(_viewport = 0) constructor {
-	x = 0
-	y = 0
+	x = x
+	y = y
 	//[TEST] tentative to understand scoping while using "private" functions & variablesp
 	elementsList = [];
 	//
@@ -110,12 +110,10 @@ function Jabba(_viewport = 0) constructor {
 	}
 	
 	static Draw = function(){
-		//with(__theHud){
-			var _i=0;repeat(array_length(elementsList)){
-				elementsList[_i].Draw()
-				_i++
-			}
-		//}
+		var _i=0;repeat(array_length(elementsList)){
+			elementsList[_i].Draw()
+			_i++
+		}
 		
 	}
 
@@ -178,6 +176,10 @@ function __hudelement__() constructor{
 			return _val;
 	
 		}),
+	}
+	
+	static SetValue = function(_value){
+		value = _value
 	}
 	
 	/// @func SetPosition
@@ -700,73 +702,69 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	itemsList = []
 	carousselSize = 0
 	rotation = 0
-	rotationSpeed = 0
+	rotationSpeed = 0.1
 	wRadius = 128
 	hRadius = 128
-	drawOrder = []//ds_priority_create()
+	drawOrder = []
 	
-	__items = {}
-	with(__items){
+	/// @desc add an iten to the caroussel in the itemlist
+	__add = function(_name, _sprite, _pos){
+		var _item = new JabbaGraphicElement(_sprite)
+		_item.SetPosition(other.x,other.y)
 		
-		add = function(_name, _sprite, _pos){
-			var _item = new JabbaGraphicElement(_sprite)
-			_item.SetPosition(other.x,other.y)
-			
-			with(other){
-				var _itemStruct = {
-					ID : carousselSize, //NO. Just testing purpose. To do better.
-					name : _name,
-					item : _item
-				}
-				if _pos = undefined{
-					array_push(itemsList,_itemStruct)
-					carousselSize = array_length(itemsList)
-					return
-				}
-				itemsList[_pos] = _itemStruct
-				carousselSize = array_length(itemsList)
-			}
-			
+		var _itemStruct = {
+			ID : carousselSize, //NO. Just testing purpose. To do better.
+			name : _name,
+			item : _item
 		}
+		if _pos = undefined{
+			array_push(itemsList,_itemStruct)
+			carousselSize = array_length(itemsList)
+			return
+		}
+		itemsList[_pos] = _itemStruct
+		carousselSize = array_length(itemsList)
 		
-		dispatch = function(){
-			with(other){
-				rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
-				var _prio = ds_priority_create()
-				var _i = 0; repeat(carousselSize){
-					ds_priority_add(_prio, itemsList[_i], lengthdir_y(hRadius/2, (rotation-90) + _i * (360/carousselSize) ))
-					_i++
-					
-				}
-				var _x,_y
-				var _i = carousselSize-1; repeat(carousselSize){
-					drawOrder[_i] = ds_priority_delete_min(_prio)
-					_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
-					_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) ) 
-					drawOrder[_i][$ "item"].SetPosition(_x,_y)
-					_i--
-					
-				}
-				
-				ds_priority_destroy(_prio)
-			}
-			
-			
-		}
 	}
 	
-	addItem = function(_name, _sprite, _pos = undefined){
-		with(__items){
-			add(_name, _sprite, _pos)
+	/// @desc calculate the position of each item in the caroussel
+	__dispatch = function(){
+		rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
+		var _prio = ds_priority_create()
+		var _i = 0; repeat(carousselSize){
+			ds_priority_add(_prio, itemsList[_i], lengthdir_y(hRadius/2, (rotation-90) + _i * (360/carousselSize) ))
+			_i++
+			
+		}
+		var _x,_y
+		var _i = 0; repeat(carousselSize){
+			drawOrder[_i] = ds_priority_delete_min(_prio)
+			_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
+			_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) ) 
+			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y)
+			_i++
+			
 		}
 		
+		ds_priority_destroy(_prio)
+		
+	}
+
+	
+	addItem = function(_name, _sprite, _pos = undefined){
+
+		__add(_name, _sprite, _pos)
 		return undefined
 	}
 	
+	SetRadius = function(_wRadius, _hRadius){
+		
+	}
+	
 	Update = function(){
-		with(__items){
-			dispatch()
-		}
+
+		__dispatch()
+
 	}
 	
 	Draw = function(){
@@ -879,3 +877,69 @@ function CountDigit (_value){
 }
 #endregion
 
+function select_relative_wrap(_current, _delta) {
+	//
+	//  Returns an argument in a position relative to a given value.
+	//  If a relative position is beyond the range of given choices,
+	//  the position is wrapped until it is within range. If current
+	//  value isn't among the choices, the return value is undefined.
+	//
+	//      current     value matching a given choice
+	//      delta       relative position of desired choice, integer
+	//      choiceN     value to return, if selected
+	//
+	//  eg. select_relative_wrap("Name", -2, "Hello", "Doctor", "Name") == "Hello"
+	//      select_relative_wrap("Name", 2, "Hello", "Doctor", "Name") == "Doctor"
+	//
+	/// GMLscripts.com/license
+	{
+	    var _size = argument_count - 2;
+	    var _choices = ds_list_create();
+	    for (var _i = 2; _i < argument_count; _i++) ds_list_add(_choices, argument[_i]);
+	    _i = ds_list_find_index(_choices, _current);
+	    if (_i < 0) return undefined;
+	    _i = (((_i + _delta) mod _size) + _size) mod _size;
+	    var _result = ds_list_find_value(_choices, _i);
+	    ds_list_destroy(_choices);
+	    return _result;
+	}
+
+
+}
+
+/// @function			number_wrap(value, min, max, [include_max?]);
+/// @description		Wraps a value to stay between the set min and max.
+/// @argument			{real} value The value to wrap.
+/// @argument			{real} min The lower value to wrap around.
+/// @argument			{real} max The higher value to wrap around.
+/// @argument			{boolean} [include_max?=true] Whether to allow the value to be equal to max (true) or not (false).
+/// @returns			{real} The wrapped value.
+function number_wrap(_value, _min, _max) {
+	var __min = min(_min, _max);
+	_max = max(_min, _max);
+	_min = __min;
+
+	if (_min == _max) {
+		return _min;
+	}
+
+	var _diff = (_max - _min);
+	if (argument_count == 3 || argument[3]) {
+		while (_value > _max || _value < _min) {
+			if (_value > _max) {
+				_value -= _diff + 1;
+			} else if (_value < _min) {
+				_value += _diff + 1;
+			}
+		}
+	} else {
+		while (_value >= _max || _value < _min) {
+			if (_value >= _max) {
+				_value -= _diff;
+			} else if (_value < _min) {
+				_value += _diff;
+			}
+		}
+	}
+	return _value;
+}
