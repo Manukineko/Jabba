@@ -21,7 +21,7 @@
   "layers": [
     {"blendMode":0,"displayName":"default","isLocked":false,"opacity":100,"visible":true,"resourceVersion":"1.0","name":"55fc035c-3e7b-4e69-a563-5df5830eb144","tags":[],"resourceType":"GMImageLayer",},
   ],
-  "origin": 0,
+  "origin": 4,
   "preMultiplyAlpha": false,
   "sequence": {
     "autoRecord": true,
@@ -64,8 +64,8 @@
     ],
     "visibleRange": null,
     "volume": 1,
-    "xorigin": 0,
-    "yorigin": 0,
+    "xorigin": 16,
+    "yorigin": 16,
     "parent": {
       "name": "sItem1",
       "path": "sprites/sItem1/sItem1.yy",
@@ -84,8 +84,8 @@
   "type": 0,
   "width": 32,
   "parent": {
-    "name": "Sprites",
-    "path": "folders/Sprites.yy",
+    "name": "caroussel",
+    "path": "folders/Demo/elements/caroussel.yy",
   },
   "resourceVersion": "1.0",
   "name": "sItem1",

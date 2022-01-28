@@ -11,6 +11,10 @@ function Jabba(_viewport = 0) constructor {
 	y = y
 	//[TEST] tentative to understand scoping while using "private" functions & variablesp
 	elementsList = [];
+	elementsListSize = 0
+	isHidden = false
+	
+	margin = {}
 	//
 	var _owner = other;
 	__theHud = {};
@@ -23,8 +27,10 @@ function Jabba(_viewport = 0) constructor {
 		// Internal fuction to add an element in Jabba's elements list
 		__addElement = method(other, function(_element){
 			var _list = elementsList
+			
 			with (__theHud){
 				array_push(_list, _element)
+				other.elementsListSize = array_length(_list)
 				return _element
 			}
 		})
@@ -68,12 +74,6 @@ function Jabba(_viewport = 0) constructor {
 	/// @desc create an Extended Quota element constructor and store it in the HUD	
 	static CreateQuotaCounterExtElement = function(){
 		var _element = new JabbaQuotaCounterExtElement()
-		var _as
-		//with (__theHud){
-		//	array_push(elementsList, _element)
-		//	_as = array_length(elementsList)
-		//	return elementsList[_as-1]
-		//}
 		//[TEST] tentative to understand scoping while using "private" functions & variables
 		with(__theHud){
 			__addElement(_element)
@@ -109,16 +109,60 @@ function Jabba(_viewport = 0) constructor {
 		return _element
 	}
 	
-	static Draw = function(){
-		var _i=0;repeat(array_length(elementsList)){
-			elementsList[_i].Draw()
-			_i++
+	static SetMargin = function(_top, _left = undefined, _bottom = undefined, _right = undefined){
+		if is_undefined(_left){
+			
+				_right = _left
+				_bottom = _top
+			
+		}
+		if is_undefined(_bottom){
+			
+				_right = _top
+				_bottom = _top
+				_left = _left
+			
 		}
 		
+		with(margin){
+			top = _top
+			left = _left
+			bottom = _bottom
+			right = _right
+		}
+		
+		return self
+		
+	}
+	
+	__setAnchor = function(){
+		
+	}
+	
+	static AddAnchor = function(){}
+	
+	/// @func ToggleHide
+	/// @desc toggle the element's isHidden variable to bypass drawing
+	static ToggleHide = function(){
+		
+		isHidden = !isHidden
+	}
+	
+	static Hide = function(_bool){
+		isHidden = _bool
+	}
+	
+	static Draw = function(){
+		if !isHidden{
+			var _i=0;repeat(array_length(elementsList)){
+				elementsList[_i].Draw()
+				_i++
+			}
+		}
 	}
 
-		/// @func FeedbackPlayer
-		/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
+	/// @func FeedbackPlayer
+	/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
 	static FeedbackPlayer = function(){
 		var _i=0;repeat(array_length(elementsList)){
 			elementsList[_i].feedback()
@@ -135,8 +179,8 @@ function Jabba(_viewport = 0) constructor {
 function __hudelement__() constructor{
 	x = 0
 	y = 0
-	xscale = 1
-	yscale = 1
+	xScale = 1
+	yScale = 1
 	scale = 1
 	angle = 0
 	color = c_white
@@ -161,7 +205,7 @@ function __hudelement__() constructor{
 			func : method(other, function(){
 				if hasFeedback{	
 					scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
-					xscale = scale; yscale = scale
+					xScale = scale; yScale = scale
 				}
 			}),
 			params : ["scale", 2]
@@ -195,11 +239,36 @@ function __hudelement__() constructor{
 	    return self
 	}
 	
+	static SetScale = function(_xScale, _yScale = undefined){
+		
+		if is_undefined(_yScale){
+			_yScale = _xScale
+		}
+		
+		xScale = _xScale
+		yScale = _yScale
+		
+		return self
+		
+	}
+	
+	static SetAlpha = function(_alpha){
+		
+		alpha = _alpha
+		
+		return self
+		
+	}
+	
 	/// @func ToggleHide
 	/// @desc toggle the element's isHidden variable to bypass drawing
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
+	}
+	
+	static Hide = function(_bool){
+		isHidden = _bool
 	}
 	
 	__feedbackGetParams = function(){
@@ -260,7 +329,7 @@ function JabbaCounterElement() : __hudelement__() constructor{
 		if !isHidden{
 			draw_set_halign(halign)
 			draw_set_valign(valign)
-			draw_text_transformed_color(x,y, value, xscale, yscale, angle, color, color, color, color, alpha )
+			draw_text_transformed_color(x,y, value, xScale, yScale, angle, color, color, color, color, alpha )
 			draw_set_halign(-1)
 			draw_set_valign(-1)
 		}
@@ -289,8 +358,6 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
         
         return self
     }
-    
-    
     
     static SetValue = function(_value){
     	value = _value
@@ -322,14 +389,18 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
     valueLength = 0
     quota = 0
     
-    valueDigits = []
-    quotaDigits = []
-    digitsLimit = undefined
+    digitsLimit = 9
+    valueDigits = array_create(digitsLimit, 0)
+    quotaDigits = array_create(digitsLimit, 0)
+    
     counterValueLimit = undefined
-    digitsColor = []
+    
 	colorQuotaReached = c_red
 	colorCounterDefault = c_white
-	matchingDigit = []
+	digitsColor = array_create(digitsLimit, colorCounterDefault)
+	
+	matchingDigit = array_create(digitsLimit,false)
+	
 	spriteFont = JabbaFont
 	spriteFontFrame = []
 	spriteFontWidth = sprite_get_width(spriteFont)
@@ -375,13 +446,21 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
         //trick to build the number of quota Digits dynamically
         //I count the number of characters and use that to resize the digit array
         
-        quotaDigits = array_create(digitsLimit, 0)
+        
+        array_resize(quotaDigits, digitsLimit)
+        	//quotaDigits = array_create(digitsLimit, 0)
+        
         //resize the value digits array
-        valueDigits = array_create(digitsLimit, 0)
+        array_resize(valueDigits, digitsLimit)
+        	//valueDigits = array_create(digitsLimit, 0)
+        
         //resize the color array
-        digitsColor = array_create(digitsLimit, colorCounterDefault)
+        array_resize(digitsColor, digitsLimit)
+        	//digitsColor = array_create(digitsLimit, colorCounterDefault)
+        
         //resize the matching digit array
-        matchingDigit = array_create(digitsLimit,false)
+        array_resize(matchingDigit, digitsLimit)
+        	//matchingDigit = array_create(digitsLimit,false)
         
         //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
         var _cvl = (power(10, digitsLimit)) - 1//string_repeat("9", digitsLimit)
@@ -446,7 +525,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
         	var _i=digitsLimit-1; repeat(valueLength){
-        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xscale, yscale, 0, digitsColor[_i], 1 )
+        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xScale, yScale, 0, digitsColor[_i], 1 )
         		_i--
         	}
 		}
@@ -472,6 +551,8 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	timeLimit = 0
 	timeSeparator = ":"
 	
+	halign = fa_center
+	valign = fa_middle
 	timeUnit = []
 	timeDigit = [0,0,0,0,0]
 	timeFormat = []
@@ -513,6 +594,13 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	//internally in Jabba and then use in the update function.
 	//3. custom mide, allow to build a set of different format (sot it means being able to
 	//return the func to an instance variable)
+	
+	static SetTextAlign = function(_halign, _valign){
+		halign = _halign
+		valign = _valign
+		
+		return self
+	}
 	
 	/// @func SetTimeFormat
 	/// @desc Set the time format. Each Unit to use is store in an array. The display order will match the input order
@@ -600,16 +688,17 @@ function JabbaTimerElement() : __hudelement__() constructor{
 			_str = _str+timeSeparator
 			_i++
 		}
-		
-		
 	}
 	
 	static Draw = function(){
 		if !isHidden{
-			draw_text(x,y, __string)
+			draw_set_halign(halign)
+			draw_set_valign(valign)
+			draw_text_transformed_color(x,y, __string, xScale, yScale, angle, color, color, color, color, alpha )
+			draw_set_halign(-1)
+			draw_set_valign(-1)
 		}
 	}
-	
 }
 
 #endregion
@@ -623,7 +712,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	mask = sJabbaGaugeBarMask
 	maxValue = _maxValue
 	tolerance = 0
-	inverse = 0
+	inverse = 1
 	xFlip = 1
 	yFlip = 1
 	
@@ -635,10 +724,11 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 		u_time = shader_get_uniform(other.shader, "time")
 		u_tolerance = shader_get_uniform(other.shader, "tolerance")
 		u_inverse = shader_get_uniform(other.shader, "inverse")
+		
 	}
 	
-	
-	SetValue = function(_value, _feedbackTrigger){
+	static SetValue = function(_value, _feedbackTrigger){
+		
 		value = _value/maxValue
 		hasFeedback = _feedbackTrigger
 		
@@ -652,17 +742,20 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 		}
 	}
 	
-	SetFlip = function(_xFlip = false, _yFlip = false){
+	static SetFlip = function(_xFlip = false, _yFlip = false){
+		
 		xFlip = _xFlip = true ? -1 : 1;
 		yFlip = _yFlip = true ? -1 : 1;
 		
+		
+		
 	}
 	
-	SetAngle = function(_angle){
+	static SetAngle = function(_angle){
 		angle = _angle
 	}
 	
-	SetShaderDissolve = function (_shader = jabbaShaderDissolve , _sprite, _mask){
+	static SetShaderDissolve = function (_shader = jabbaShaderDissolve , _sprite, _mask){
 		shader = _shader
 		sprite = _sprite
 		mask = _mask
@@ -673,23 +766,21 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 			u_tolerance = shader_get_uniform(other.shader, "tolerance")
 			u_inverse = shader_get_uniform(other.shader, "inverse")
 		}
-		
 	}
 	
-	Draw = function(){
+	static Draw = function(){
 		if !isHidden{
+			
 			shader_set(shader)
 			texture_set_stage(__shaderParams.u_mask_tex, __shaderParams.mask_tex)
 			shader_set_uniform_f(__shaderParams.u_time, value)
 			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
 			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(sprite,frame,x,y,xscale,yscale,angle,color,alpha)
+			draw_sprite_ext(sprite,frame,x,y,xScale*xFlip,yScale*yFlip,angle,color,alpha)
 			shader_reset();
+		
 		}
 	}
-	
-	
-	
 }
 
 #endregion
@@ -698,19 +789,21 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 
 function JabbaCarousselElement() : __hudelement__() constructor {
 	
-	
 	itemsList = []
 	carousselSize = 0
 	rotation = 0
 	rotationSpeed = 0.1
 	wRadius = 128
 	hRadius = 128
+	fadeMin = .8
+	scaleMin = .8
 	drawOrder = []
 	
 	/// @desc add an iten to the caroussel in the itemlist
 	__add = function(_name, _sprite, _pos){
 		var _item = new JabbaGraphicElement(_sprite)
 		_item.SetPosition(other.x,other.y)
+		_item.SetOrigin(MiddleCenter)
 		
 		var _itemStruct = {
 			ID : carousselSize, //NO. Just testing purpose. To do better.
@@ -736,12 +829,14 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 			_i++
 			
 		}
-		var _x,_y
+		var _x,_y,_fade, _scale
 		var _i = 0; repeat(carousselSize){
 			drawOrder[_i] = ds_priority_delete_min(_prio)
 			_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
-			_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) ) 
-			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y)
+			_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
+			_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
+			_scale = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)), scaleMin,1)
+			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale)
 			_i++
 			
 		}
@@ -751,29 +846,59 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	}
 
 	
-	addItem = function(_name, _sprite, _pos = undefined){
+	static AddItem = function(_name, _sprite, _pos = undefined){
 
 		__add(_name, _sprite, _pos)
 		return undefined
 	}
 	
-	SetRadius = function(_wRadius, _hRadius){
+	static SetRadius = function(_wRadius, _hRadius = undefined){
+		
+		if is_undefined(_hRadius){
+			_hRadius = _wRadius
+		}
+		
+		wRadius = _wRadius
+		hRadius = _hRadius
+		
+		return self
 		
 	}
 	
-	Update = function(){
+	static SetDepth = function(_value){
+		scaleMin = clamp(_value,0,1)
+		
+		return self
+	}
+	
+	static SetDrawDistance = function(_value){
+		fadeMin = clamp(_value,0,alpha)
+		
+		return self
+	}
+	
+	static SetRotationSpeed = function(_speed){
+		if (_speed = 0) show_error("Caroussel speed is 0",true)
+		
+		rotationSpeed = abs(_speed)
+		
+		return self
+	}
+	
+	static Update = function(){
 
 		__dispatch()
 
 	}
 	
-	Draw = function(){
-		var _i=0;repeat(array_length(itemsList)){
+	static Draw = function(){
+		if !isHidden {
+			var _i=0;repeat(array_length(itemsList)){
 				if drawOrder[_i] != 0 drawOrder[_i][$ "item"].Draw()
 				_i++
 			}
+		}
 	}
-	
 }
 
 #endregion
@@ -781,11 +906,39 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 #region SPRITE ELEMENT
 
 function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
+	
+	#macro TopLeft [0,0]
+	#macro TopCenter [0,0.5]
+	#macro TopRight [0,1]
+	#macro MiddleLeft [0.5, 0]
+	#macro MiddleCenter [0.5, 0.5]
+	#macro MiddleRight [0.5, 1]
+	#macro BottomLeft [1, 0]
+	#macro BottomCenter [1, 0.5]
+	#macro BottomRight [1, 1]
 
 	sprite = _sprite
+	width = sprite_get_width(_sprite)
+	height = sprite_get_height(_sprite)
 	
-	Draw = function(){
-		draw_sprite_ext(sprite, frame, x, y, xscale, yscale, angle, color, alpha)
+	static SetOrigin = function(_x, _y = undefined){
+		
+		var _xoff, _yoff
+		if is_array(_x){
+			_y = _x[1]*height
+			_x = _x[0]*width
+		}
+		
+		_xoff = _x
+		_yoff = _y
+		
+		sprite_set_offset(sprite, _xoff, _yoff)
+	}
+	
+	static Draw = function(){
+		if !isHidden {
+			draw_sprite_ext(sprite, frame, x, y, xScale, yScale, angle, color, alpha)
+		}
 	}
 }
 
@@ -877,69 +1030,16 @@ function CountDigit (_value){
 }
 #endregion
 
-function select_relative_wrap(_current, _delta) {
-	//
-	//  Returns an argument in a position relative to a given value.
-	//  If a relative position is beyond the range of given choices,
-	//  the position is wrapped until it is within range. If current
-	//  value isn't among the choices, the return value is undefined.
-	//
-	//      current     value matching a given choice
-	//      delta       relative position of desired choice, integer
-	//      choiceN     value to return, if selected
-	//
-	//  eg. select_relative_wrap("Name", -2, "Hello", "Doctor", "Name") == "Hello"
-	//      select_relative_wrap("Name", 2, "Hello", "Doctor", "Name") == "Doctor"
-	//
-	/// GMLscripts.com/license
-	{
-	    var _size = argument_count - 2;
-	    var _choices = ds_list_create();
-	    for (var _i = 2; _i < argument_count; _i++) ds_list_add(_choices, argument[_i]);
-	    _i = ds_list_find_index(_choices, _current);
-	    if (_i < 0) return undefined;
-	    _i = (((_i + _delta) mod _size) + _size) mod _size;
-	    var _result = ds_list_find_value(_choices, _i);
-	    ds_list_destroy(_choices);
-	    return _result;
+function value_wrap_selector(_current, _delta, _list) {
+	
+	var _size = array_length(_list)
+	var _i = 0; repeat(_size){
+		if _list[_i] = _current break
+		_i++
 	}
+	//if _i < 0 return undefined
+	_i = (((_i + _delta) mod _size) + _size) mod _size;
+	var _result = _list[_i]
+	return _result
 
-
-}
-
-/// @function			number_wrap(value, min, max, [include_max?]);
-/// @description		Wraps a value to stay between the set min and max.
-/// @argument			{real} value The value to wrap.
-/// @argument			{real} min The lower value to wrap around.
-/// @argument			{real} max The higher value to wrap around.
-/// @argument			{boolean} [include_max?=true] Whether to allow the value to be equal to max (true) or not (false).
-/// @returns			{real} The wrapped value.
-function number_wrap(_value, _min, _max) {
-	var __min = min(_min, _max);
-	_max = max(_min, _max);
-	_min = __min;
-
-	if (_min == _max) {
-		return _min;
-	}
-
-	var _diff = (_max - _min);
-	if (argument_count == 3 || argument[3]) {
-		while (_value > _max || _value < _min) {
-			if (_value > _max) {
-				_value -= _diff + 1;
-			} else if (_value < _min) {
-				_value += _diff + 1;
-			}
-		}
-	} else {
-		while (_value >= _max || _value < _min) {
-			if (_value >= _max) {
-				_value -= _diff;
-			} else if (_value < _min) {
-				_value += _diff;
-			}
-		}
-	}
-	return _value;
 }

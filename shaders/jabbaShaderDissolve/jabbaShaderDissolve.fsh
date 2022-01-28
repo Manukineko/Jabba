@@ -7,7 +7,7 @@ uniform float tolerance;
 uniform float inverse;
 
 void main() {
-	// fator tolerance into time
+	// factor tolerance into time
 	float time_ext = time + time * tolerance;
 	//get samples
 	vec4 base_col = v_vColour * texture2D(gm_BaseTexture, v_vTexcoord);

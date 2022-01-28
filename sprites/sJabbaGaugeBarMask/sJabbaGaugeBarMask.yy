@@ -84,8 +84,8 @@
   "type": 0,
   "width": 128,
   "parent": {
-    "name": "Sprites",
-    "path": "folders/Sprites.yy",
+    "name": "gaugeBar",
+    "path": "folders/Demo/elements/gaugeBar.yy",
   },
   "resourceVersion": "1.0",
   "name": "sJabbaGaugeBarMask",

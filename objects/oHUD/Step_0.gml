@@ -1,8 +1,7 @@
 
 if keyboard_check_pressed(vk_space){
     value += 1000
-    combo++
-    combo = number_wrap(combo,0,10,true)
+    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
     
     counter.SetValue(combo)
     //value = clamp(value, 0, 9999)
@@ -15,19 +14,17 @@ if keyboard_check(vk_down){
     life--
 }
 if keyboard_check_pressed(ord("H")){
-    quotaSimple.ToggleHide()
-    show_debug_message("hide:"+string(quotaSimple.isHidden))
+    hud.ToggleHide()
+    show_debug_message("hide:"+string(hud.isHidden))
 }
 
 if keyboard_check_pressed(vk_left){
-    item--
-    item = number_wrap(item,0,4,true)
+    item = value_wrap_selector(item, -1, [0,1,2,3,4])
     caroussel.SetValue(item)
 }
 
 if keyboard_check_pressed(vk_right){
-    item++
-    item = number_wrap(item,0,4,true)
+    item = value_wrap_selector(item, +1, [0,1,2,3,4])
     caroussel.SetValue(item)
 }
 
