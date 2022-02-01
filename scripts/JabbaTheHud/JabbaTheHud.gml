@@ -9,10 +9,15 @@
 function Jabba(_viewport = 0) constructor {
 	x = x
 	y = y
-	//[TEST] tentative to understand scoping while using "private" functions & variablesp
+	
 	elementsList = [];
 	elementsListSize = 0
 	isHidden = false
+	
+	width = view_get_wport(_viewport)
+	height = view_get_hport(_viewport)
+	x = view_get_xport(_viewport)
+	y = view_get_yport(_viewport)
 	
 	margin = {}
 	//
@@ -22,8 +27,6 @@ function Jabba(_viewport = 0) constructor {
 		owner = _owner;
 		viewport = _viewport
 	
-		//elementsList = [];
-		//[TEST] tentative to understand scoping while using "private" functions & variables
 		// Internal fuction to add an element in Jabba's elements list
 		__addElement = method(other, function(_element){
 			var _list = elementsList
@@ -50,7 +53,7 @@ function Jabba(_viewport = 0) constructor {
 	/// @desc create a Count element constructor and store it in the HUD
 	static CreateCounterElement = function(){
 		var _element = new JabbaCounterElement()
-		//[TEST] tentative to understand scoping while using "private" functions & variables
+
 		with(__theHud){
 			__addElement(_element)
 		}
@@ -62,7 +65,7 @@ function Jabba(_viewport = 0) constructor {
 	/// @desc create an Extended Quota element constructor and store it in the HUD	
 	static CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
-		//[TEST] tentative to understand scoping while using "private" functions & variables
+
 		with(__theHud){
 			__addElement(_element)
 		}
@@ -74,7 +77,7 @@ function Jabba(_viewport = 0) constructor {
 	/// @desc create an Extended Quota element constructor and store it in the HUD	
 	static CreateQuotaCounterExtElement = function(){
 		var _element = new JabbaQuotaCounterExtElement()
-		//[TEST] tentative to understand scoping while using "private" functions & variables
+
 		with(__theHud){
 			__addElement(_element)
 		}
@@ -135,9 +138,16 @@ function Jabba(_viewport = 0) constructor {
 		
 	}
 	
-	__setAnchor = function(){
-		
-	}
+	//__setAnchor = function(){
+	//	with (anchor){
+	//		top = 
+	//		middle =
+	//		bottom =
+	//		left =
+	//		center =
+	//		right = 
+	//	}
+	//}
 	
 	static AddAnchor = function(){}
 	
@@ -193,14 +203,18 @@ function __hudelement__() constructor{
 	hasFeedback = true
 	runFeedback = true
 	feedback = function(){}
-	__activeFeedback = "popout"
+	__activeFeedback = "none"
 	
 	
 	//A list of built-in feedback. I plan to allow the user to add custom one.
 	__feedbacks = {}
 	with(__feedbacks){
 
-		none = function(){}
+		none = {
+			func : method(other, function(){}),
+			params : []
+		}
+			
 		popout = {
 			func : method(other, function(){
 				if hasFeedback{	
@@ -220,6 +234,16 @@ function __hudelement__() constructor{
 			return _val;
 	
 		}),
+	}
+	
+	__feedbackGetParams = function(){
+		
+		var _params = __feedbacks[$ __activeFeedback][$ "params"]
+		var _i=0; repeat(array_length(_params)/2){
+			variable_struct_set(self, _params[_i], _params[_i+1])
+			_i += 2
+		}
+		
 	}
 	
 	static SetValue = function(_value){
@@ -271,14 +295,28 @@ function __hudelement__() constructor{
 		isHidden = _bool
 	}
 	
-	__feedbackGetParams = function(){
+	/// @func SetFeedback
+	/// @desc set the feedback that will be played when the value changes
+	/// @params {string} feedback name of the feedback as a steing (default : popout)
+	static SetFeedback = function(_effect){
+		var _feedback = variable_struct_get(__feedbacks, _effect)
+		feedback = _feedback.func
+		__activeFeedback = _effect
 		
-		var _params = __feedbacks[$ __activeFeedback][$ "params"]
-		var _i=0; repeat(array_length(_params)/2){
-			variable_struct_set(self, _params[_i], _params[_i+1])
-			_i += 2
+		return self
+		
+	}
+	
+	static AddFeedback = function(_name, _function, _params){
+		var _struct = {}
+		with(_struct){
+			func = method(other,_function)
+			params = _params
 		}
 		
+		variable_struct_set(__feedbacks, _name, _struct)
+		
+		return self
 	}
 }
 
@@ -345,6 +383,7 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
 	counterValueLimit = (power(10, digitsLimit)) - 1
 	colorQuotaReached = c_red
 	colorCounterDefault = c_white
+	__activeFeedback = "popout"
 	
 	static SetQuota = function(_quota = 1000, _limit = 9){
     	//quota to reach
@@ -407,7 +446,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 	letterSpacing = 2 
 	
 	feedback = __feedbacks.popout.func
-	//__activeFeedback = "popout"
+	__activeFeedback = "popout"
     
     /// @func SetSpriteFont
     /// @desc The spritesheet used for the font
@@ -611,15 +650,14 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 		switch(array_length(_array)){
 			case 1 : _func = function(_time){
-		    			//return [timeUnit[timeFormat[0]](_time)]
+		    		
 		    			var _a = []
 						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
 						return _a
 					}
 			break
 			case 2 : _func = function(_time){
-					    //return [timeUnit[timeFormat[0]](_time),
-						//		timeUnit[timeFormat[1]](_time)]
+					    
 						var _a = []
 						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
 						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
@@ -627,9 +665,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 					}
 			break;
 			case 3 : _func = method(self, function(_time){
-		    			//return [timeUnit[timeFormat[0]](_time),
-						//		timeUnit[timeFormat[1]](_time),
-						//		timeUnit[timeFormat[2]](_time)]
+		    			
 						var _a = []
 						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
 						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
@@ -638,9 +674,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 					})
 			break
 			case 4 : _func = function(_time){
-		    			//return [timeUnit[timeFormat[0]](_time),
-						//		timeUnit[timeFormat[1]](_time),
-						//		timeUnit[timeFormat[2]](_time)]
+		    			
 						var _a = []
 						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
 						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
@@ -650,9 +684,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 					}
 			break
 			case 5 : _func = function(_time){
-		    			//return [timeUnit[timeFormat[0]](_time),
-						//		timeUnit[timeFormat[1]](_time),
-						//		timeUnit[timeFormat[2]](_time)]
+		    			
 						var _a = []
 						array_set(_a, timeFormat[0], timeUnit[timeFormat[0]](_time))
 						array_set(_a, timeFormat[1], timeUnit[timeFormat[1]](_time))
@@ -790,6 +822,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 function JabbaCarousselElement() : __hudelement__() constructor {
 	
 	itemsList = []
+	activeItem = undefined
 	carousselSize = 0
 	rotation = 0
 	rotationSpeed = 0.1
@@ -798,6 +831,26 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	fadeMin = .8
 	scaleMin = .8
 	drawOrder = []
+	colorBlendDefault = c_white
+	colorBlendActive = c_black
+	
+	with(__feedbacks){
+
+		highlight = {
+			func : method(other, function(){
+				if runFeedback{
+					var _previous = activeItem
+					_previous[$ "item"].SetColor(colorBlendDefault)
+					itemsList[value][$ "item"].SetColor(colorBlendActive)
+				
+					runFeedback = false
+				}
+			}),
+			params : ["runFeedback", true]
+		}
+	}
+	
+	show_debug_message(__feedbacks)
 	
 	/// @desc add an iten to the caroussel in the itemlist
 	__add = function(_name, _sprite, _pos){
@@ -822,6 +875,9 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	
 	/// @desc calculate the position of each item in the caroussel
 	__dispatch = function(){
+		
+		//var _previous = activeItem
+		
 		rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
 		var _prio = ds_priority_create()
 		var _i = 0; repeat(carousselSize){
@@ -841,10 +897,36 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 			
 		}
 		
+		activeItem = drawOrder[carousselSize-1]
+		//activeItem[$ "item"].SetColor(c_blue)
+		
+		
+		//if hasFeedback && runFeedback{
+		//	var _done = floor(abs(_x))
+		//	if _done < 1{
+		//		activeItem[$ "item"].SetColor(c_blue)
+		//		if !is_undefined(_previous) && _previous != activeItem{
+		//			_previous[$ "item"].SetColor(c_white)
+		//		}
+		//		runFeedback = false
+		//	}
+		//}
+		//Test in order to implement the feedback
+		//var _d = point_direction(0,0,_x,_y)
+		//show_debug_message(_previous)
 		ds_priority_destroy(_prio)
 		
 	}
 
+	static SetValue = function(_value){
+		value = _value
+		
+		if hasFeedback{
+			
+			__feedbackGetParams()
+		
+		}
+	}
 	
 	static AddItem = function(_name, _sprite, _pos = undefined){
 
@@ -933,6 +1015,14 @@ function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
 		_yoff = _y
 		
 		sprite_set_offset(sprite, _xoff, _yoff)
+		
+		return self
+	}
+	
+	static SetColor = function(_color){
+		color = _color
+		
+		return self
 	}
 	
 	static Draw = function(){
