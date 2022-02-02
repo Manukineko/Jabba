@@ -7,9 +7,11 @@
 /// [TODO] anchor system as well as custom attach points
 /// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
 function Jabba(_viewport = 0) constructor {
+	
 	x = x
 	y = y
 	
+	// Array holding all the Elements
 	elementsList = [];
 	elementsListSize = 0
 	isHidden = false
@@ -49,7 +51,7 @@ function Jabba(_viewport = 0) constructor {
 		//})
 		//
 	}
-	/// @func CreateCounterElement
+	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
 	static CreateCounterElement = function(){
 		var _element = new JabbaCounterElement()
@@ -61,8 +63,8 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	/// @func CreateQuotaCounterElement
-	/// @desc create an Extended Quota element constructor and store it in the HUD	
+	/// @func CreateQuotaCounterElement()
+	/// @desc create a Quota Element constructor and store it in the HUD	
 	static CreateQuotaCounterElement = function(){
 		var _element = new JabbaQuotaCounterElement()
 
@@ -73,8 +75,8 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	/// @func CreateQuotaCounterExtElement
-	/// @desc create an Extended Quota element constructor and store it in the HUD	
+	/// @func CreateQuotaCounterExtElement()
+	/// @desc create an Extended Quota Element constructor and store it in the HUD	
 	static CreateQuotaCounterExtElement = function(){
 		var _element = new JabbaQuotaCounterExtElement()
 
@@ -85,7 +87,7 @@ function Jabba(_viewport = 0) constructor {
 		//
 	}
 	
-	/// @func CreateTimerElement
+	/// @func CreateTimerElement()
 	/// @desc create a Timer element constructor and store it in the HUD	
 	static CreateTimerElement = function(){
 		var _element = new JabbaTimerElement()
@@ -94,8 +96,9 @@ function Jabba(_viewport = 0) constructor {
 		}
 		return _element
 	}
-	/// @func CreateTimerElement
+	/// @func CreateGaugeBarElement(maxValue)
 	/// @desc create a Timer element constructor
+	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
 	static CreateGaugeBarElement = function(_maxValue){
 		var _element = new JabbaGaugeBarElement(_maxValue)
 		with(__theHud){
@@ -104,7 +107,10 @@ function Jabba(_viewport = 0) constructor {
 		return _element
 	}
 	
-	static CreateCarrouselElement = function(_maxValue){
+	/// @func CreateCarrouselElement()
+	/// @desc create an empty Caroussel Element constructor
+	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
+	static CreateCarrouselElement = function(){
 		var _element = new JabbaCarousselElement()
 		with(__theHud){
 			__addElement(_element)
@@ -112,6 +118,12 @@ function Jabba(_viewport = 0) constructor {
 		return _element
 	}
 	
+	/// @func SetMargin
+	/// @desc Set a margin for the whole HUD
+	/// @param {integrer} Top
+	/// @param {integrer} Left
+	/// @param {integrer} Bottom
+	/// @param {integrer} Right
 	static SetMargin = function(_top, _left = undefined, _bottom = undefined, _right = undefined){
 		if is_undefined(_left){
 			
@@ -149,19 +161,26 @@ function Jabba(_viewport = 0) constructor {
 	//	}
 	//}
 	
+	/// @func AddAnchor
+	/// @desc It will add points the user can reference to position the element 
 	static AddAnchor = function(){}
 	
-	/// @func ToggleHide
+	/// @func ToggleHide()
 	/// @desc toggle the element's isHidden variable to bypass drawing
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
 	}
 	
+	/// @func Hide()
+	/// @desc Hide or Unhide the whole HUD
+	/// @param {bool} boolean
 	static Hide = function(_bool){
 		isHidden = _bool
 	}
 	
+	/// @func Draw()
+	/// @desc Draw all the elements if their internal isHidden variable is true
 	static Draw = function(){
 		if !isHidden{
 			var _i=0;repeat(array_length(elementsList)){
@@ -171,7 +190,7 @@ function Jabba(_viewport = 0) constructor {
 		}
 	}
 
-	/// @func FeedbackPlayer
+	/// @func FeedbackPlayer()
 	/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
 	static FeedbackPlayer = function(){
 		var _i=0;repeat(array_length(elementsList)){
@@ -187,6 +206,9 @@ function Jabba(_viewport = 0) constructor {
 #region HUDELEMENT - the base constructor for all elements
 
 function __hudelement__() constructor{
+	
+	//Public Variables
+	//you can access those variables but it should be better to use the profided functions, as some manage some stuffs automatically.
 	x = 0
 	y = 0
 	xScale = 1
@@ -197,16 +219,17 @@ function __hudelement__() constructor{
 	alpha = 1
 	frame = 0
 	value = 0
-	
 	isHidden = false
 	isReach = false
 	hasFeedback = true
 	runFeedback = true
 	feedback = function(){}
+	
+	//Private variable
 	__activeFeedback = "none"
 	
-	
-	//A list of built-in feedback. I plan to allow the user to add custom one.
+	//A list of global built-in feedback.
+	//Each element can also have their own feedbacks
 	__feedbacks = {}
 	with(__feedbacks){
 
@@ -214,7 +237,8 @@ function __hudelement__() constructor{
 			func : method(other, function(){}),
 			params : []
 		}
-			
+		
+		//inflate shortly the element
 		popout = {
 			func : method(other, function(){
 				if hasFeedback{	
@@ -236,6 +260,7 @@ function __hudelement__() constructor{
 		}),
 	}
 	
+	//internal - this will set the variable stored in a feedback struct ("params" member)
 	__feedbackGetParams = function(){
 		
 		var _params = __feedbacks[$ __activeFeedback][$ "params"]
@@ -246,14 +271,23 @@ function __hudelement__() constructor{
 		
 	}
 	
-	static SetValue = function(_value){
+	//Public functions
+	/// @func SetValue
+	/// @desc set the value to read from
+	/// @params {relative to element} value the value to read
+	/// @params {bool} play the element feedback (default : true)
+	static SetValue = function(_value, _triggerFeedback = true){
 		value = _value
+		hasFeedback = _triggerFeedback
+		if hasFeedback{
+			__feedbackGetParams()
+		}
 	}
 	
 	/// @func SetPosition
 	/// @desc set the position.
-	/// @params {real} x
-	/// @params {real} y
+	/// @params {integrer} x
+	/// @params {integrer} y
 	/// [NOTE] Could set a way to choose between SET and ADD ?
 	static SetPosition = function(_x, _y){
 
@@ -263,6 +297,10 @@ function __hudelement__() constructor{
 	    return self
 	}
 	
+	/// @func SetScale(xScale, yScale)
+	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale
+	/// @param {integrer} xScale or Scale
+	///	@param {integrer} yScale If omitted, it will get the same value as xScale
 	static SetScale = function(_xScale, _yScale = undefined){
 		
 		if is_undefined(_yScale){
@@ -276,6 +314,9 @@ function __hudelement__() constructor{
 		
 	}
 	
+	/// @func SetAlpha(alpha)
+	/// @desc Set the transparency
+	/// @param {integrer} alpha
 	static SetAlpha = function(_alpha){
 		
 		alpha = _alpha
@@ -295,7 +336,7 @@ function __hudelement__() constructor{
 		isHidden = _bool
 	}
 	
-	/// @func SetFeedback
+	/// @func SetFeedback(feedback)
 	/// @desc set the feedback that will be played when the value changes
 	/// @params {string} feedback name of the feedback as a steing (default : popout)
 	static SetFeedback = function(_effect){
@@ -307,6 +348,11 @@ function __hudelement__() constructor{
 		
 	}
 	
+	/// @func AddFeedback
+	/// @desc Add a User-Defined feedback 
+	/// @param {string} name The name of the custom feedback
+	/// @param {function} function The feedback behavior
+	/// @param {array} params An array of parameters as follow : ["variable 1", value 1, "variable 2", value 2, ...]
 	static AddFeedback = function(_name, _function, _params){
 		var _struct = {}
 		with(_struct){
@@ -321,17 +367,22 @@ function __hudelement__() constructor{
 }
 
 #endregion
-
+// A simple element that will play a feedback when a value change. Basically, it just display a string.
 #region COUNTER ELEMENT
-/// @func JabbaCounter
+/// @func JabbaCounter()
 /// @desc a simple counter. it will display the value with a feedback when it changes.
 function JabbaCounterElement() : __hudelement__() constructor{
-	value = 0
+	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
+	
 	halign = fa_center
 	valign = fa_middle
 	
+	/// @func SetTextAlign()
+	/// @desc Set the alignement of the text (GML constant fa_*)
+	/// @param {constant} halign
+	/// @param {constant} valign
 	static SetTextAlign = function(_halign, _valign){
 		halign = _halign
 		valign = _valign
@@ -339,30 +390,8 @@ function JabbaCounterElement() : __hudelement__() constructor{
 		return self
 	}
 	
-	/// @func SetValue
-	/// @desc set the value to read from
-	/// @params {real} value the value to read
-	/// @params {bool} play a feedback (default : true)
-	static SetValue = function(_value, _triggerFeedback = true){
-		value = _value
-		hasFeedback = _triggerFeedback
-		if hasFeedback{
-			__feedbackGetParams()
-		}
-	}
-	
-	/// @func SetFeedback
-	/// @desc set the feedback that will be played when the value changes
-	/// @params {string} feedback name of the feedback as a steing (default : popout)
-	static SetFeedback = function(_effect){
-		var _feedback = variable_struct_get(__feedbacks, _effect)
-		feedback = _feedback.func
-		__activeFeedback = _effect
-		
-		return self
-		
-	}
-	
+	/// @func Draw()
+	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
 			draw_set_halign(halign)
@@ -376,6 +405,7 @@ function JabbaCounterElement() : __hudelement__() constructor{
 #endregion
 
 #region QUOTA COUNTER
+// An Element that will change color when a quota is reached
 function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
 	
 	quota = 0
@@ -385,18 +415,22 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
 	colorCounterDefault = c_white
 	__activeFeedback = "popout"
 	
+	/// @func SetQuota(quota, counterLimit)
+	/// @desc Set the quota to compare the value to.
+	/// @param {real} quota
+	/// @param {real} counterLimit Set the maximum unit to display. This is mandatory in order to calculate the position neatly
 	static SetQuota = function(_quota = 1000, _limit = 9){
-    	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
         quota = _quota;
         digitsLimit = _limit
         
         //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
-        var _cvl = (power(10, digitsLimit)) - 1//string_repeat("9", digitsLimit)
+        var _cvl = (power(10, digitsLimit)) - 1
         counterValueLimit = _cvl
         
         return self
     }
+    
     
     static SetValue = function(_value){
     	value = _value
@@ -419,7 +453,7 @@ function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
     }
 }
 #endregion
-
+// An EXTENDED version of the Quota Counter Element that use sprite as its font. It allow to progressively change the color of each unit individually
 #region QUOTA COUNTER EXT
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
@@ -448,7 +482,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
     
-    /// @func SetSpriteFont
+    /// @func SetSpriteFont(sprite)
     /// @desc The spritesheet used for the font
     /// @params {sprite} sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
     static SetSpriteFont = function(_sprite){
@@ -459,10 +493,10 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 			return self
     }
 	
-	/// @func SetTextColor
+	/// @func SetTextColor(defaultColor, goalColor)
 	/// @desc Set the regular color and the color for when the quota is reached
-	/// @params {color} defaulColor
-	/// @params {color} goalColor
+	/// @params {color} defaultColor
+	/// @params {color} goalColor The color to change when the quota is reached
 	static SetTextColor = function(_defaultColor, _goalColor ){
     	
     	colorCounterDefault = _defaultColor
@@ -470,10 +504,10 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 		
 	}
     
-    /// @func SetQuota
+    /// @func SetQuota(quota, counterLimit)
     /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
-    /// @params {Int} quota the quota value to reach
-    /// @params {Int} The Digit limit to display (default : 9 (100 000 000) )
+    /// @params {integrer} quota the quota value to reach
+    /// @params {integrer} The Digit limit to display (default : 9 (100 000 000) )
     static SetQuota = function(_quota = 1000, _limit = 9){
     	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
@@ -513,9 +547,9 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
         
     }
     
-   /// @func SetValue
+   /// @func SetValue(value)
    /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
-   /// @params {int} value
+   /// @params {integrer} value
    /// //[TODO] Add feedback system per DIGITS
     static SetValue = function(_value){
     	
@@ -560,6 +594,8 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 			
 	}
     
+    /// @func Draw()
+    /// @desc Draw the element
     static Draw = method(self, function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
@@ -573,8 +609,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 #endregion
 
 #region TIMER ELEMENT
-/// @func JabbaTimerElement
-/// @desc a timer element that will split and display the time.
+//An element that will split and display a time.
 function JabbaTimerElement() : __hudelement__() constructor{
 	
 	//Time Unit to use to set the time format
@@ -599,13 +634,6 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	__createText = undefined
 	__string = undefined
 	
-	//not used ... yet ?
-	//__private = {}
-	//with(__private){
-	//	format = {
-	//		defaut: 
-	//	}
-	//}
 	//Create an array of function to convert time from
 	//milliseconde to every time units
 	timeUnit[JT.DAYS] = function(_time){
@@ -634,16 +662,9 @@ function JabbaTimerElement() : __hudelement__() constructor{
 	//3. custom mide, allow to build a set of different format (sot it means being able to
 	//return the func to an instance variable)
 	
-	static SetTextAlign = function(_halign, _valign){
-		halign = _halign
-		valign = _valign
-		
-		return self
-	}
-	
-	/// @func SetTimeFormat
-	/// @desc Set the time format. Each Unit to use is store in an array. The display order will match the input order
-	/// @params an array of time unit to use (Use the enum provided above)
+	/// @func SetTimeFormat(array)
+	/// @desc Set the time format. The order in the array is the display order
+	/// @params {array} format An array of time unit to use (Use the JT enum provided above. eg : [JT.MIN, JT.SEC])
 	static SetTimeFormat = function(_array){
 		timeFormat = _array
 		var _func
@@ -702,9 +723,9 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		
 	}
 	
-	/// @func UpdateTime
-	/// @desc The fonction to use to upadate and format the time into a string that will be display
-	/// @param {Int} Time in millisecondes
+	/// @func UpdateTime(time)
+	/// @desc The fonction to use to update and format the time into a string that will be display
+	/// @param {integrer} Time in millisecondes
 	static UpdateTime = function(_time){
 		value = _time
 		timeDigit = __getFormat(_time)
@@ -722,6 +743,8 @@ function JabbaTimerElement() : __hudelement__() constructor{
 		}
 	}
 	
+	/// @func Draw()
+	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
 			draw_set_halign(halign)
@@ -736,6 +759,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 #endregion
 
 #region GAUGE ELEMENT
+// An element that displa a value as a gauge bar (life bar, stamina bar, etc)
 
 function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	
@@ -744,10 +768,9 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	mask = sJabbaGaugeBarMask
 	maxValue = _maxValue
 	tolerance = 0
-	inverse = 1
-	xFlip = 1
-	yFlip = 1
+	inverse = true
 	
+	//The parameters for the shader
 	__shaderParams = {}
 	with(__shaderParams){
 		
@@ -759,11 +782,16 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 		
 	}
 	
+	/// @func SetValue
+	/// @desc Set the value use to manipulate the gauge
+	/// @param {integrer} value
+	/// @param {boolean} triggerFeedback If the element's feedback is to be triggered when the gauge is filled (/!\ Subject to change)
 	static SetValue = function(_value, _feedbackTrigger){
 		
 		value = _value/maxValue
 		hasFeedback = _feedbackTrigger
 		
+		//what a mess. Nothing make sens here.
 		if hasFeedback && runFeedback{
 			if value >= maxValue{
 				value = maxValue
@@ -774,21 +802,19 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 		}
 	}
 	
-	static SetFlip = function(_xFlip = false, _yFlip = false){
-		
-		xFlip = _xFlip = true ? -1 : 1;
-		yFlip = _yFlip = true ? -1 : 1;
-		
-		
-		
-	}
-	
+	/// @func SetAngle(angle)
+	/// @desc Set the angle of the element
+	/// @param {integrer} angle
 	static SetAngle = function(_angle){
 		angle = _angle
 	}
 	
-	static SetShaderDissolve = function (_shader = jabbaShaderDissolve , _sprite, _mask){
-		shader = _shader
+	/// @func SetShaderDissolve(sprite, mask)
+	/// @desc Set the shader and the two necessary sprites for the effect 
+	/// @param {sprite} sprite the sprite to dissolve
+	/// @param {sprite} mask the sprite used to dissolve
+	static SetShaderDissolve = function ( _sprite, _mask/*, _shader = jabbaShaderDissolve*/){
+		//shader = _shader
 		sprite = _sprite
 		mask = _mask
 		with(__shaderParams){
@@ -800,6 +826,8 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 		}
 	}
 	
+	/// @func Draw()
+	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
 			
@@ -808,7 +836,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 			shader_set_uniform_f(__shaderParams.u_time, value)
 			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
 			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(sprite,frame,x,y,xScale*xFlip,yScale*yFlip,angle,color,alpha)
+			draw_sprite_ext(sprite,frame,x,y,xScale,yScale,angle,color,alpha)
 			shader_reset();
 		
 		}
@@ -818,7 +846,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 #endregion
 
 #region CAROUSSEL ELEMENT
-
+// An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
 function JabbaCarousselElement() : __hudelement__() constructor {
 	
 	itemsList = []
@@ -834,6 +862,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	colorBlendDefault = c_white
 	colorBlendActive = c_black
 	
+	//Private
 	with(__feedbacks){
 
 		highlight = {
@@ -852,7 +881,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	
 	show_debug_message(__feedbacks)
 	
-	/// @desc add an iten to the caroussel in the itemlist
+	/// @desc add an item to the caroussel in the itemlist
 	__add = function(_name, _sprite, _pos){
 		var _item = new JabbaGraphicElement(_sprite)
 		_item.SetPosition(other.x,other.y)
@@ -918,22 +947,31 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		
 	}
 
-	static SetValue = function(_value){
-		value = _value
-		
-		if hasFeedback{
-			
-			__feedbackGetParams()
-		
-		}
-	}
+	//static SetValue = function(_value){
+	//	value = _value
+	//	
+	//	if hasFeedback{
+	//		
+	//		__feedbackGetParams()
+	//	
+	//	}
+	//}
 	
+	/// @func AddItem(name, sprite)
+	/// @desc Add an Item, a sprite, to the caroussel
+	/// @param {string} name the name for the item
+	/// @param {sprite} sprite the sprite to use
+	/// @param {real} position NOT USED (yet)
 	static AddItem = function(_name, _sprite, _pos = undefined){
 
 		__add(_name, _sprite, _pos)
 		return undefined
 	}
 	
+	/// @func SetRadius(width, height)
+	/// @desc Set the radius of the caroussel. If the Height is omitted, it will be set to the Width value (caroussel would be a perfect circle)
+	/// @param {integrer} radiusWidth
+	/// @param {integrer} radiusHeight
 	static SetRadius = function(_wRadius, _hRadius = undefined){
 		
 		if is_undefined(_hRadius){
@@ -947,18 +985,27 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		
 	}
 	
+	/// @func SetDepth(scale)
+	/// @desc The Depth is the size of the items other than the active one in order to give a sense of depth to the caroussel.
+	/// @param {integrer} scale Between 0 and 1
 	static SetDepth = function(_value){
 		scaleMin = clamp(_value,0,1)
 		
 		return self
 	}
 	
+	/// @func SetDrawDistance(alpha)
+	/// @desc Act on the transparency of the items other than the active one
+	/// @param {integrer} alpha Between 0 and 1
 	static SetDrawDistance = function(_value){
 		fadeMin = clamp(_value,0,alpha)
 		
 		return self
 	}
 	
+	/// @func SetRotationSpeed(speed)
+	/// @desc Set the speed of rotation of the caroussel when an item becom active
+	/// @param {integrer} speed
 	static SetRotationSpeed = function(_speed){
 		if (_speed = 0) show_error("Caroussel speed is 0",true)
 		
@@ -967,12 +1014,16 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		return self
 	}
 	
+	/// @func Update()
+	/// @desc This function must be executed each frame if you use this Element (I plan to implement it better later)
 	static Update = function(){
 
 		__dispatch()
 
 	}
 	
+	/// @func Draw()
+	/// @desc Draw the caroussel
 	static Draw = function(){
 		if !isHidden {
 			var _i=0;repeat(array_length(itemsList)){
@@ -1002,6 +1053,8 @@ function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
 	sprite = _sprite
 	width = sprite_get_width(_sprite)
 	height = sprite_get_height(_sprite)
+	xFlip = 1
+	yFlip = 1
 	
 	static SetOrigin = function(_x, _y = undefined){
 		
@@ -1019,6 +1072,13 @@ function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
 		return self
 	}
 	
+	static SetFlip = function(_xFlip = false, _yFlip = false){
+		
+		xFlip = _xFlip = true ? -1 : 1;
+		yFlip = _yFlip = true ? -1 : 1;
+		
+	}
+	
 	static SetColor = function(_color){
 		color = _color
 		
@@ -1027,7 +1087,7 @@ function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
 	
 	static Draw = function(){
 		if !isHidden {
-			draw_sprite_ext(sprite, frame, x, y, xScale, yScale, angle, color, alpha)
+			draw_sprite_ext(sprite, frame, x, y, xScale*xFlip, yScale*yFlip, angle, color, alpha)
 		}
 	}
 }
