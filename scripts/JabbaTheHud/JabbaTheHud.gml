@@ -1,4 +1,4 @@
-#macro JabbaTheHud _hud.__theHud
+#macro defaultName "element "+ string(elementsListSize)
 
 #region JABBA CONTAINER
 /// @func Jabba
@@ -6,7 +6,7 @@
 /// @params {Int} viewport the viewport to assign the HUD to (in case of splitscreen) - Dafault: viewport[0]
 /// [TODO] anchor system as well as custom attach points
 /// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
-function Jabba(_viewport = 0) constructor {
+function JabbaContainer(_viewport = 0) constructor {
 	
 	x = x
 	y = y
@@ -19,9 +19,24 @@ function Jabba(_viewport = 0) constructor {
 	width = view_get_wport(_viewport)
 	height = view_get_hport(_viewport)
 	x = view_get_xport(_viewport)
+	
+	
 	y = view_get_yport(_viewport)
 	
 	margin = {}
+	with(margin){
+		top = 0
+		left = 0
+		bottom = 0
+		right = 0
+	}
+	
+	top = view_get_yport(_viewport)
+	left = view_get_xport(_viewport)
+	middle = top + height/2
+	center = left + width/2
+	bottom = top + height
+	right = left + width
 	//
 	var _owner = other;
 	__theHud = {};
@@ -53,8 +68,8 @@ function Jabba(_viewport = 0) constructor {
 	}
 	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
-	static CreateCounterElement = function(){
-		var _element = new JabbaCounterElement()
+	static CreateCounterElement = function(_name = defaultName){
+		var _element = new JabbaCounterElement(_name)
 
 		with(__theHud){
 			__addElement(_element)
@@ -65,8 +80,8 @@ function Jabba(_viewport = 0) constructor {
 	
 	/// @func CreateQuotaCounterElement()
 	/// @desc create a Quota Element constructor and store it in the HUD	
-	static CreateQuotaCounterElement = function(){
-		var _element = new JabbaQuotaCounterElement()
+	static CreateQuotaCounterElement = function(_name = defaultName){
+		var _element = new JabbaQuotaCounterElement(_name)
 
 		with(__theHud){
 			__addElement(_element)
@@ -146,20 +161,22 @@ function Jabba(_viewport = 0) constructor {
 			right = _right
 		}
 		
+		__setAnchor()
+		
 		return self
 		
 	}
 	
-	//__setAnchor = function(){
-	//	with (anchor){
-	//		top = 
-	//		middle =
-	//		bottom =
-	//		left =
-	//		center =
-	//		right = 
-	//	}
-	//}
+	__setAnchor = function(){
+	
+		top 	=	view_get_yport(_viewport) + margin.top
+		left	=	view_get_xport(_viewport) + margin.left
+		middle	=	top + height/2
+		center	=	left + width/2
+		bottom	=	top + height - margin.bottom
+		right	=	left + width - margin.right
+		
+	}
 	
 	/// @func AddAnchor
 	/// @desc It will add points the user can reference to position the element 
@@ -209,6 +226,7 @@ function __hudelement__() constructor{
 	
 	//Public Variables
 	//you can access those variables but it should be better to use the profided functions, as some manage some stuffs automatically.
+	name = ""
 	x = 0
 	y = 0
 	xScale = 1
@@ -371,7 +389,9 @@ function __hudelement__() constructor{
 #region COUNTER ELEMENT
 /// @func JabbaCounter()
 /// @desc a simple counter. it will display the value with a feedback when it changes.
-function JabbaCounterElement() : __hudelement__() constructor{
+function JabbaCounterElement(_name) : __hudelement__() constructor{
+	
+	name = _name
 	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
@@ -406,8 +426,9 @@ function JabbaCounterElement() : __hudelement__() constructor{
 
 #region QUOTA COUNTER
 // An Element that will change color when a quota is reached
-function JabbaQuotaCounterElement() : JabbaCounterElement() constructor{
+function JabbaQuotaCounterElement(_name) : JabbaCounterElement() constructor{
 	
+	name = _name
 	quota = 0
 	digitsLimit = 9
 	counterValueLimit = (power(10, digitsLimit)) - 1
@@ -1192,4 +1213,41 @@ function value_wrap_selector(_current, _delta, _list) {
 	var _result = _list[_i]
 	return _result
 
+}
+
+/// @function			number_wrap(value, min, max, [include_max?]);
+/// @description		Wraps a value to stay between the set min and max.
+/// @argument			{real} value The value to wrap.
+/// @argument			{real} min The lower value to wrap around.
+/// @argument			{real} max The higher value to wrap around.
+/// @argument			{boolean} [include_max?=true] Whether to allow the value to be equal to max (true) or not (false).
+/// @returns			{real} The wrapped value.
+function number_wrap(_value, _min, _max) {
+	var __min = min(_min, _max);
+	_max = max(_min, _max);
+	_min = __min;
+
+	if (_min == _max) {
+		return _min;
+	}
+
+	var _diff = (_max - _min);
+	if (argument_count == 3 || argument[3]) {
+		while (_value > _max || _value < _min) {
+			if (_value > _max) {
+				_value -= _diff + 1;
+			} else if (_value < _min) {
+				_value += _diff + 1;
+			}
+		}
+	} else {
+		while (_value >= _max || _value < _min) {
+			if (_value >= _max) {
+				_value -= _diff;
+			} else if (_value < _min) {
+				_value += _diff;
+			}
+		}
+	}
+	return _value;
 }
