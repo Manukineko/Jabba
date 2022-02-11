@@ -69,8 +69,8 @@
   ],
   "nineSlice": null,
   "parent": {
-    "name": "Scripts",
-    "path": "folders/Scripts.yy",
+    "name": "editor",
+    "path": "folders/Jabba/editor.yy",
   },
   "resourceVersion": "1.0",
   "name": "sArrow",

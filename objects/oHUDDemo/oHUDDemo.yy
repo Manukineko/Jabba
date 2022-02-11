@@ -27,11 +27,11 @@
   ],
   "overriddenProperties": [],
   "parent": {
-    "name": "Jabba",
-    "path": "folders/Jabba.yy",
+    "name": "Demo",
+    "path": "folders/Demo.yy",
   },
   "resourceVersion": "1.0",
-  "name": "oHUD",
+  "name": "oHUDDemo",
   "tags": [],
   "resourceType": "GMObject",
 }

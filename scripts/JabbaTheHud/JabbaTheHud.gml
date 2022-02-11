@@ -15,12 +15,11 @@ function JabbaContainer(_viewport = 0) constructor {
 	elementsList = [];
 	elementsListSize = 0
 	isHidden = false
+	viewport = _viewport
 	
 	width = view_get_wport(_viewport)
 	height = view_get_hport(_viewport)
 	x = view_get_xport(_viewport)
-	
-	
 	y = view_get_yport(_viewport)
 	
 	margin = {}
@@ -31,19 +30,17 @@ function JabbaContainer(_viewport = 0) constructor {
 		right = 0
 	}
 	
-	top = view_get_yport(_viewport)
-	left = view_get_xport(_viewport)
-	middle = top + height/2
-	center = left + width/2
-	bottom = top + height
-	right = left + width
+	top = view_get_yport(_viewport) + margin.top
+	left = view_get_xport(_viewport) + margin.left
+	middle = height/2
+	center = width/2
+	bottom = height - margin.bottom
+	right = width - margin.right
 	//
 	var _owner = other;
 	__theHud = {};
 	with (__theHud){
 		owner = _owner;
-		viewport = _viewport
-	
 		// Internal fuction to add an element in Jabba's elements list
 		__addElement = method(other, function(_element){
 			var _list = elementsList
@@ -54,6 +51,7 @@ function JabbaContainer(_viewport = 0) constructor {
 				return _element
 			}
 		})
+	}
 		
 		//MAYBE LATER if perf are shiesse
 		//__buildDrawList = method(other, function(){
@@ -65,7 +63,17 @@ function JabbaContainer(_viewport = 0) constructor {
 		//	}
 		//})
 		//
+		
+	static __setAnchor = function(){
+	
+		top 	= view_get_yport(viewport) + margin.top
+		left	= view_get_xport(viewport) + margin.left
+		middle	= height/2
+		center	= width/2
+		bottom	= height - margin.bottom
+		right	= width - margin.right
 	}
+	
 	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
 	static CreateCounterElement = function(_name = defaultName){
@@ -133,6 +141,17 @@ function JabbaContainer(_viewport = 0) constructor {
 		return _element
 	}
 	
+	/// @func CreateGraphicElement()
+	/// @desc create a sprite Element constructor
+	/// @param {sprite} sprite
+	static CreateGraphicElement = function(_sprite){
+		var _element = new JabbaGraphicElement(_sprite)
+		with(__theHud){
+			__addElement(_element)
+		}
+		return _element
+	}
+	
 	/// @func SetMargin
 	/// @desc Set a margin for the whole HUD
 	/// @param {integrer} Top
@@ -141,16 +160,16 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @param {integrer} Right
 	static SetMargin = function(_top, _left = undefined, _bottom = undefined, _right = undefined){
 		if is_undefined(_left){
-			
-				_right = _left
+				_left = _top
+				_right = _top
 				_bottom = _top
 			
 		}
 		if is_undefined(_bottom){
 			
-				_right = _top
+				_right = _left
 				_bottom = _top
-				_left = _left
+				
 			
 		}
 		
@@ -167,14 +186,17 @@ function JabbaContainer(_viewport = 0) constructor {
 		
 	}
 	
-	__setAnchor = function(){
-	
-		top 	=	view_get_yport(_viewport) + margin.top
-		left	=	view_get_xport(_viewport) + margin.left
-		middle	=	top + height/2
-		center	=	left + width/2
-		bottom	=	top + height - margin.bottom
-		right	=	left + width - margin.right
+	static SetViewport = function(_viewport){
+		viewport = _viewport
+		
+		width = view_get_wport(_viewport)
+		height = view_get_hport(_viewport)
+		x = view_get_xport(_viewport)
+		y = view_get_yport(_viewport)
+		
+		__setAnchor()
+		
+		return self
 		
 	}
 	
@@ -338,6 +360,17 @@ function __hudelement__() constructor{
 	static SetAlpha = function(_alpha){
 		
 		alpha = _alpha
+		
+		return self
+		
+	}
+	
+	/// @func SetColor(color)
+	/// @desc Set the color
+	/// @param {integrer} color
+	static SetColor = function(_color){
+		
+		color = _color
 		
 		return self
 		
@@ -967,16 +1000,6 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 		ds_priority_destroy(_prio)
 		
 	}
-
-	//static SetValue = function(_value){
-	//	value = _value
-	//	
-	//	if hasFeedback{
-	//		
-	//		__feedbackGetParams()
-	//	
-	//	}
-	//}
 	
 	/// @func AddItem(name, sprite)
 	/// @desc Add an Item, a sprite, to the caroussel

@@ -1,3 +1,6 @@
+
+activeElement = HUDObject.elementsList[element]
+
 switch (state){
     case JabbaEd.unselected:
         if keyboard_check_pressed(vk_left){
@@ -16,13 +19,16 @@ switch (state){
             state = JabbaEd.selected
             
             
+            
 			
         }
     break
     
     case JabbaEd.selected:
+    var _xpos, _ypos
         if keyboard_check_pressed(vk_left){
             xx -= 1
+            _xpos = xx-HUDObject.margin.left
         }
         else if keyboard_check_pressed(vk_right){
             xx += 1
@@ -37,11 +43,11 @@ switch (state){
             state = JabbaEd.unselected
         }
         HUDObject.elementsList[element].SetPosition(xx, yy)
+       
 	break
 }
 
 x = xx
 y = yy
 
-
-
+str = "X :"+string(xx)+"\nY :"+string(yy)

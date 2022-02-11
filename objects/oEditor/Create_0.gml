@@ -1,5 +1,5 @@
 
-#macro HUDObject oHUD.hud
+#macro HUDObject oHUDDemo.hud
 
 
 enum JabbaEd{
@@ -13,6 +13,8 @@ yy = y
 state = JabbaEd.unselected
 element = 0
 elementSize = 0
+str = ""
+activeElement = undefined
 with(HUDObject){
     other.elementSize = elementsListSize
 }
