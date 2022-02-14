@@ -76,8 +76,8 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
-	static CreateCounterElement = function(_name = defaultName){
-		var _element = new JabbaCounterElement(_name)
+	static CreateCounterElement = function(_limit, _name = defaultName){
+		var _element = new JabbaCounterElement(_limit, _name)
 
 		with(__theHud){
 			__addElement(_element)
@@ -253,6 +253,8 @@ function __hudelement__() constructor{
 	y = 0
 	xScale = 1
 	yScale = 1
+	xFlip = 1
+	yFlip = 1
 	scale = 1
 	angle = 0
 	color = c_white
@@ -339,8 +341,8 @@ function __hudelement__() constructor{
 	
 	/// @func SetScale(xScale, yScale)
 	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale
-	/// @param {integrer} xScale or Scale
-	///	@param {integrer} yScale If omitted, it will get the same value as xScale
+	/// @param {real} xScale or Scale
+	///	@param {real} yScale If omitted, it will get the same value as xScale
 	static SetScale = function(_xScale, _yScale = undefined){
 		
 		if is_undefined(_yScale){
@@ -354,9 +356,28 @@ function __hudelement__() constructor{
 		
 	}
 	
+	/// @func SetFlip(xFlip, yFlip)
+	/// @desc Flip the element. You can omit the second parameter if you want yFlip to be the same as xFlip
+	/// @param {real} xFlip or global Flip
+	///	@param {real} yFlip If omitted, it will get the same value as xFlip
+	static SetFlip = function(_xFlip, _yFlip = undefined){
+		
+		if is_undefined(_yFlip){
+			_yFlip = _xFlip
+		}
+		
+		xFlip = _xFlip
+		yFlip = _yFlip
+		//xScale = xScale*_xFlip
+		//yScale = yScale*_yFlip
+		
+		return self
+		
+	}
+	
 	/// @func SetAlpha(alpha)
 	/// @desc Set the transparency
-	/// @param {integrer} alpha
+	/// @param {real} alpha
 	static SetAlpha = function(_alpha){
 		
 		alpha = _alpha
@@ -420,11 +441,14 @@ function __hudelement__() constructor{
 #endregion
 // A simple element that will play a feedback when a value change. Basically, it just display a string.
 #region COUNTER ELEMENT
-/// @func JabbaCounter()
+/// @func JabbaCounterElement(_limit, _name)
 /// @desc a simple counter. it will display the value with a feedback when it changes.
-function JabbaCounterElement(_name) : __hudelement__() constructor{
+/// @param {int}limit
+/// @param {string} name
+function JabbaCounterElement(_limit = 10, _name = "") : __hudelement__() constructor{
 	
 	name = _name
+	limit = _limit
 	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
@@ -439,6 +463,12 @@ function JabbaCounterElement(_name) : __hudelement__() constructor{
 	static SetTextAlign = function(_halign, _valign){
 		halign = _halign
 		valign = _valign
+		
+		return self
+	}
+	
+	static SetLimit = function(_limit){
+		limit = _limit
 		
 		return self
 	}
@@ -459,11 +489,11 @@ function JabbaCounterElement(_name) : __hudelement__() constructor{
 
 #region QUOTA COUNTER
 // An Element that will change color when a quota is reached
-function JabbaQuotaCounterElement(_name) : JabbaCounterElement() constructor{
+function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaCounterElement() constructor{
 	
 	name = _name
-	quota = 0
-	digitsLimit = 9
+	digitsLimit = _digitsLimit
+	quota = _quota
 	counterValueLimit = (power(10, digitsLimit)) - 1
 	colorQuotaReached = c_red
 	colorCounterDefault = c_white
@@ -473,10 +503,15 @@ function JabbaQuotaCounterElement(_name) : JabbaCounterElement() constructor{
 	/// @desc Set the quota to compare the value to.
 	/// @param {real} quota
 	/// @param {real} counterLimit Set the maximum unit to display. This is mandatory in order to calculate the position neatly
-	static SetQuota = function(_quota = 1000, _limit = 9){
+	static SetQuota = function(_quota){
     	//counter internal unit limit (it won't count past the number of unit)
         quota = _quota;
-        digitsLimit = _limit
+        
+        return self
+    }
+    
+    static SetDigitsLimit = function(_digitsLimit){
+    	digitsLimit = _digitsLimit
         
         //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
         var _cvl = (power(10, digitsLimit)) - 1
@@ -484,7 +519,6 @@ function JabbaQuotaCounterElement(_name) : JabbaCounterElement() constructor{
         
         return self
     }
-    
     
     static SetValue = function(_value){
     	value = _value
@@ -861,6 +895,8 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	/// @param {integrer} angle
 	static SetAngle = function(_angle){
 		angle = _angle
+		
+		return self
 	}
 	
 	/// @func SetShaderDissolve(sprite, mask)
@@ -890,7 +926,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 			shader_set_uniform_f(__shaderParams.u_time, value)
 			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
 			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(sprite,frame,x,y,xScale,yScale,angle,color,alpha)
+			draw_sprite_ext(sprite,frame,x,y,xScale*xFlip,yScale*yFlip,angle,color,alpha)
 			shader_reset();
 		
 		}
