@@ -32,7 +32,6 @@ if !instance_exists(oEditor){
 quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
 gaugeBar1.SetValue(life)
-gaugeBar2.SetValue(life)
 timer.UpdateTime(get_timer()/1000)
 caroussel.Update()
 

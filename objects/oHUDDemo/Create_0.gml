@@ -24,9 +24,7 @@ counter.SetPosition(hud.center, hud.bottom-128).SetFeedback("popout", ["scale", 
 mugshot = hud.CreateGraphicElement(sMugshot)
 mugshot.SetPosition(hud.left+34, hud.top+34)
 gaugeBar1 = hud.CreateGaugeBarElement(100)
-gaugeBar1.SetPosition(hud.left+70,hud.top+58).SetColor(c_lime).SetAngle(-45).SetFlip(1,)
-gaugeBar2= hud.CreateGaugeBarElement(100)
-gaugeBar2.SetPosition(hud.left+70,hud.top+58).SetColor(c_lime).SetAngle(45).SetFlip(-1,)
+gaugeBar1.SetPosition(hud.left+70,hud.top+58).SetColor(c_lime)
 mugshotFrame = hud.CreateGraphicElement(sMugshotFrame)
 mugshotFrame.SetPosition(hud.left+32, hud.top+32)
 

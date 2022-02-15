@@ -42,11 +42,16 @@ function JabbaContainer(_viewport = 0) constructor {
 	with (__theHud){
 		owner = _owner;
 		// Internal fuction to add an element in Jabba's elements list
-		__addElement = method(other, function(_element){
+		__addElement = method(other, function(_element, _index){
 			var _list = elementsList
 			
 			with (__theHud){
-				array_push(_list, _element)
+				if is_undefined(_index){
+					array_push(_list, _element)
+				}
+				else{
+					array_set(_list, _index, _element)	
+				}
 				other.elementsListSize = array_length(_list)
 				return _element
 			}
@@ -74,13 +79,17 @@ function JabbaContainer(_viewport = 0) constructor {
 		right	= width - margin.right
 	}
 	
+	
+	//Public Methods
+	//Each have a Name and Index optional parameter.
+	
 	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
-	static CreateCounterElement = function(_limit, _name = defaultName){
+	static CreateCounterElement = function(_limit, _index = undefined, _name = defaultName){
 		var _element = new JabbaCounterElement(_limit, _name)
 
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 		//
@@ -88,11 +97,11 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateQuotaCounterElement()
 	/// @desc create a Quota Element constructor and store it in the HUD	
-	static CreateQuotaCounterElement = function(_name = defaultName){
+	static CreateQuotaCounterElement = function(_index = undefined, _name = defaultName){
 		var _element = new JabbaQuotaCounterElement(_name)
 
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 		//
@@ -100,11 +109,11 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateQuotaCounterExtElement()
 	/// @desc create an Extended Quota Element constructor and store it in the HUD	
-	static CreateQuotaCounterExtElement = function(){
-		var _element = new JabbaQuotaCounterExtElement()
+	static CreateQuotaCounterExtElement = function(_index = undefined, _name = defaultName){
+		var _element = new JabbaQuotaCounterExtElement(_name)
 
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 		//
@@ -112,20 +121,20 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateTimerElement()
 	/// @desc create a Timer element constructor and store it in the HUD	
-	static CreateTimerElement = function(){
-		var _element = new JabbaTimerElement()
+	static CreateTimerElement = function(_index = undefined, _name = defaultName){
+		var _element = new JabbaTimerElement(_name)
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 	}
 	/// @func CreateGaugeBarElement(maxValue)
 	/// @desc create a Timer element constructor
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
-	static CreateGaugeBarElement = function(_maxValue){
-		var _element = new JabbaGaugeBarElement(_maxValue)
+	static CreateGaugeBarElement = function(_maxValue, _index = undefined, _name = defaultName){
+		var _element = new JabbaGaugeBarElement(_maxValue, _name)
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 	}
@@ -133,10 +142,10 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @func CreateCarrouselElement()
 	/// @desc create an empty Caroussel Element constructor
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
-	static CreateCarrouselElement = function(){
-		var _element = new JabbaCarousselElement()
+	static CreateCarrouselElement = function(_index = undefined, _name = defaultName){
+		var _element = new JabbaCarousselElement(_name)
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 	}
@@ -144,10 +153,10 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @func CreateGraphicElement()
 	/// @desc create a sprite Element constructor
 	/// @param {sprite} sprite
-	static CreateGraphicElement = function(_sprite){
-		var _element = new JabbaGraphicElement(_sprite)
+	static CreateGraphicElement = function(_sprite, _index = undefined, _name = defaultName){
+		var _element = new JabbaGraphicElement(_sprite, _name)
 		with(__theHud){
-			__addElement(_element)
+			__addElement(_element, _index)
 		}
 		return _element
 	}
@@ -200,15 +209,13 @@ function JabbaContainer(_viewport = 0) constructor {
 		
 	}
 	
-	/// @func AddAnchor
-	/// @desc It will add points the user can reference to position the element 
-	static AddAnchor = function(){}
-	
 	/// @func ToggleHide()
 	/// @desc toggle the element's isHidden variable to bypass drawing
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
+		
+		return self
 	}
 	
 	/// @func Hide()
@@ -216,6 +223,8 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @param {bool} boolean
 	static Hide = function(_bool){
 		isHidden = _bool
+		
+		return self
 	}
 	
 	/// @func Draw()
@@ -328,8 +337,8 @@ function __hudelement__() constructor{
 	
 	/// @func SetPosition
 	/// @desc set the position.
-	/// @params {integrer} x
-	/// @params {integrer} y
+	/// @params {real} x
+	/// @params {real} y
 	/// [NOTE] Could set a way to choose between SET and ADD ?
 	static SetPosition = function(_x, _y){
 
@@ -340,7 +349,7 @@ function __hudelement__() constructor{
 	}
 	
 	/// @func SetScale(xScale, yScale)
-	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale
+	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale. Take the flipping value in account.
 	/// @param {real} xScale or Scale
 	///	@param {real} yScale If omitted, it will get the same value as xScale
 	static SetScale = function(_xScale, _yScale = undefined){
@@ -349,17 +358,39 @@ function __hudelement__() constructor{
 			_yScale = _xScale
 		}
 		
-		xScale = _xScale
-		yScale = _yScale
+		xScale = _xScale * xFlip
+		yScale = _yScale * yFlip
 		
 		return self
 		
 	}
 	
+	/// @func SetScaleX(xScale)
+	/// @desc set the size on the x axis, taking in account the flipping value
+	/// @param {real} xScale
+	static SetScaleX = function(_xScale){
+		
+		xScale = _xScale
+		
+		xScale = xScale * xFlip
+		
+	}
+	
+	/// @func SetScaleY(yScale)
+	/// @desc set the size on the y axis, taking in account the flipping value
+	/// @param {real} yScale
+	static SetScaleY = function(_yScale){
+	
+		yScale = _yScale
+	
+		yScale = yScale * yFlip
+	
+	}
+	
 	/// @func SetFlip(xFlip, yFlip)
 	/// @desc Flip the element. You can omit the second parameter if you want yFlip to be the same as xFlip
-	/// @param {real} xFlip or global Flip
-	///	@param {real} yFlip If omitted, it will get the same value as xFlip
+	/// @param {integrer} xFlip or global Flip
+	///	@param {integrer} yFlip If omitted, it will get the same value as xFlip
 	static SetFlip = function(_xFlip, _yFlip = undefined){
 		
 		if is_undefined(_yFlip){
@@ -373,6 +404,20 @@ function __hudelement__() constructor{
 		
 		return self
 		
+	}
+	
+	/// @func ToggleFlipX()
+	/// @desc flip the element on the x axis. xScale variable will be updated as well.
+	static ToggleFlipX = function(){
+		xFlip = sign(xScale * -1)
+		xScale = xScale * xFlip
+	}
+	
+	/// @func ToggleFlipY()
+	/// @desc flip the element on the x axis. yScale variable will be updated as well.
+	static ToggleFlipY = function(){
+		yFlip = sign(yScale * -1)
+		yScale = yScale * yFlip
 	}
 	
 	/// @func SetAlpha(alpha)
@@ -404,6 +449,9 @@ function __hudelement__() constructor{
 		isHidden = !isHidden
 	}
 	
+	/// @func Hide(bool)
+	/// @desc Hide or show the element
+	/// @param {bool} bool
 	static Hide = function(_bool){
 		isHidden = _bool
 	}
@@ -545,7 +593,7 @@ function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaC
 #region QUOTA COUNTER EXT
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
-function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
+function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
   
     valueLength = 0
     quota = 0
@@ -698,7 +746,7 @@ function JabbaQuotaCounterExtElement() : __hudelement__() constructor{
 
 #region TIMER ELEMENT
 //An element that will split and display a time.
-function JabbaTimerElement() : __hudelement__() constructor{
+function JabbaTimerElement(_name = "") : __hudelement__() constructor{
 	
 	//Time Unit to use to set the time format
 	enum JT{
@@ -849,7 +897,7 @@ function JabbaTimerElement() : __hudelement__() constructor{
 #region GAUGE ELEMENT
 // An element that displa a value as a gauge bar (life bar, stamina bar, etc)
 
-function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
+function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() constructor{
 	
 	shader = jabbaShaderDissolve
 	sprite = sJabbaGaugeBar
@@ -872,7 +920,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	
 	/// @func SetValue
 	/// @desc Set the value use to manipulate the gauge
-	/// @param {integrer} value
+	/// @param {real} value
 	/// @param {boolean} triggerFeedback If the element's feedback is to be triggered when the gauge is filled (/!\ Subject to change)
 	static SetValue = function(_value, _feedbackTrigger){
 		
@@ -892,7 +940,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 	
 	/// @func SetAngle(angle)
 	/// @desc Set the angle of the element
-	/// @param {integrer} angle
+	/// @param {real} angle
 	static SetAngle = function(_angle){
 		angle = _angle
 		
@@ -926,7 +974,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 			shader_set_uniform_f(__shaderParams.u_time, value)
 			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
 			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(sprite,frame,x,y,xScale*xFlip,yScale*yFlip,angle,color,alpha)
+			draw_sprite_ext(sprite,frame,x,y,xScale,yScale,angle,color,alpha)
 			shader_reset();
 		
 		}
@@ -937,7 +985,7 @@ function JabbaGaugeBarElement(_maxValue) : __hudelement__() constructor{
 
 #region CAROUSSEL ELEMENT
 // An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
-function JabbaCarousselElement() : __hudelement__() constructor {
+function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 	
 	itemsList = []
 	activeItem = undefined
@@ -1045,7 +1093,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 	static AddItem = function(_name, _sprite, _pos = undefined){
 
 		__add(_name, _sprite, _pos)
-		return undefined
+		return self
 	}
 	
 	/// @func SetRadius(width, height)
@@ -1118,7 +1166,7 @@ function JabbaCarousselElement() : __hudelement__() constructor {
 
 #region SPRITE ELEMENT
 
-function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
+function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor{
 	
 	#macro TopLeft [0,0]
 	#macro TopCenter [0,0.5]
@@ -1150,13 +1198,6 @@ function JabbaGraphicElement(_sprite) : __hudelement__() constructor{
 		sprite_set_offset(sprite, _xoff, _yoff)
 		
 		return self
-	}
-	
-	static SetFlip = function(_xFlip = false, _yFlip = false){
-		
-		xFlip = _xFlip = true ? -1 : 1;
-		yFlip = _yFlip = true ? -1 : 1;
-		
 	}
 	
 	static SetColor = function(_color){

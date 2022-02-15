@@ -28,7 +28,7 @@
   "overriddenProperties": [],
   "parent": {
     "name": "Demo",
-    "path": "folders/Demo.yy",
+    "path": "folders/Jabba/Demo.yy",
   },
   "resourceVersion": "1.0",
   "name": "oHUDDemo",
