@@ -39,4 +39,4 @@ caroussel.Update()
 //elapsedTime = (currentTime - previousTime) / 1000
 //timer.UpdateTime(currentTime)
 
-hud.FeedbackPlayer()
+//hud.FeedbackPlayer()

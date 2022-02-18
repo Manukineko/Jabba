@@ -227,6 +227,13 @@ function JabbaContainer(_viewport = 0) constructor {
 		return self
 	}
 	
+	static Update = function(){
+		var _i=0;repeat(array_length(elementsList)){
+			elementsList[_i].Update()
+			_i++
+		}
+	}
+	
 	/// @func Draw()
 	/// @desc Draw all the elements if their internal isHidden variable is true
 	static Draw = function(){
@@ -260,6 +267,8 @@ function __hudelement__() constructor{
 	name = ""
 	x = 0
 	y = 0
+	xx = 0
+	yy = 0
 	xScale = 1
 	yScale = 1
 	xFlip = 1
@@ -278,6 +287,13 @@ function __hudelement__() constructor{
 	
 	//Private variable
 	__activeFeedback = "none"
+	__anyUpdated = false
+	__positionUpdated = false
+	__rotationUpdated = false
+	__scaleUpdated = false
+	__originUpdated = false
+	__alphaUpdated = false
+	__feedbackUpdated = false
 	
 	//A list of global built-in feedback.
 	//Each element can also have their own feedbacks
@@ -322,6 +338,39 @@ function __hudelement__() constructor{
 		
 	}
 	
+	__update = function(){
+		if (__originUpdated){
+			
+			__originUpdated = false;
+		}
+		if (__positionUpdated){
+			
+			__positionUpdated = false;
+		}
+		if (__rotationUpdated){
+			
+			__rotationUpdated = false;
+		}
+		if (__scaleUpdated){
+			
+			xScale = xScale * xFlip;
+			yScale = yScale * yFlip;
+			
+			__scaleUpdated = false;
+		}
+		if (__alphaUpdated){
+			
+			__alphaUpdated = false;
+		}
+		if (__feedbackUpdated){
+			__feedbackGetParams();
+			
+			__feedbackUpdated = false;
+		}
+		
+		__anyUpdated = false;
+	}
+	
 	//Public functions
 	/// @func SetValue
 	/// @desc set the value to read from
@@ -331,7 +380,9 @@ function __hudelement__() constructor{
 		value = _value
 		hasFeedback = _triggerFeedback
 		if hasFeedback{
-			__feedbackGetParams()
+			__feedbackUpdated = true
+			__anyUpdated = true
+			//__feedbackGetParams()
 		}
 	}
 	
@@ -355,12 +406,13 @@ function __hudelement__() constructor{
 	static SetScale = function(_xScale, _yScale = undefined){
 		
 		if is_undefined(_yScale){
-			_yScale = _xScale
+			_yScale = _xScale;
 		}
 		
-		xScale = _xScale * xFlip
-		yScale = _yScale * yFlip
-		
+		//xScale = _xScale * xFlip
+		//yScale = _yScale * yFlip
+		__scaleUpdated = true;
+		__anyUpdated = true;
 		return self
 		
 	}
@@ -370,9 +422,13 @@ function __hudelement__() constructor{
 	/// @param {real} xScale
 	static SetScaleX = function(_xScale){
 		
-		xScale = _xScale
+		xScale = _xScale;
 		
-		xScale = xScale * xFlip
+		//xScale = xScale * xFlip
+		__scaleUpdated = true;
+		__anyUpdated = true;
+		
+		return self
 		
 	}
 	
@@ -383,7 +439,11 @@ function __hudelement__() constructor{
 	
 		yScale = _yScale
 	
-		yScale = yScale * yFlip
+		//yScale = yScale * yFlip
+		__scaleUpdated = true;
+		__anyUpdated = true;
+		
+		return self
 	
 	}
 	
@@ -394,11 +454,14 @@ function __hudelement__() constructor{
 	static SetFlip = function(_xFlip, _yFlip = undefined){
 		
 		if is_undefined(_yFlip){
-			_yFlip = _xFlip
+			_yFlip = _xFlip;
 		}
 		
-		xFlip = _xFlip
-		yFlip = _yFlip
+		xFlip = _xFlip;
+		yFlip = _yFlip;
+		
+		__scaleUpdated = true;
+		__anyUpdated = true;
 		//xScale = xScale*_xFlip
 		//yScale = yScale*_yFlip
 		
@@ -410,14 +473,24 @@ function __hudelement__() constructor{
 	/// @desc flip the element on the x axis. xScale variable will be updated as well.
 	static ToggleFlipX = function(){
 		xFlip = sign(xScale * -1)
-		xScale = xScale * xFlip
+		
+		__scaleUpdated = true
+		__anyUpdated = true
+		//xScale = xScale * xFlip
+		
+		return self
+		
 	}
 	
 	/// @func ToggleFlipY()
 	/// @desc flip the element on the x axis. yScale variable will be updated as well.
 	static ToggleFlipY = function(){
 		yFlip = sign(yScale * -1)
-		yScale = yScale * yFlip
+		
+		__scaleUpdated = true
+		__anyUpdated = true
+		//yScale = yScale * yFlip
+		return self
 	}
 	
 	/// @func SetAlpha(alpha)
@@ -447,6 +520,8 @@ function __hudelement__() constructor{
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
+		
+		return self
 	}
 	
 	/// @func Hide(bool)
@@ -454,6 +529,17 @@ function __hudelement__() constructor{
 	/// @param {bool} bool
 	static Hide = function(_bool){
 		isHidden = _bool
+		
+		return self
+	}
+	
+	static Update = function(){
+		if (__anyUpdated){
+			__update();
+		}
+		if (hasFeedback){
+			feedback();
+		}
 	}
 	
 	/// @func SetFeedback(feedback)
@@ -574,7 +660,9 @@ function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaC
     	if value >= quota{
     		if !isReach{
     			if hasFeedback{
-    				__feedbackGetParams()
+    				__feedbackUpdated = true
+    				__anyUpdated = true
+    				//__feedbackGetParams()
     			}
     			isReach = true
     		}
@@ -931,6 +1019,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() construc
 		if hasFeedback && runFeedback{
 			if value >= maxValue{
 				value = maxValue
+				__feedbackUpdated = true
 				__feedbackGetParams()
 				runFeedback = false
 			}
@@ -1198,6 +1287,19 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 		sprite_set_offset(sprite, _xoff, _yoff)
 		
 		return self
+	}
+	
+	static SetOffset = function(_xOffset, _yOffset){
+		xx = -sprite_get_xoffset(sprite) + _xOffset;
+		
+		yy = -sprite_get_yoffset(sprite) + _yOffset;
+	
+	}
+	
+	static SetRotation = function(_angle){
+		var _c = dcos(_angle);
+		var _s = dsin(_angle);
+	
 	}
 	
 	static SetColor = function(_color){

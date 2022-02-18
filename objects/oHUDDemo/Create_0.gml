@@ -19,7 +19,7 @@ timer.SetTimeFormat([JT.MIN, JT.SEC, JT.HUN]).SetPosition(hud.center, 32)
 //timer.CreateTimerText()
 
 counter = hud.CreateCounterElement()
-counter.SetPosition(hud.center, hud.bottom-128).SetFeedback("popout", ["scale", 2])
+counter.SetPosition(hud.center, hud.bottom-128).SetFeedback("popout")
 
 mugshot = hud.CreateGraphicElement(sMugshot)
 mugshot.SetPosition(hud.left+34, hud.top+34)
