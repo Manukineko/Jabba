@@ -1281,6 +1281,8 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 			_x = _x[0]*width
 		}
 		
+		xx = _x
+		xx = _y
 		_xoff = _x
 		_yoff = _y
 		
@@ -1290,15 +1292,21 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 	}
 	
 	static SetOffset = function(_xOffset, _yOffset){
-		xx = -sprite_get_xoffset(sprite) + _xOffset;
-		
-		yy = -sprite_get_yoffset(sprite) + _yOffset;
+		xOrigin = -sprite_get_xoffset(sprite) + _xOffset;
+		yOrigin = -sprite_get_yoffset(sprite) + _yOffset;
 	
+	}
+	
+	static SetPosition = function(_x, _y){
+		x = _x - xx
+		y = _y - yy
 	}
 	
 	static SetRotation = function(_angle){
 		var _c = dcos(_angle);
 		var _s = dsin(_angle);
+		xx = _c * xOrigin - _s * yOrigin
+		yy = _c * yOrigin + _s * xOrigin
 	
 	}
 	
@@ -1310,7 +1318,7 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 	
 	static Draw = function(){
 		if !isHidden {
-			draw_sprite_ext(sprite, frame, x, y, xScale*xFlip, yScale*yFlip, angle, color, alpha)
+			draw_sprite_ext(sprite, frame, x, y, xScale, yScale, angle, color, alpha)
 		}
 	}
 }
