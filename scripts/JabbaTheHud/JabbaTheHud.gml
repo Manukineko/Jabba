@@ -269,6 +269,8 @@ function __hudelement__() constructor{
 	y = 0
 	xx = 0
 	yy = 0
+	xOrigin = 0
+	yOrigin = 0
 	xScale = 1
 	yScale = 1
 	xFlip = 1
@@ -340,14 +342,25 @@ function __hudelement__() constructor{
 	
 	__update = function(){
 		if (__originUpdated){
+			xOrigin = -sprite_get_xoffset(sprite) + xOrigin;
+			yOrigin = -sprite_get_yoffset(sprite) + yOrigin;
 			
 			__originUpdated = false;
 		}
 		if (__positionUpdated){
+			xx = x - xOrigin//xx
+			yy = y - yOrigin//yy
+			x = xx
+			y = yy
 			
 			__positionUpdated = false;
 		}
 		if (__rotationUpdated){
+			
+			var _c = dcos(angle);
+			var _s = dsin(angle);
+			x = xx - _c * xOrigin - _s * yOrigin
+			y = yy - _c * yOrigin + _s * xOrigin
 			
 			__rotationUpdated = false;
 		}
@@ -1273,7 +1286,7 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 	xFlip = 1
 	yFlip = 1
 	
-	static SetOrigin = function(_x, _y = undefined){
+	static SetOffset = function(_x, _y = undefined){
 		
 		var _xoff, _yoff
 		if is_array(_x){
@@ -1282,7 +1295,7 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 		}
 		
 		xx = _x
-		xx = _y
+		yy = _y
 		_xoff = _x
 		_yoff = _y
 		
@@ -1291,22 +1304,40 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 		return self
 	}
 	
-	static SetOffset = function(_xOffset, _yOffset){
-		xOrigin = -sprite_get_xoffset(sprite) + _xOffset;
-		yOrigin = -sprite_get_yoffset(sprite) + _yOffset;
+	static SetOrigin = function(_xOrigin, _yOrigin){
+		xOrigin = _xOrigin
+		yOrigin = _yOrigin
+		
+		__originUpdated = true
+		__anyUpdated = true;
+		//xOrigin = -sprite_get_xoffset(sprite) + _xOrigin;
+		//yOrigin = -sprite_get_yoffset(sprite) + _yOrigin;
+		
+		return self
 	
 	}
 	
 	static SetPosition = function(_x, _y){
-		x = _x - xx
-		y = _y - yy
+		x = _x
+		y = _y
+		__positionUpdated = true
+		__anyUpdated = true
+		//x = _x - xx
+		//y = _y - yy
+		
+		return self
 	}
 	
 	static SetRotation = function(_angle){
-		var _c = dcos(_angle);
-		var _s = dsin(_angle);
-		xx = _c * xOrigin - _s * yOrigin
-		yy = _c * yOrigin + _s * xOrigin
+		angle = _angle
+		__rotationUpdated = true
+		__anyUpdated = true
+		//var _c = dcos(angle);
+		//var _s = dsin(angle);
+		//xx = _c * xOrigin - _s * yOrigin
+		//yy = _c * yOrigin + _s * xOrigin
+		
+		return self
 	
 	}
 	

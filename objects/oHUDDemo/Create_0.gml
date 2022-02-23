@@ -36,19 +36,7 @@ caroussel.AddItem("item 3", sItem3)
 caroussel.AddItem("item 4", sItem4)
 caroussel.AddItem("item 5", sItem5)
 
+customOriginTest = hud.CreateGraphicElement(sItem1)
+customOriginTest.SetOrigin(0,0).SetPosition(200,200)
 
-/// @func draw_sprite_offset(sprite, x, y, xoffset, yoffset, rotation)
-/// @param sprite_index
-/// @param x
-/// @param y
-/// @param xoffset
-/// @param yoffset
-/// @param rotation
-draw_sprite_offset = function(_sprite, _x, _y, _xOffset, _yOffset, _rot) {
-    var _c = dcos(_rot);
-    var _s = dsin(_rot);
-    var _oX = -sprite_get_xoffset(_sprite) + _xOffset;
-    var _oY = -sprite_get_yoffset(_sprite) + _yOffset;
-    draw_sprite_ext(_sprite, 0, _x - _c * _oX - _s * _oY, _y - _c * _oY + _s * _oX, 1, 1, _rot, c_white, 1);
-}
 tourne = 0
