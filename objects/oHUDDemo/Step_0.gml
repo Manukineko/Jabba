@@ -1,6 +1,6 @@
 if !instance_exists(oEditor){
 	if keyboard_check_pressed(vk_space){
-	    value += 1000
+	    value += irandom(100)
 	    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
 	    
 	    counter.SetValue(combo)

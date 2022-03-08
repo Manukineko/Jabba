@@ -5,6 +5,7 @@
     {"id":{"name":"JabbaTheHud","path":"scripts/JabbaTheHud/JabbaTheHud.yy",},"order":0,},
     {"id":{"name":"oHUD","path":"objects/oHUD/oHUD.yy",},"order":3,},
     {"id":{"name":"JabbaFont","path":"sprites/JabbaFont/JabbaFont.yy",},"order":3,},
+    {"id":{"name":"fJabbaFont","path":"fonts/fJabbaFont/fJabbaFont.yy",},"order":4,},
     {"id":{"name":"jabbaShaderDissolve","path":"shaders/jabbaShaderDissolve/jabbaShaderDissolve.yy",},"order":0,},
     {"id":{"name":"oEditor","path":"objects/oEditor/oEditor.yy",},"order":0,},
     {"id":{"name":"oHUDDemo","path":"objects/oHUDDemo/oHUDDemo.yy",},"order":1,},

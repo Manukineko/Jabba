@@ -260,7 +260,7 @@ function JabbaContainer(_viewport = 0) constructor {
 
 #region HUDELEMENT - the base constructor for all elements
 
-function __hudelement__() constructor{
+function __baseElement() constructor{
 	
 	//Public Variables
 	//you can access those variables but it should be better to use the profided functions, as some manage some stuffs automatically.
@@ -271,6 +271,8 @@ function __hudelement__() constructor{
 	yy = 0
 	xOrigin = 0
 	yOrigin = 0
+	height = 0
+	width = 0 
 	xScale = 1
 	yScale = 1
 	xFlip = 1
@@ -281,6 +283,8 @@ function __hudelement__() constructor{
 	alpha = 1
 	frame = 0
 	value = 0
+	asset = undefined
+	type = asset_unknown
 	isHidden = false
 	isReach = false
 	hasFeedback = true
@@ -342,8 +346,41 @@ function __hudelement__() constructor{
 	
 	__update = function(){
 		if (__originUpdated){
-			xOrigin = -sprite_get_xoffset(sprite) + xOrigin;
-			yOrigin = -sprite_get_yoffset(sprite) + yOrigin;
+			var _xo = 0, _yo = 0
+			if asset_get_type(asset) = asset_sprite{
+				_xo = sprite_get_xoffset(asset)
+				_yo = sprite_get_yoffset(asset)
+			}
+			else if asset_get_type(asset) = asset_font{
+				switch(halign){
+					case fa_left : _xo = 0; break;
+					case fa_center : _xo = (width/2); break;
+					case fa_right : _xo = width; break;
+				}
+				switch(valign){
+					case fa_top : _yo = 0; break;
+					case fa_middle : _yo = (height/2); break;
+					case fa_bottom : _yo = height; break;
+				}
+			}
+			if type = asset_sprite{
+				_xo = sprite_get_xoffset(asset)
+				_yo = sprite_get_yoffset(asset)
+			}
+			else if type = asset_font{
+				switch(halign){
+					case fa_left : _xo = 0; break;
+					case fa_center : _xo = (width/2); break;
+					case fa_right : _xo = width; break;
+				}
+				switch(valign){
+					case fa_top : _yo = 0; break;
+					case fa_middle : _yo = (height/2); break;
+					case fa_bottom : _yo = height; break;
+				}
+			}
+			xOrigin = -_xo + xOrigin;
+			yOrigin = -_yo + yOrigin;
 			
 			__originUpdated = false;
 		}
@@ -404,13 +441,46 @@ function __hudelement__() constructor{
 	/// @params {real} x
 	/// @params {real} y
 	/// [NOTE] Could set a way to choose between SET and ADD ?
-	static SetPosition = function(_x, _y){
-
-	    x = _x;
-	    y = _y;
-	    
-	    return self
+	static SetOrigin = function(_xOrigin, _yOrigin = undefined){
+		
+		if is_array(_xOrigin){
+			_yOrigin = _xOrigin[0] * height
+			_xOrigin = _xOrigin[1] * width
+		}
+		xOrigin = _xOrigin
+		yOrigin = _yOrigin
+		
+		__originUpdated = true
+		__anyUpdated = true;
+		
+		return self
+	
 	}
+	
+	static SetPosition = function(_x, _y){
+		x = _x
+		y = _y
+		__positionUpdated = true
+		__anyUpdated = true
+		
+		return self
+	}
+	
+	static SetRotation = function(_angle){
+		angle = _angle
+		__rotationUpdated = true
+		__anyUpdated = true
+		
+		return self
+	
+	}
+	//static SetPosition = function(_x, _y){
+	
+	//    x = _x;
+	//    y = _y;
+	//    
+	//    return self
+	//}
 	
 	/// @func SetScale(xScale, yScale)
 	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale. Take the flipping value in account.
@@ -585,6 +655,14 @@ function __hudelement__() constructor{
 	}
 }
 
+function __fontTypeElement__() : __baseElement() constructor{
+	type = asset_font
+}
+
+function __spriteTypeElement__() : __baseElement() constructor{
+	type = asset_sprite
+}
+
 #endregion
 // A simple element that will play a feedback when a value change. Basically, it just display a string.
 #region COUNTER ELEMENT
@@ -592,10 +670,11 @@ function __hudelement__() constructor{
 /// @desc a simple counter. it will display the value with a feedback when it changes.
 /// @param {int}limit
 /// @param {string} name
-function JabbaCounterElement(_limit = 10, _name = "") : __hudelement__() constructor{
+function JabbaCounterElement(_limit = 10, _name = "") : __fontTypeElement__() constructor{
 	
 	name = _name
 	limit = _limit
+	asset = fJabbaFont
 	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
@@ -611,6 +690,9 @@ function JabbaCounterElement(_limit = 10, _name = "") : __hudelement__() constru
 		halign = _halign
 		valign = _valign
 		
+		__originUpdated = true
+		__anyUpdated = true
+		
 		return self
 	}
 	
@@ -624,6 +706,7 @@ function JabbaCounterElement(_limit = 10, _name = "") : __hudelement__() constru
 	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
+			draw_set_font(asset)
 			draw_set_halign(halign)
 			draw_set_valign(valign)
 			draw_text_transformed_color(x,y, value, xScale, yScale, angle, color, color, color, color, alpha )
@@ -639,6 +722,7 @@ function JabbaCounterElement(_limit = 10, _name = "") : __hudelement__() constru
 function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaCounterElement() constructor{
 	
 	name = _name
+	asset = fJabbaFont
 	digitsLimit = _digitsLimit
 	quota = _quota
 	counterValueLimit = (power(10, digitsLimit)) - 1
@@ -669,6 +753,8 @@ function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaC
     
     static SetValue = function(_value){
     	value = _value
+    	height = string_height(value)
+		width = string_width(value)
     	
     	if value >= quota{
     		if !isReach{
@@ -688,13 +774,17 @@ function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaC
     	
     	return self
     }
+    
+    static SetFont = function(_font){
+    	asset = _font
+    }
 }
 #endregion
 // An EXTENDED version of the Quota Counter Element that use sprite as its font. It allow to progressively change the color of each unit individually
 #region QUOTA COUNTER EXT
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
-function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
+function JabbaQuotaCounterExtElement(_name = "") : __spriteTypeElement__() constructor{
   
     valueLength = 0
     quota = 0
@@ -711,9 +801,9 @@ function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
 	
 	matchingDigit = array_create(digitsLimit,false)
 	
-	spriteFont = JabbaFont
+	asset = JabbaFont
 	spriteFontFrame = []
-	spriteFontWidth = sprite_get_width(spriteFont)
+	spriteFontWidth = sprite_get_width(asset)
 	letterSpacing = 2 
 	
 	feedback = __feedbacks.popout.func
@@ -723,9 +813,9 @@ function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
     /// @desc The spritesheet used for the font
     /// @params {sprite} sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
     static SetSpriteFont = function(_sprite){
-			spriteFont = _sprite
+			asset = _sprite
 			
-			spriteFontWidth = sprite_get_width(spriteFont)
+			spriteFontWidth = sprite_get_width(asset)
 			
 			return self
     }
@@ -837,7 +927,7 @@ function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
         	var _i=digitsLimit-1; repeat(valueLength){
-        		draw_sprite_ext(spriteFont, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xScale, yScale, 0, digitsColor[_i], 1 )
+        		draw_sprite_ext(asset, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xScale, yScale, angle, digitsColor[_i], 1 )
         		_i--
         	}
 		}
@@ -847,7 +937,7 @@ function JabbaQuotaCounterExtElement(_name = "") : __hudelement__() constructor{
 
 #region TIMER ELEMENT
 //An element that will split and display a time.
-function JabbaTimerElement(_name = "") : __hudelement__() constructor{
+function JabbaTimerElement(_name = "") : __fontTypeElement__() constructor{
 	
 	//Time Unit to use to set the time format
 	enum JT{
@@ -859,6 +949,7 @@ function JabbaTimerElement(_name = "") : __hudelement__() constructor{
 	}
 	
 	//time = 568954
+	asset = fJabbaFont
 	timeLimit = 0
 	timeSeparator = ":"
 	
@@ -984,6 +1075,7 @@ function JabbaTimerElement(_name = "") : __hudelement__() constructor{
 	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
+			draw_set_font(asset)
 			draw_set_halign(halign)
 			draw_set_valign(valign)
 			draw_text_transformed_color(x,y, __string, xScale, yScale, angle, color, color, color, color, alpha )
@@ -998,10 +1090,10 @@ function JabbaTimerElement(_name = "") : __hudelement__() constructor{
 #region GAUGE ELEMENT
 // An element that displa a value as a gauge bar (life bar, stamina bar, etc)
 
-function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() constructor{
+function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() constructor{
 	
 	shader = jabbaShaderDissolve
-	sprite = sJabbaGaugeBar
+	asset = sJabbaGaugeBar
 	mask = sJabbaGaugeBarMask
 	maxValue = _maxValue
 	tolerance = 0
@@ -1040,22 +1132,13 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() construc
 		}
 	}
 	
-	/// @func SetAngle(angle)
-	/// @desc Set the angle of the element
-	/// @param {real} angle
-	static SetAngle = function(_angle){
-		angle = _angle
-		
-		return self
-	}
-	
 	/// @func SetShaderDissolve(sprite, mask)
 	/// @desc Set the shader and the two necessary sprites for the effect 
 	/// @param {sprite} sprite the sprite to dissolve
 	/// @param {sprite} mask the sprite used to dissolve
 	static SetShaderDissolve = function ( _sprite, _mask/*, _shader = jabbaShaderDissolve*/){
 		//shader = _shader
-		sprite = _sprite
+		asset = _sprite
 		mask = _mask
 		with(__shaderParams){
 			mask_tex = sprite_get_texture(other.mask,0)
@@ -1076,7 +1159,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() construc
 			shader_set_uniform_f(__shaderParams.u_time, value)
 			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
 			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(sprite,frame,x,y,xScale,yScale,angle,color,alpha)
+			draw_sprite_ext(asset,frame,x,y,xScale,yScale,angle,color,alpha)
 			shader_reset();
 		
 		}
@@ -1087,7 +1170,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __hudelement__() construc
 
 #region CAROUSSEL ELEMENT
 // An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
-function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
+function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	
 	itemsList = []
 	activeItem = undefined
@@ -1117,15 +1200,26 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 			}),
 			params : ["runFeedback", true]
 		}
+		popout = {
+			func: method(other, function(){
+				if runFeedback{	
+						activeItem.scale = other.scale > 1 ? __tweenFunctions.Tween_LerpTime(other.scale, 1, 0.1, 1) : 1
+						xScale = other.scale; yScale = other.scale
+					}
+					//if activeItem.scale <= 0 runFeedback = false
+					
+				//}
+			}),
+			params : ["scale", 2]
+		}
 	}
 	
 	show_debug_message(__feedbacks)
 	
 	/// @desc add an item to the caroussel in the itemlist
-	__add = function(_name, _sprite, _pos){
+	__add = function( _sprite, _name, _pos){
 		var _item = new JabbaGraphicElement(_sprite)
-		_item.SetPosition(other.x,other.y)
-		_item.SetOrigin(MiddleCenter)
+		_item.SetOrigin(MiddleCenter).SetPosition(other.x,other.y)
 		
 		var _itemStruct = {
 			ID : carousselSize, //NO. Just testing purpose. To do better.
@@ -1143,7 +1237,7 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 	}
 	
 	/// @desc calculate the position of each item in the caroussel
-	__dispatch = function(){
+	__update = function(){
 		
 		//var _previous = activeItem
 		
@@ -1161,12 +1255,19 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 			_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
 			_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
 			_scale = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)), scaleMin,1)
-			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale)
+			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale).Update()
 			_i++
 			
 		}
 		
-		activeItem = drawOrder[carousselSize-1]
+		//TO DO BETTER
+		activeItem = itemsList[value][$ "item"]//drawOrder[carousselSize-1][$ "item"]
+		if hasFeedback && isReach{
+			activeItem.__feedbackUpdated = true
+			activeItem.__anyUpdated = true
+			activeItem.Update()
+			isReach = false
+		}
 		//activeItem[$ "item"].SetColor(c_blue)
 		
 		
@@ -1192,10 +1293,41 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 	/// @param {string} name the name for the item
 	/// @param {sprite} sprite the sprite to use
 	/// @param {real} position NOT USED (yet)
-	static AddItem = function(_name, _sprite, _pos = undefined){
+	static AddItem = function(_sprite, _name = "", _pos = undefined){
 
-		__add(_name, _sprite, _pos)
+		__add( _sprite, _name, _pos)
 		return self
+	}
+	
+		/// @func SetFeedback(feedback)
+	/// @desc set the feedback that will be played when the value changes
+	/// @params {string} feedback name of the feedback as a string (default : popout)
+	static SetFeedback = function(_effect, _targetItem = false){
+		
+		if _targetItem{
+			
+			var _i = 0; repeat(carousselSize){
+			
+				with(itemsList[_i][$ "item"]){
+					
+					var _feedback = variable_struct_get(__feedbacks, _effect)
+					feedback = _feedback.func
+					__activeFeedback = _effect
+					
+				}
+				
+				_i++
+			}
+			return self
+		}
+			
+		var _feedback = variable_struct_get(__feedbacks, _effect)
+		feedback = _feedback.func
+		__activeFeedback = _effect
+		
+		
+		return self
+		
 	}
 	
 	/// @func SetRadius(width, height)
@@ -1219,46 +1351,75 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 	/// @desc The Depth is the size of the items other than the active one in order to give a sense of depth to the caroussel.
 	/// @param {integrer} scale Between 0 and 1
 	static SetDepth = function(_value){
+		
 		scaleMin = clamp(_value,0,1)
 		
 		return self
+		
 	}
 	
 	/// @func SetDrawDistance(alpha)
 	/// @desc Act on the transparency of the items other than the active one
 	/// @param {integrer} alpha Between 0 and 1
 	static SetDrawDistance = function(_value){
+		
 		fadeMin = clamp(_value,0,alpha)
 		
 		return self
+		
 	}
 	
 	/// @func SetRotationSpeed(speed)
 	/// @desc Set the speed of rotation of the caroussel when an item becom active
 	/// @param {integrer} speed
 	static SetRotationSpeed = function(_speed){
+		
 		if (_speed = 0) show_error("Caroussel speed is 0",true)
 		
 		rotationSpeed = abs(_speed)
 		
 		return self
+		
+	}
+	
+	//Public functions
+	/// @func SetValue
+	/// @desc set the value to read from
+	/// @params {relative to element} value the value to read
+	/// @params {bool} play the element feedback (default : true)
+	static SetValue = function(_value, _triggerFeedback = true){
+		
+		value = _value
+		hasFeedback = _triggerFeedback
+		
+		if hasFeedback{
+			
+			isReach = true
+			__feedbackUpdated = true
+			__anyUpdated = true
+			
+		}
 	}
 	
 	/// @func Update()
 	/// @desc This function must be executed each frame if you use this Element (I plan to implement it better later)
 	static Update = function(){
 
-		__dispatch()
+		__update()
 
 	}
 	
 	/// @func Draw()
 	/// @desc Draw the caroussel
 	static Draw = function(){
+		
 		if !isHidden {
+			
 			var _i=0;repeat(array_length(itemsList)){
+				
 				if drawOrder[_i] != 0 drawOrder[_i][$ "item"].Draw()
 				_i++
+				
 			}
 		}
 	}
@@ -1268,7 +1429,7 @@ function JabbaCarousselElement(_name = "") : __hudelement__() constructor {
 
 #region SPRITE ELEMENT
 
-function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor{
+function JabbaGraphicElement(_sprite, _name = "") : __spriteTypeElement__() constructor{
 	
 	#macro TopLeft [0,0]
 	#macro TopCenter [0,0.5]
@@ -1280,66 +1441,64 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 	#macro BottomCenter [1, 0.5]
 	#macro BottomRight [1, 1]
 
-	sprite = _sprite
+	asset = _sprite
 	width = sprite_get_width(_sprite)
 	height = sprite_get_height(_sprite)
 	xFlip = 1
 	yFlip = 1
 	
+	//feedback = __feedbacks.popout.func
+	//__activeFeedback = "popout"
+	
 	static SetOffset = function(_x, _y = undefined){
 		
 		var _xoff, _yoff
-		if is_array(_x){
-			_y = _x[1]*height
-			_x = _x[0]*width
+		if is_array(_x){  
+			_y = _x[0]*height
+			_x = _x[1]*width
 		}
-		
-		xx = _x
-		yy = _y
+
 		_xoff = _x
 		_yoff = _y
 		
-		sprite_set_offset(sprite, _xoff, _yoff)
+		sprite_set_offset(asset, _xoff, _yoff)
 		
 		return self
 	}
 	
-	static SetOrigin = function(_xOrigin, _yOrigin){
-		xOrigin = _xOrigin
-		yOrigin = _yOrigin
-		
-		__originUpdated = true
-		__anyUpdated = true;
-		//xOrigin = -sprite_get_xoffset(sprite) + _xOrigin;
-		//yOrigin = -sprite_get_yoffset(sprite) + _yOrigin;
-		
-		return self
-	
-	}
-	
-	static SetPosition = function(_x, _y){
-		x = _x
-		y = _y
-		__positionUpdated = true
-		__anyUpdated = true
-		//x = _x - xx
-		//y = _y - yy
-		
-		return self
-	}
-	
-	static SetRotation = function(_angle){
-		angle = _angle
-		__rotationUpdated = true
-		__anyUpdated = true
-		//var _c = dcos(angle);
-		//var _s = dsin(angle);
-		//xx = _c * xOrigin - _s * yOrigin
-		//yy = _c * yOrigin + _s * xOrigin
-		
-		return self
-	
-	}
+	//static SetOrigin = function(_xOrigin, _yOrigin = undefined){
+	//	
+	//	if is_array(_xOrigin){
+	//		_yOrigin = _xOrigin[0] * height
+	//		_xOrigin = _xOrigin[1] * width
+	//	}
+	//	xOrigin = _xOrigin
+	//	yOrigin = _yOrigin
+	//	
+	//	__originUpdated = true
+	//	__anyUpdated = true;
+	//	
+	//	return self
+	//
+	//}
+	//
+	//static SetPosition = function(_x, _y){
+	//	x = _x
+	//	y = _y
+	//	__positionUpdated = true
+	//	__anyUpdated = true
+	//	
+	//	return self
+	//}
+	//
+	//static SetRotation = function(_angle){
+	//	angle = _angle
+	//	__rotationUpdated = true
+	//	__anyUpdated = true
+	//	
+	//	return self
+	//
+	//}
 	
 	static SetColor = function(_color){
 		color = _color
@@ -1349,7 +1508,7 @@ function JabbaGraphicElement(_sprite, _name = "") : __hudelement__() constructor
 	
 	static Draw = function(){
 		if !isHidden {
-			draw_sprite_ext(sprite, frame, x, y, xScale, yScale, angle, color, alpha)
+			draw_sprite_ext(asset, frame, x, y, xScale, yScale, angle, color, alpha)
 		}
 	}
 }
