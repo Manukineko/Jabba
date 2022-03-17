@@ -33,7 +33,7 @@ quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
 gaugeBar1.SetValue(life)
 timer.UpdateTime(get_timer()/1000)
-caroussel.Update()
+//caroussel.Update()
 
 //currentTime = get_timer()
 //elapsedTime = (currentTime - previousTime) / 1000

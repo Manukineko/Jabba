@@ -275,6 +275,7 @@ function __baseElement() constructor{
 	width = 0 
 	xScale = 1
 	yScale = 1
+	scale = 1
 	xFlip = 1
 	yFlip = 1
 	scale = 1
@@ -297,6 +298,7 @@ function __baseElement() constructor{
 	__positionUpdated = false
 	__rotationUpdated = false
 	__scaleUpdated = false
+	__radiusUpdated = false
 	__originUpdated = false
 	__alphaUpdated = false
 	__feedbackUpdated = false
@@ -319,7 +321,9 @@ function __baseElement() constructor{
 					xScale = scale; yScale = scale
 				}
 			}),
-			params : ["scale", 2]
+			params : method(other, function(){
+				scale = 2//["scale", 2]
+			})
 		}
 	}
 	
@@ -408,6 +412,13 @@ function __baseElement() constructor{
 			
 			__scaleUpdated = false;
 		}
+		if (__radiusUpdated){
+			wRadius = wRadius
+			hRadius = hRadius
+			
+			__radiusUpdated = false
+			
+		}
 		if (__alphaUpdated){
 			
 			__alphaUpdated = false;
@@ -492,8 +503,8 @@ function __baseElement() constructor{
 			_yScale = _xScale;
 		}
 		
-		//xScale = _xScale * xFlip
-		//yScale = _yScale * yFlip
+		xScale = _xScale
+		yScale = _yScale
 		__scaleUpdated = true;
 		__anyUpdated = true;
 		return self
@@ -1177,6 +1188,10 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	carousselSize = 0
 	rotation = 0
 	rotationSpeed = 0.1
+	radius = 1
+	//__activeFeedback = "popout"
+	//feedback = __feedback.popout.func
+	
 	wRadius = 128
 	hRadius = 128
 	fadeMin = .8
@@ -1184,6 +1199,7 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	drawOrder = []
 	colorBlendDefault = c_white
 	colorBlendActive = c_black
+	hasFeedback = true
 	
 	//Private
 	with(__feedbacks){
@@ -1202,18 +1218,29 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		}
 		popout = {
 			func: method(other, function(){
-				if runFeedback{	
-						activeItem.scale = other.scale > 1 ? __tweenFunctions.Tween_LerpTime(other.scale, 1, 0.1, 1) : 1
-						xScale = other.scale; yScale = other.scale
+				if hasFeedback{	
+						radius = radius > 0 ? __tweenFunctions.Tween_LerpTime(radius, 0, 0.1, 1) : 0
+						wRadius = wRadius + radius; hRadius = hRadius + radius
+						__radiusUpdated = true
+						__anyUpdated = true
+						//wRadius = wRadius * radius; hRadius = hRadius * radius
+						//SetRadius(wRadius, hRadius)
 					}
 					//if activeItem.scale <= 0 runFeedback = false
 					
 				//}
 			}),
-			params : ["scale", 2]
+			//params : ["radius", 16, "wRadius", other.wRadius+other.radius, "hRadius", other.hRadius+other.radius]
+			params : method(other, function(){
+				radius = 16
+				wRadius = wRadius + radius
+				hRadius = hRadius + radius
+			})
 		}
 	}
-	
+
+
+
 	show_debug_message(__feedbacks)
 	
 	/// @desc add an item to the caroussel in the itemlist
@@ -1235,9 +1262,19 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		carousselSize = array_length(itemsList)
 		
 	}
+	__feedbackGetParams = function(){
+		
+		var _params = __feedbacks[$ __activeFeedback]//[$ "params"]
+		_params.params()
+		//var _i=0; repeat(array_length(_params)/2){
+		//	variable_struct_set(self, _params[_i], _params[_i+1])
+		//	_i += 2
+		//}
+		
+	}
 	
 	/// @desc calculate the position of each item in the caroussel
-	__update = function(){
+	__buildItem = function(){
 		
 		//var _previous = activeItem
 		
@@ -1342,6 +1379,8 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		
 		wRadius = _wRadius
 		hRadius = _hRadius
+		__radiusUpdated = true;
+		__anyUpdated = true;
 		
 		return self
 		
@@ -1401,12 +1440,15 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		}
 	}
 	
-	/// @func Update()
-	/// @desc This function must be executed each frame if you use this Element (I plan to implement it better later)
 	static Update = function(){
-
-		__update()
-
+		if (__anyUpdated){
+			__update();
+		}
+		if (hasFeedback){
+			feedback();
+		}
+		
+		__buildItem()
 	}
 	
 	/// @func Draw()

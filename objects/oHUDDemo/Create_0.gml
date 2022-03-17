@@ -25,7 +25,7 @@ mugshotFrame = hud.CreateGraphicElement(sMugshotFrame)
 mugshotFrame.SetPosition(hud.left+32, hud.top+32)
 
 caroussel = hud.CreateCarrouselElement()
-caroussel.SetPosition(hud.center, hud.bottom-128).SetRadius(128,64).SetDepth(0.8).SetDrawDistance(0.5).AddItem(sItem1, "item 1" )
+caroussel.SetPosition(hud.center, hud.bottom-128).SetRadius(128,64).SetDepth(0.8).SetDrawDistance(0.5).SetRotation(45).AddItem(sItem1, "item 1" )
 caroussel.AddItem(sItem2, "item 2")
 caroussel.AddItem(sItem3, "item 3")
 caroussel.AddItem(sItem4, "item 4")
