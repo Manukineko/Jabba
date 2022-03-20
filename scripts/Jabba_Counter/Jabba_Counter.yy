@@ -6,7 +6,7 @@
     "path": "folders/Jabba.yy",
   },
   "resourceVersion": "1.0",
-  "name": "JabbaTheHud",
+  "name": "Jabba_Counter",
   "tags": [],
   "resourceType": "GMScript",
 }

@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"sItem5","path":"sprites/sItem5/sItem5.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "sBlood",
     "tags": [],
     "resourceType": "GMSequence",

@@ -95,7 +95,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"JabbaFont","path":"sprites/JabbaFont/JabbaFont.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "sBlood",
     "tags": [],
     "resourceType": "GMSequence",
