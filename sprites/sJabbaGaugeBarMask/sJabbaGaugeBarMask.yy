@@ -13,7 +13,7 @@
   "bbox_bottom": 7,
   "HTile": false,
   "VTile": false,
-  "For3D": true,
+  "For3D": false,
   "width": 88,
   "height": 8,
   "textureGroupId": {
@@ -41,7 +41,7 @@
     "moments": {"Keyframes":[],"resourceVersion":"1.0","resourceType":"KeyframeStore<MomentsEventKeyframe>",},
     "tracks": [
       {"name":"frames","spriteId":null,"keyframes":{"Keyframes":[
-            {"id":"066bbaac-30c3-428a-a07d-06b9bd8aff75","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"ec26876c-de78-4041-a554-4c754a5f8075","path":"sprites/sJabbaGaugeBarMask/sJabbaGaugeBarMask.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
+            {"id":"fca43ffe-cf50-4eda-87f1-8e94cd32fb47","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"ec26876c-de78-4041-a554-4c754a5f8075","path":"sprites/sJabbaGaugeBarMask/sJabbaGaugeBarMask.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
           ],"resourceVersion":"1.0","resourceType":"KeyframeStore<SpriteFrameKeyframe>",},"trackColour":0,"inheritsTrackColour":true,"builtinName":0,"traits":0,"interpolation":1,"tracks":[],"events":[],"isCreationTrack":false,"resourceVersion":"1.0","tags":[],"resourceType":"GMSpriteFramesTrack","modifiers":[],},
     ],
     "visibleRange": null,
@@ -60,14 +60,38 @@
     "eventStubScript": null,
     "parent": {"name":"sJabbaGaugeBarMask","path":"sprites/sJabbaGaugeBarMask/sJabbaGaugeBarMask.yy",},
     "resourceVersion": "1.4",
-    "name": "sBlood",
+    "name": "sJabbaGaugeBarMask",
     "tags": [],
     "resourceType": "GMSequence",
   },
   "layers": [
     {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"a38769c1-bae1-4c70-abd1-db317c38674c","tags":[],"resourceType":"GMImageLayer",},
   ],
-  "nineSlice": null,
+  "nineSlice": {
+    "left": 0,
+    "top": 0,
+    "right": 0,
+    "bottom": 0,
+    "guideColour": [
+      4294902015,
+      4294902015,
+      4294902015,
+      4294902015,
+    ],
+    "highlightColour": 1728023040,
+    "highlightStyle": 0,
+    "enabled": false,
+    "tileMode": [
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
+    "resourceVersion": "1.0",
+    "loadedVersion": null,
+    "resourceType": "GMNineSliceData",
+  },
   "parent": {
     "name": "gaugeBar",
     "path": "folders/Jabba/Demo/elements/gaugeBar.yy",

@@ -3,23 +3,67 @@
 
 function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() constructor{
 	
+	#macro shaderParams activeShaderData.params
+	
 	shader = jabbaShaderDissolve
 	asset = sJabbaGaugeBar
 	mask = sJabbaGaugeBarMask
+	width = sprite_get_width(asset)
+	height = sprite_get_height(asset)
 	maxValue = _maxValue
 	tolerance = 0
 	inverse = true
+	_valueNormalized = 0
 	
-	//The parameters for the shader
-	__shaderParams = {}
-	with(__shaderParams){
+	_shaders = {
+		dissolve : {
+			shaderScript : jabbaShaderDissolve,
+			params : {
+				tolerance : 0,
+				inverse : true,
+				mask_tex : sprite_get_texture(mask,0),
+				u_mask_tex : shader_get_sampler_index(jabbaShaderDissolve, "mask_tex"),
+				mask_transform : shader_remap_uv_scale(asset, mask),
+				u_mask_transform : shader_get_uniform(jabbaShaderDissolve, "mask_transform"),
+				u_time : shader_get_uniform(jabbaShaderDissolve, "time"),
+				u_tolerance : shader_get_uniform(jabbaShaderDissolve, "tolerance"),
+				u_inverse : shader_get_uniform(jabbaShaderDissolve, "inverse"),
+			},
+			
+			shaderSet : function(_value){
+				shader_set(shaderScript)
+					texture_set_stage(params.u_mask_tex, params.mask_tex)
+					shader_set_uniform_f_array(params.u_mask_transform, params.mask_transform)
+					shader_set_uniform_f(params.u_time, _value)
+					shader_set_uniform_f(params.u_tolerance,params.tolerance)
+					shader_set_uniform_f(params.u_inverse,params.inverse)
+					draw_sprite_ext(asset,frame,xx,yy,xScale,yScale,angle,color,alpha)
+				shader_reset();
+			}
+			
+		}
+	}
+	
+	activeShaderData = _shaders.dissolve
+	activeShaderName = "dissolve"
+	
+	AddShader = function (_name, _shader, _init, _set ){
+		var _struct = {}
+		with(_struct){
+			shaderScript = _shader
+			params = _init
+			shaderSet = method(other,_set)
+		}
 		
-		mask_tex = sprite_get_texture(other.mask,0)
-		u_mask_tex = shader_get_sampler_index(other.shader, "mask_tex")
-		u_time = shader_get_uniform(other.shader, "time")
-		u_tolerance = shader_get_uniform(other.shader, "tolerance")
-		u_inverse = shader_get_uniform(other.shader, "inverse")
+		variable_struct_set(_shaders, _name, _struct)
 		
+		return self
+		
+	}
+	
+	SetShader = function(_name){
+		activeShaderData = variable_struct_get(_shaders, _name)
+		activeShaderName = _name
 	}
 	
 	/// @func SetValue
@@ -28,7 +72,8 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 	/// @param {boolean} triggerFeedback If the element's feedback is to be triggered when the gauge is filled (/!\ Subject to change)
 	static SetValue = function(_value, _feedbackTrigger){
 		
-		value = _value/maxValue
+		value = min(_value, maxValue)
+		_valueNormalized = value/maxValue
 		hasFeedback = _feedbackTrigger
 		
 		//what a mess. Nothing make sens here.
@@ -43,35 +88,12 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 		}
 	}
 	
-	/// @func SetShaderDissolve(sprite, mask)
-	/// @desc Set the shader and the two necessary sprites for the effect 
-	/// @param {sprite} sprite the sprite to dissolve
-	/// @param {sprite} mask the sprite used to dissolve
-	static SetShaderDissolve = function ( _sprite, _mask/*, _shader = jabbaShaderDissolve*/){
-		//shader = _shader
-		asset = _sprite
-		mask = _mask
-		with(__shaderParams){
-			mask_tex = sprite_get_texture(other.mask,0)
-			u_mask_tex = shader_get_sampler_index(other.shader, "mask_tex")
-			u_time = shader_get_uniform(other.shader, "value")
-			u_tolerance = shader_get_uniform(other.shader, "tolerance")
-			u_inverse = shader_get_uniform(other.shader, "inverse")
-		}
-	}
-	
 	/// @func Draw()
 	/// @desc Draw the element
 	static Draw = function(){
 		if !isHidden{
 			
-			shader_set(shader)
-			texture_set_stage(__shaderParams.u_mask_tex, __shaderParams.mask_tex)
-			shader_set_uniform_f(__shaderParams.u_time, value)
-			shader_set_uniform_f(__shaderParams.u_tolerance,tolerance)
-			shader_set_uniform_f(__shaderParams.u_inverse,inverse)
-			draw_sprite_ext(asset,frame,x,y,xScale,yScale,angle,color,alpha)
-			shader_reset();
+			activeShaderData.shaderSet(_valueNormalized)
 		
 		}
 	}

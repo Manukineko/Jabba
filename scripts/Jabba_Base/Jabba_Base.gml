@@ -554,3 +554,35 @@ function number_wrap(_value, _min, _max) {
 	}
 	return _value;
 }
+
+function shader_remap_uv_scale(_sprite, _mask){
+	
+	//variables
+	var _sprite_uvs		= sprite_get_uvs(_sprite, 0)
+	var _sprite_uv_w	= _sprite_uvs[2] - _sprite_uvs[0]
+	var _sprite_uv_h 	= _sprite_uvs[3] - _sprite_uvs[1]
+	var _sprite_aspect	= sprite_get_width(_sprite) / sprite_get_height(_sprite)
+	
+	var _mask_uvs		= sprite_get_uvs(_mask, 0)
+	var _mask_uv_w		= _mask_uvs[2] - _mask_uvs[0]
+	var _mask_uv_h 		= _mask_uvs[3] - _mask_uvs[1]
+	var _mask_aspect		= sprite_get_width(_mask) / sprite_get_height(_mask)
+
+	//Calculate
+	var _scale_x		= _mask_uv_w / _sprite_uv_w
+	var _scale_y		= _mask_uv_h / _sprite_uv_h
+	if (_sprite_aspect > _mask_aspect) {
+		_scale_y		/= _sprite_aspect / _mask_aspect
+		var _shift_x	= _mask_uvs[0] - _sprite_uvs[0] * _scale_x
+		var _shift_y	= _mask_uvs[1] - _sprite_uvs[1] * _scale_y
+		_shift_y		+= 0.5 * (_mask_uv_h - _sprite_uv_h * _scale_y)
+	}
+	else {
+		_scale_x		*= _sprite_aspect / _mask_aspect
+		var _shift_x	= _mask_uvs[0] - _sprite_uvs[0] * _scale_x
+		var _shift_y	= _mask_uvs[1] - _sprite_uvs[1] * _scale_y
+		_shift_x		+= 0.5 * (_mask_uv_w - _sprite_uv_w * _scale_x)
+	}
+	
+	return [_scale_x, _scale_y, _shift_x, _shift_y]
+}
