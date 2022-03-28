@@ -43,6 +43,8 @@ function __baseElement() constructor{
 	__alphaUpdated = false
 	__feedbackUpdated = false
 	
+	me = self
+	
 	//A list of global built-in feedback.
 	//Each element can also have their own feedbacks
 	__feedbacks = {}
@@ -65,6 +67,22 @@ function __baseElement() constructor{
 				scale = 2//["scale", 2]
 			})
 		}
+		//fliponce = {
+		//	params : method(other, function(){
+		//		variable_struct_set(me, "ani",0)
+		//		runFeedback = true
+		//	}),
+		//	func : method(other, function(){
+		//		if runFeedback{
+		//			if xFlip = 0 {variable_struct_set(me, "ani",1)}
+		//			if ani = 2 {runFeedback = false}
+		//		
+		//			var _f = Wave(1, 0, 0.1, 0.0)
+		//			SetFlip(_f,1)
+		//		}
+		//	})
+		//	
+		//}
 	}
 	
 	//Internal tween functions shamelessly taken from Simon Milfred's (awesome) Bless Hay Gaming Utils pack (https://blesshaygaming.itch.io/bhg-utils). seriously, check it out.
@@ -516,6 +534,27 @@ function value_wrap_selector(_current, _delta, _list) {
 	var _result = _list[_i]
 	return _result
 
+}
+
+/// @func Wave(_from, _to, _duration, _offset)
+/// @desc Returns a value that will wave back and forth between [from-to] over [duration] seconds
+/// @param from
+/// @param to
+/// @param duration - in seconde
+/// @param offset
+ 
+//Code by Shaun Spalding - ported for GMS2.3+ by me.
+// 
+// Examples
+//      image_angle = Wave(-45,45,1,0)  -> rock back and forth 90 degrees in a second
+//      x = Wave(-10,10,0.25,0)         -> move left and right quickly
+ 
+// Or here is a fun one! Make an object be all squishy!! ^u^
+//      image_xscale = Wave(0.5, 2.0, 1.0, 0.0)
+//      image_yscale = Wave(2.0, 0.5, 1.0, 0.0)
+function wave(_from, _to, _duration, _offset){
+	var a4 = (_to - _from) * 0.5;
+	return _from + a4 + sin((((current_time * 0.001) + _duration * _offset) / _duration) * (pi*2)) * a4;
 }
 
 /// @function			number_wrap(value, min, max, [include_max?]);

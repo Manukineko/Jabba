@@ -14,9 +14,13 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 	tolerance = 0
 	inverse = true
 	_valueNormalized = 0
+	var _self = self
 	
 	_shaders = {
 		dissolve : {
+			///!\ Only for buit-in shader : store reference of the constructor variables to use them in the ShaderSet function below. Enjoy scoping XD
+			owner : _self,
+			//
 			shaderScript : jabbaShaderDissolve,
 			params : {
 				tolerance : 0,
@@ -37,7 +41,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 					shader_set_uniform_f(params.u_time, _value)
 					shader_set_uniform_f(params.u_tolerance,params.tolerance)
 					shader_set_uniform_f(params.u_inverse,params.inverse)
-					draw_sprite_ext(asset,frame,xx,yy,xScale,yScale,angle,color,alpha)
+					draw_sprite_ext(owner.asset,owner.frame,owner.xx,owner.yy,owner.xScale,owner.yScale,owner.angle,owner.color,owner.alpha)
 				shader_reset();
 			}
 			

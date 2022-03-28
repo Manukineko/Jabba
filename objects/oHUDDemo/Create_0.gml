@@ -23,11 +23,21 @@ counter = hud.CreateCounterElement()
 counter.SetPosition(hud.center, hud.bottom-128)
 	.SetFeedback("popout")
 
-//mugshot = hud.CreateGraphicElement(sMugshot)
-//mugshot.SetPosition(hud.left+34, hud.top+34)
-gaugeBar1 = hud.CreateGaugeBarElement(100)
-gaugeBar1.SetPosition(hud.left+70,hud.top+58)
+//GAUGE BAR with built-in shader (dissolve)
+mugshot = hud.CreateGraphicElement(sMugshot)
+mugshot.SetPosition(hud.left+34, hud.top+34)
+gaugeBar = hud.CreateGaugeBarElement(100)
+gaugeBar.SetPosition(hud.left+70,hud.top+58)
 	.SetColor(c_orange)
+mugshotFrame = hud.CreateGraphicElement(sMugshotFrame)
+mugshotFrame.SetPosition(hud.left+32, hud.top+32)
+
+//GAUGE BAR with custom Shader (well, example is the same code than the built-in dissolve)
+mugshotCustomShader = hud.CreateGraphicElement(sMugshot)
+mugshotCustomShader.SetPosition(hud.left+34, hud.top+80)
+gaugeBarCustomShader = hud.CreateGaugeBarElement(100)
+gaugeBarCustomShader.SetPosition(hud.left+70,hud.top+104)
+	.SetColor(c_aqua)
 	.AddShader("dissolveCustom", jabbaShaderDissolve, {
 		tolerance : 0,
 		inverse : true,
@@ -50,9 +60,8 @@ gaugeBar1.SetPosition(hud.left+70,hud.top+58)
 		}
 	)
 	.SetShader("dissolveCustom")
-		
-mugshotFrame = hud.CreateGraphicElement(sMugshotFrame)
-mugshotFrame.SetPosition(hud.left+32, hud.top+32)
+mugshotFrameCustomShader = hud.CreateGraphicElement(sMugshotFrame)
+mugshotFrameCustomShader.SetPosition(hud.left+32, hud.top+78)
 
 caroussel = hud.CreateCarrouselElement()
 caroussel.SetPosition(hud.center, hud.bottom-128)
@@ -65,7 +74,7 @@ caroussel.AddItem(sItem2, "item 2")
 caroussel.AddItem(sItem3, "item 3")
 caroussel.AddItem(sItem4, "item 4")
 caroussel.AddItem(sItem5, "item 5")
-caroussel.SetFeedback("popout", false)
+caroussel.SetFeedback("popout")
 
 customOriginTest = hud.CreateGraphicElement(sItem1)
 customOriginTest.SetOrigin(MiddleCenter)

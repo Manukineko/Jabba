@@ -10,12 +10,14 @@ if !instance_exists(oEditor){
 	if keyboard_check(vk_up){
 	    life++
 	    life = min(life,100)
-		gaugeBar1.SetValue(life)
+		gaugeBar.SetValue(life)
+		gaugeBarCustomShader.SetValue(life)
 	}
 	if keyboard_check(vk_down){
 	    life--
 	    life = max(life,0)
-		gaugeBar1.SetValue(life)
+		gaugeBar.SetValue(life)
+		gaugeBarCustomShader.SetValue(life)
 	}
 	if keyboard_check_pressed(ord("H")){
 	    hud.ToggleHide()
@@ -35,7 +37,7 @@ if !instance_exists(oEditor){
 
 quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
-//gaugeBar1.SetValue(life)
+//gaugeBar.SetValue(life)
 timer.SetTime(get_timer()/1000)
 //caroussel.Update()
 
