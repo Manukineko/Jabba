@@ -29,7 +29,7 @@ function __baseElement() constructor{
 	isHidden = false
 	isReach = false
 	hasFeedback = true
-	runFeedback = true
+	runFeedback = false
 	feedback = function(){}
 	
 	//Private variable
@@ -43,46 +43,49 @@ function __baseElement() constructor{
 	__alphaUpdated = false
 	__feedbackUpdated = false
 	
-	me = self
+	var _self = self
 	
 	//A list of global built-in feedback.
 	//Each element can also have their own feedbacks
-	__feedbacks = {}
-	with(__feedbacks){
+	__feedbacks = {
+		
+		owner : _self,
 
-		none = {
+		none : {
 			func : method(other, function(){}),
 			params : method(other, function(){}),
-		}
+		},
 		
 		//inflate shortly the element
-		popout = {
-			func : method(other, function(){
+		popout : {
+			func : method(self, function(){
 				if hasFeedback{	
 					scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
 					xScale = scale; yScale = scale
+					SetScale(scale,scale)
 				}
 			}),
-			params : method(other, function(){
+			params : method(self, function(){
 				scale = 2//["scale", 2]
+				
 			})
+		},
+		fliponce : {
+			params : method(self, function(){
+				runFeedback = true
+				variable_struct_set(self, "ani",0)
+			}),
+			func : method(self, function(){
+				if runFeedback{
+					if xFlip = 0 {variable_struct_set(self, "ani",1)}
+					if ani = 2 {runFeedback = false}
+				
+					var _f = Wave(1, 0, 0.1, 0.0)
+					SetFlip(_f,1)
+				}
+			})
+			
 		}
-		//fliponce = {
-		//	params : method(other, function(){
-		//		variable_struct_set(me, "ani",0)
-		//		runFeedback = true
-		//	}),
-		//	func : method(other, function(){
-		//		if runFeedback{
-		//			if xFlip = 0 {variable_struct_set(me, "ani",1)}
-		//			if ani = 2 {runFeedback = false}
-		//		
-		//			var _f = Wave(1, 0, 0.1, 0.0)
-		//			SetFlip(_f,1)
-		//		}
-		//	})
-		//	
-		//}
 	}
 	
 	//Internal tween functions shamelessly taken from Simon Milfred's (awesome) Bless Hay Gaming Utils pack (https://blesshaygaming.itch.io/bhg-utils). seriously, check it out.
@@ -384,12 +387,14 @@ function __baseElement() constructor{
 	}
 	
 	static Update = function(){
-		if (__anyUpdated){
-			__update();
-		}
 		if (hasFeedback){
 			feedback();
 		}
+		
+		if (__anyUpdated){
+			__update();
+		}
+		
 	}
 	
 	/// @func SetFeedback(feedback)

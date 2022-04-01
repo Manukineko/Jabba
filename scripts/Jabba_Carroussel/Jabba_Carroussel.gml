@@ -19,6 +19,9 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	colorBlendDefault = c_white
 	colorBlendActive = c_black
 	hasFeedback = true
+	itemHasFeedback = true
+	initFeedback = false // set the feedback's variables
+	__itemsProcessStep = 0
 	
 	//Private
 	with(__feedbacks){
@@ -109,25 +112,38 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 			
 		}
 		var _x,_y,_fade, _scale
+		__itemsProcessStep = 0; repeat(2){
 		var _i = 0; repeat(carousselSize){
-			drawOrder[_i] = ds_priority_delete_min(_prio)
-			_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
-			_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
-			_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
-			_scale = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)), scaleMin,1)
-			drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale).Update()
+			switch(__itemsProcessStep){
+				//start to calculate ITEMS' position & co
+				case 0 :
+					drawOrder[_i] = ds_priority_delete_min(_prio)
+					_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
+					_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
+					_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
+					_scale = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)), scaleMin,1)
+					drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale)//.Update()
+					
+				break;
+				//Then call the Update for each. Feedback will kick in as well
+				case 1 :
+					drawOrder[_i][$ "item"].Update()
+				break
+			}
 			_i++
 			
 		}
+		__itemsProcessStep++
+		}
 		
 		//TO DO BETTER
-		activeItem = itemsList[value][$ "item"]//drawOrder[carousselSize-1][$ "item"]
-		if hasFeedback && isReach{
-			activeItem.__feedbackUpdated = true
-			activeItem.__anyUpdated = true
-			activeItem.Update()
-			isReach = false
-		}
+		//activeItem = itemsList[value][$ "item"]//drawOrder[carousselSize-1][$ "item"]
+		//if hasFeedback && isReach{
+		//	activeItem.__feedbackUpdated = true
+		//	activeItem.__anyUpdated = true
+		//	activeItem.Update()
+		//	isReach = false
+		//}
 		//activeItem[$ "item"].SetColor(c_blue)
 		
 		
@@ -173,6 +189,7 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 					var _feedback = variable_struct_get(__feedbacks, _effect)
 					feedback = _feedback.func
 					__activeFeedback = _effect
+					hasFeedback = true
 					
 				}
 				
@@ -254,16 +271,27 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	static SetValue = function(_value, _triggerFeedback = true){
 		
 		value = _value
-		hasFeedback = _triggerFeedback
+		activeItem = itemsList[value][$ "item"]
+		//hasFeedback = _triggerFeedback
+		initFeedback = _triggerFeedback
+		runFeedback = _triggerFeedback
 		
-		if _triggerFeedback{
-			
-			isReach = true
-			__feedbackGetParams()
+			if initFeedback{
+				
+				if hasFeedback{
+					isReach = true
+					__feedbackGetParams()
+				}
+				if itemHasFeedback{
+					activeItem.__feedbackGetParams()
+				}
+				
+				initFeedback = false
+				
 			//__feedbackUpdated = true
 			//__anyUpdated = true
 			//
-		}
+			}
 	}
 	
 	static Update = function(){
