@@ -21,7 +21,7 @@ timer.SetTimeFormat([JT.MIN, JT.SEC, JT.HUN])
 
 counter = hud.CreateCounterElement()
 counter.SetPosition(hud.center, hud.bottom-128)
-	.SetFeedback("popout")
+	.SetFeedback("popout2")
 
 //GAUGE BAR with built-in shader (dissolve)
 mugshot = hud.CreateGraphicElement(sMugshot)
@@ -74,7 +74,7 @@ caroussel.AddItem(sItem2, "item A1")
 caroussel.AddItem(sItem3, "item B1")
 caroussel.AddItem(sItem4, "item B2")
 caroussel.AddItem(sItem5, "item A2")
-caroussel.SetFeedback("popout").SetFeedback("fliponce", true)
+caroussel.SetFeedback("popout2").SetFeedback("fliponce", true)
 
 customOriginTest = hud.CreateGraphicElement(sItem1)
 customOriginTest.SetOrigin(MiddleCenter)

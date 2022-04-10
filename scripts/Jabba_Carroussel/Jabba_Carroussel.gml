@@ -63,6 +63,32 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 				//hRadius = hRadius + radius
 			})
 		}
+		popout2 = {
+			radius : 0,
+			time : 0,
+			runFeedback : false,
+			
+			
+			params : function(){
+				self.time = 0
+				self.runFeedback = true
+				self.radius = 32
+			},
+			func: function(){
+				if runFeedback{
+					if radius <=0 {runFeedback = false; return}
+					time += 0.1
+					radius = tween(32, 0, time, EASE.OUT_ELASTIC )
+					callbackInternalUpdate(radius, radius)
+				}
+					
+			},
+			callbackInternalUpdate : method(other, function(_a, _b){
+				wRadius = width + _a
+				hRadius = height + _b
+				//SetRadius(_wr, _hr)
+			})
+		}
 	}
 
 

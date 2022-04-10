@@ -70,20 +70,55 @@ function __baseElement() constructor{
 				
 			})
 		},
-		fliponce : {
-			params : method(self, function(){
-				runFeedback = true
-				variable_struct_set(self, "ani",0)
-			}),
-			func : method(self, function(){
-				if runFeedback{
-					if xFlip = 0 {variable_struct_set(self, "ani",1)}
-					if ani = 2 {runFeedback = false}
-				
-					var _f = Wave(1, 0, 0.1, 0.0)
-					SetFlip(_f,1)
-				}
+		popout2 : {
+			scale : 1,
+			time : 0,
+			//xScale : xScale,
+			//yScale : yScale,
+			//InitFeedbackVars
+			params : function(){
+				time = 0
+				//scale = 2//["scale", 2]
+			},
+			func : function(){
+				time += 0.1
+					scale = tween(2,1, time, EASE.INOUT_CUBIC)
+					callbackInternalUpdate(scale, scale)
+					
+			},
+			
+			callbackInternalUpdate : method(self, function(_a,_b){
+					SetScale(_a,_b)
 			})
+		},
+		fliponce : {
+			animate : 0,
+			time : 0,
+			runFeedback : false,
+			xFlip : 1,
+			params : function(){
+				self.runFeedback = true
+				self.animate = 0
+				self.time = 0
+			},
+			internal : method(self, function(_arg){
+				SetFlip(_arg,1)
+			}),
+			func : function(){
+				
+				if runFeedback{
+					time += 0.05
+					switch(animate){
+						case 0: if xFlip <= 0 {animate = 1; time = 0; return;}
+							xFlip = tween(1,0, time, EASE.INOUT_CUBIC)
+						break;
+						case 1: if xFlip >= 1 {runFeedback = false; return;}
+							xFlip = tween(0,1, time, EASE.INOUT_CUBIC);
+						break;
+					}
+					internal(xFlip);
+				}
+			}
 			
 		}
 	}
@@ -557,7 +592,7 @@ function value_wrap_selector(_current, _delta, _list) {
 // Or here is a fun one! Make an object be all squishy!! ^u^
 //      image_xscale = Wave(0.5, 2.0, 1.0, 0.0)
 //      image_yscale = Wave(2.0, 0.5, 1.0, 0.0)
-function wave(_from, _to, _duration, _offset){
+function Wave(_from, _to, _duration, _offset){
 	var a4 = (_to - _from) * 0.5;
 	return _from + a4 + sin((((current_time * 0.001) + _duration * _offset) / _duration) * (pi*2)) * a4;
 }
@@ -629,4 +664,18 @@ function shader_remap_uv_scale(_sprite, _mask){
 	}
 	
 	return [_scale_x, _scale_y, _shift_x, _shift_y]
+}
+
+function ceil_ext(_value, _size){
+	_size = 1-_size
+	return ceil(_value/_size) * _size
+}
+
+function round_ext(_value, _size){
+	return round(_value/_size) * _size
+}
+
+function floor_ext(_value, _size){
+	_size = 1-_size
+	return floor(_value/_size) * _size
 }
