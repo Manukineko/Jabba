@@ -17,73 +17,41 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 	scaleMin = .8
 	drawOrder = []
 	colorBlendDefault = c_white
-	colorBlendActive = c_black
+	colorBlendActive = c_yellow
 	hasFeedback = true
 	itemHasFeedback = true
 	initFeedback = false // set the feedback's variables
 	__itemsProcessStep = 0
 	
 	//Private
-	with(__feedbacks){
-
-		highlight = {
-			func : method(other, function(){
-				if runFeedback{
-					var _previous = activeItem
-					_previous[$ "item"].SetColor(colorBlendDefault)
-					itemsList[value][$ "item"].SetColor(colorBlendActive)
-				
-					runFeedback = false
-				}
-			}),
-			params : ["runFeedback", true]
-		}
-		popout = {
-			func: method(other, function(){
-				if hasFeedback{	
-						
-						radius = radius > 0 ? __tweenFunctions.Tween_LerpTime(radius, 0, 0.1, 1) : 0
-						wRadius = width + radius
-						hRadius = height + radius
-						//wRadius = wRadius - radius; hRadius = hRadius - radius
-						//__radiusUpdated = true
-						//__anyUpdated = true
-						//wRadius = wRadius * radius; hRadius = hRadius * radius
-						//SetRadius(wRadius, hRadius)
-					}
-					//if radius <= 0 runFeedback = false
-					
-				//}
-			}),
-			//params : ["radius", 16, "wRadius", other.wRadius+other.radius, "hRadius", other.hRadius+other.radius]
-			params : method(other, function(){
-				radius = 32
-				//SetRadius(wRadius + 16,hRadius + 16)
-				//wRadius = wRadius + radius
-				//hRadius = hRadius + radius
-			})
-		}
-		popout2 = {
+	__feedbacks = {
+		
+		none : {
+			func : function(){},
+			init : function(){}
+		},
+		popout : {
 			radius : 0,
 			time : 0,
 			runFeedback : false,
 			
 			
-			params : function(){
+			init : function(){
 				self.time = 0
 				self.runFeedback = true
 				self.radius = 32
 			},
 			func: function(){
 				if runFeedback{
-					if radius <=0 {runFeedback = false; return}
 					time += 0.1
-					radius = tween(32, 0, time, EASE.OUT_ELASTIC )
-					callbackInternalUpdate(radius, radius)
+					radius = tween(32, 0, time, EASE.SMOOTHSTEP )
+					changeRadius(radius, radius)
+					if time = 1 {runFeedback = false}
 				}
 					
 			},
-			callbackInternalUpdate : method(other, function(_a, _b){
+			changeRadius : method(other, function(_a, _b){
+				//SetRadius(width + _a, height + _b)
 				wRadius = width + _a
 				hRadius = height + _b
 				//SetRadius(_wr, _hr)
@@ -91,33 +59,35 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		}
 	}
 
-
-
 	show_debug_message(__feedbacks)
 	
 	/// @desc add an item to the caroussel in the itemlist
 	__add = function( _sprite, _name, _pos){
-		var _item = new JabbaGraphicElement(_sprite)
+		var _item = new __CarousselItemElement(_sprite, _name, carousselSize, self)
+
 		_item.SetOrigin(MiddleCenter).SetPosition(other.x,other.y)
-		
+		//_item.ID = _pos
+		//_item.name = _name
+
 		var _itemStruct = {
 			ID : carousselSize, //NO. Just testing purpose. To do better.
 			name : _name,
 			item : _item
 		}
-		if _pos = undefined{
+		//if _pos = undefined{
 			array_push(itemsList,_itemStruct)
 			carousselSize = array_length(itemsList)
 			return
-		}
-		itemsList[_pos] = _itemStruct
-		carousselSize = array_length(itemsList)
+		//}
+		//ROLLBACK : not allow custom position in the list
+		//itemsList[_pos] = _itemStruct
+		//carousselSize = array_length(itemsList)
 		
 	}
 	__feedbackGetParams = function(){
 		
 		var _params = __feedbacks[$ __activeFeedback]//[$ "params"]
-		_params.params()
+		_params.init()
 		//var _i=0; repeat(array_length(_params)/2){
 		//	variable_struct_set(self, _params[_i], _params[_i+1])
 		//	_i += 2
@@ -148,13 +118,13 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 					_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
 					_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
 					_scale = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)), scaleMin,1)
-					drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetAlpha(_fade).SetScale(_scale)//.Update()
+					drawOrder[_i][$ "item"].SetPosition(x+_x,y+_y).SetScale(_scale).SetAlpha(_fade)//.Update()
 					
 				break;
 				//Then call the Update for each. Feedback will kick in as well
 				case 1 :
 					drawOrder[_i][$ "item"].Update()
-				break
+				break;
 			}
 			_i++
 			
@@ -343,6 +313,105 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 				if drawOrder[_i] != 0 drawOrder[_i][$ "item"].Draw()
 				_i++
 				
+			}
+		}
+	}
+}
+
+function __CarousselItemElement(_sprite, _name, _pos, _owner) : JabbaGraphicElement(_sprite, _name) constructor {
+	owner = _owner
+	ID = _pos
+	
+		__feedbacks = {
+			
+		none : {
+			func : method(other, function(){}),
+			init : method(other, function(){}),
+		},
+		
+		highlight : {
+			runFeedback : false,
+			val : false,
+			
+			init : function(){
+				runFeedback = true
+				val = true
+			},
+			
+			func : function(_me = self){
+				if runFeedback{
+					colorizeItem(_me)
+					
+				}
+			},
+			colorizeItem : method(self, function(_me){
+				
+				if owner.activeItem.ID = ID {
+					if _me.val = true{
+						SetColor(owner.colorBlendActive)
+						_me.val = false
+					}
+				}
+				else{
+					SetColor(owner.colorBlendDefault)
+					_me.runFeedback = false
+				}
+					
+			}),
+			
+		},
+		
+		//inflate shortly the element
+		popout : {
+			scale : 1,
+			time : 0,
+			
+			init : function(){
+				time = 0
+				//scale = 2//["scale", 2]
+			},
+			func : function(){
+				time += 0.1
+				scale = tween(2,1, time, EASE.INOUT_CUBIC)
+				scaleMe(scale, scale)
+					
+			},
+			
+			scaleMe : method(self, function(_a,_b){
+				SetScale(_a,_b)
+			})
+		},
+		fliponce : {
+			animate : 0,
+			time : 0,
+			runFeedback : false,
+			xScale : xScale,
+			maxScale: xScale,
+			
+			init : function(){
+				self.runFeedback = true
+				self.animate = 0
+				self.time = 0
+			},
+			flipMe : method(self, function(_arg){
+				SetScale(_arg,1)
+			}),
+			func : function(){
+			
+				if runFeedback{
+					time += 0.1
+					switch(animate){
+						case 0: 
+							xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
+							if xScale <= 0 {animate = 1; time = 0;}
+						break;
+						case 1: 
+							xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
+							if xScale >= 1 {runFeedback = false;}
+						break;
+					}
+					flipMe(xScale);
+				}
 			}
 		}
 	}

@@ -29,7 +29,7 @@ function __baseElement() constructor{
 	isHidden = false
 	isReach = false
 	hasFeedback = true
-	runFeedback = false
+	//runFeedback = false
 	feedback = function(){}
 	
 	//Private variable
@@ -53,73 +53,89 @@ function __baseElement() constructor{
 
 		none : {
 			func : method(other, function(){}),
-			params : method(other, function(){}),
+			init : method(other, function(){}),
+		},
+		
+		highlight : {
+			runFeedback : false,
+			//colorActive : colorBlendActive,
+			//colorInactive : colorBlendDefault,
+			value : false,
+			
+			init : function(){
+				runFeedback = true
+				getCarrousselVar()
+			},
+			
+			func : function(){
+				if runFeedback{
+					//var _previous = activeItem
+					//_previous[$ "item"].SetColor(colorBlendDefault)
+					//itemsList[value][$ "item"].SetColor(colorBlendActive)
+				
+					runFeedback = false
+				}
+			},
+			callbackInternalUpdate : method(self, function(_a,_b){
+				
+			}),
+			getCarrousselVar : method(self, function(){})
+			
 		},
 		
 		//inflate shortly the element
 		popout : {
-			func : method(self, function(){
-				if hasFeedback{	
-					scale = scale > 1 ? __tweenFunctions.Tween_LerpTime(scale, 1, 0.1, 1) : 1
-					xScale = scale; yScale = scale
-					SetScale(scale,scale)
-				}
-			}),
-			params : method(self, function(){
-				scale = 2//["scale", 2]
-				
-			})
-		},
-		popout2 : {
 			scale : 1,
 			time : 0,
-			//xScale : xScale,
-			//yScale : yScale,
-			//InitFeedbackVars
-			params : function(){
+			
+			init : function(){
 				time = 0
 				//scale = 2//["scale", 2]
 			},
 			func : function(){
 				time += 0.1
-					scale = tween(2,1, time, EASE.INOUT_CUBIC)
-					callbackInternalUpdate(scale, scale)
+				scale = tween(2,1, time, EASE.INOUT_CUBIC)
+				callbackInternalUpdate(scale, scale)
 					
 			},
 			
 			callbackInternalUpdate : method(self, function(_a,_b){
-					SetScale(_a,_b)
+				SetScale(_a,_b)
 			})
 		},
 		fliponce : {
 			animate : 0,
 			time : 0,
 			runFeedback : false,
-			xFlip : 1,
-			params : function(){
+			xScale : xScale,
+			maxScale: xScale,
+			
+			init : function(){
 				self.runFeedback = true
 				self.animate = 0
 				self.time = 0
 			},
-			internal : method(self, function(_arg){
-				SetFlip(_arg,1)
+			flipMe : method(self, function(_arg){
+				SetScale(_arg,1)
 			}),
 			func : function(){
-				
+			
 				if runFeedback{
-					time += 0.05
+					time += 0.1
 					switch(animate){
-						case 0: if xFlip <= 0 {animate = 1; time = 0; return;}
-							xFlip = tween(1,0, time, EASE.INOUT_CUBIC)
+						case 0: 
+							xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
+							if xScale <= 0 {animate = 1; time = 0;}
 						break;
-						case 1: if xFlip >= 1 {runFeedback = false; return;}
-							xFlip = tween(0,1, time, EASE.INOUT_CUBIC);
+						case 1: 
+							xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
+							if xScale >= 1 {runFeedback = false;}
 						break;
 					}
-					internal(xFlip);
+					flipMe(xScale);
 				}
 			}
-			
+	
 		}
 	}
 	
@@ -137,7 +153,7 @@ function __baseElement() constructor{
 	static __feedbackGetParams = function(){
 		
 		var _params = __feedbacks[$ __activeFeedback]
-		_params.params()
+		_params.init()
 		
 	}
 	
@@ -453,7 +469,7 @@ function __baseElement() constructor{
 		var _struct = {}
 		with(_struct){
 			func = method(other,_function)
-			params = method(other, _params)
+			init = method(other, _params)
 		}
 		
 		variable_struct_set(__feedbacks, _name, _struct)

@@ -2,7 +2,7 @@
 
 #region JABBA CONTAINER
 /// @func Jabba
-/// @desc Constructor for the HUD container. This is completly optional if you want to manage yours youself
+/// @desc Constructor for the HUD container. This is completly optional if you want to manage yours yourself
 /// @params {Int} viewport the viewport to assign the HUD to (in case of splitscreen) - Dafault: viewport[0]
 /// [TODO] anchor system as well as custom attach points
 /// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
@@ -41,7 +41,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	__theHud = {};
 	with (__theHud){
 		owner = _owner;
-		// Internal fuction to add an element in Jabba's elements list
+		// Internal function to add an element in Jabba's elements list
 		__addElement = method(other, function(_element, _index){
 			var _list = elementsList
 			

@@ -3,7 +3,7 @@
 
 function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() constructor{
 	
-	#macro shaderParams activeShaderData.params
+	#macro shaderParams activeShaderData.init
 	
 	shader = jabbaShaderDissolve
 	asset = sJabbaGaugeBar
@@ -22,7 +22,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 			owner : _self,
 			//
 			shaderScript : jabbaShaderDissolve,
-			params : {
+			init : {
 				tolerance : 0,
 				inverse : true,
 				mask_tex : sprite_get_texture(mask,0),
@@ -36,11 +36,11 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 			
 			shaderSet : function(_value){
 				shader_set(shaderScript)
-					texture_set_stage(params.u_mask_tex, params.mask_tex)
-					shader_set_uniform_f_array(params.u_mask_transform, params.mask_transform)
-					shader_set_uniform_f(params.u_time, _value)
-					shader_set_uniform_f(params.u_tolerance,params.tolerance)
-					shader_set_uniform_f(params.u_inverse,params.inverse)
+					texture_set_stage(init.u_mask_tex, init.mask_tex)
+					shader_set_uniform_f_array(init.u_mask_transform, init.mask_transform)
+					shader_set_uniform_f(init.u_time, _value)
+					shader_set_uniform_f(init.u_tolerance,init.tolerance)
+					shader_set_uniform_f(init.u_inverse,init.inverse)
 					draw_sprite_ext(owner.asset,owner.frame,owner.xx,owner.yy,owner.xScale,owner.yScale,owner.angle,owner.color,owner.alpha)
 				shader_reset();
 			}
@@ -55,7 +55,7 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 		var _struct = {}
 		with(_struct){
 			shaderScript = _shader
-			params = _init
+			init = _init
 			shaderSet = method(other,_set)
 		}
 		
