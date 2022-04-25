@@ -2,8 +2,8 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "Jabba",
-    "path": "folders/Jabba.yy",
+    "name": "lib",
+    "path": "folders/Jabba/core/lib.yy",
   },
   "resourceVersion": "1.0",
   "name": "easings",

@@ -460,22 +460,23 @@ function __baseElement() constructor{
 		
 	}
 	
+/*** BROKEN ***/
 	/// @func AddFeedback
 	/// @desc Add a User-Defined feedback 
 	/// @param {string} name The name of the custom feedback
 	/// @param {function} function The feedback behavior
-	/// @param {function} params An array of parameters as follow : ["variable 1", value 1, "variable 2", value 2, ...]
-	static AddFeedback = function(_name, _function, _params){
-		var _struct = {}
-		with(_struct){
-			func = method(other,_function)
-			init = method(other, _params)
-		}
-		
-		variable_struct_set(__feedbacks, _name, _struct)
-		
-		return self
-	}
+	/// @param {function} init An array of parameters as follow : ["variable 1", value 1, "variable 2", value 2, ...]
+	//static AddFeedback = function(_name, _function, _init){
+	//	var _struct = {}
+	//	with(_struct){
+	//		func = method(other,_function)
+	//		init = method(other, _init)
+	//	}
+	//	
+	//	variable_struct_set(__feedbacks, _name, _struct)
+	//	
+	//	return self
+	//}
 }
 #endregion
 

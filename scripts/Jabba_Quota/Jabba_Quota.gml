@@ -1,9 +1,9 @@
 #region QUOTA COUNTER
 // An Element that will change color when a quota is reached
-function JabbaQuotaCounterElement(_quota, _digitsLimit = 9, _name = "") : JabbaCounterElement() constructor{
+function JabbaQuotaCounterElement(_quota,_asset = defaultFont, _digitsLimit = 9, _name = "") : JabbaCounterElement() constructor{
 	
 	name = _name
-	asset = fJabbaFont
+	asset = _asset
 	digitsLimit = _digitsLimit
 	quota = _quota
 	counterValueLimit = (power(10, digitsLimit)) - 1

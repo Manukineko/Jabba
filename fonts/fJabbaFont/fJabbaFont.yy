@@ -21,6 +21,7 @@
     "path": "texturegroups/Default",
   },
   "ascenderOffset": 0,
+  "ascender": 0,
   "glyphs": {
     "32": {"x":2,"y":2,"w":5,"h":15,"character":32,"shift":5,"offset":0,},
     "33": {"x":161,"y":36,"w":3,"h":15,"character":33,"shift":4,"offset":0,},
@@ -128,8 +129,8 @@
   "canGenerateBitmap": true,
   "maintainGms1Font": false,
   "parent": {
-    "name": "elements",
-    "path": "folders/Jabba/Demo/elements.yy",
+    "name": "fonts",
+    "path": "folders/Jabba/core/fonts.yy",
   },
   "resourceVersion": "1.0",
   "name": "fJabbaFont",

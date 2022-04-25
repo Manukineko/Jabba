@@ -105,8 +105,8 @@
   ],
   "nineSlice": null,
   "parent": {
-    "name": "elements",
-    "path": "folders/Jabba/Demo/elements.yy",
+    "name": "fonts",
+    "path": "folders/Jabba/core/fonts.yy",
   },
   "resourceVersion": "1.0",
   "name": "JabbaFont",

@@ -1,4 +1,6 @@
 #macro defaultName "element "+ string(elementsListSize)
+#macro defaultFont fJabbaFont
+#macro defaultBitmapFont 
 
 #region JABBA CONTAINER
 /// @func Jabba
