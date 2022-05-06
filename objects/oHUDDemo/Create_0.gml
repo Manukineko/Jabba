@@ -4,6 +4,7 @@ life = 0
 
 hud = new JabbaContainer(viewportID)
 hud.SetMargin(16)
+
 quotaSimple = hud.CreateQuotaCounterElement()
 quotaSimple.SetQuota(2500)
 	.SetPosition(hud.right-32, 64)

@@ -1,5 +1,7 @@
 #region HUDELEMENT - the base constructor for all elements
 
+
+
 function __baseElement() constructor{
 	
 	//Public Variables
