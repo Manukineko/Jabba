@@ -4,6 +4,7 @@ if !instance_exists(oEditor){
 	    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
 	    
 	    counter.SetValue(combo)
+	    counter.bib.TellFortuna("spawnMalus", 1)
 	    //value = clamp(value, 0, 9999)
 	    
 	}

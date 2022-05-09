@@ -34,6 +34,7 @@ function __baseElement() constructor{
 	//runFeedback = false
 	feedback = function(){}
 	
+	
 	//Private variable
 	__activeFeedback = "none"
 	__anyUpdated = false
@@ -448,6 +449,12 @@ function __baseElement() constructor{
 			__update();
 		}
 		
+		if ENABLE_BIBFORTUNA {
+			if array_length(bib.activeFortuna) > 0{
+				updateBib()
+			}
+		}
+		
 	}
 	
 	/// @func SetFeedback(feedback)
@@ -462,7 +469,18 @@ function __baseElement() constructor{
 		
 	}
 	
-/*** BROKEN ***/
+	if ENABLE_BIBFORTUNA{
+		bib = new Bib() ;
+		
+		static drawBib = function(){
+			bib.Draw()
+		}
+
+		static updateBib = function(){
+			bib.Update()
+		}
+	}
+	/*** BROKEN ***/
 	/// @func AddFeedback
 	/// @desc Add a User-Defined feedback 
 	/// @param {string} name The name of the custom feedback

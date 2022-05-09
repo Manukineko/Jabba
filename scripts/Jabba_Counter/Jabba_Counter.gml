@@ -38,7 +38,7 @@ function JabbaCounterElement(_asset = defaultFont, _limit = 10, _name = "") : __
 	
 	/// @func Draw()
 	/// @desc Draw the element
-	static Draw = function(){
+	 Draw = function(){
 		if !isHidden{
 			draw_set_font(asset)
 			draw_set_halign(halign)
@@ -46,6 +46,22 @@ function JabbaCounterElement(_asset = defaultFont, _limit = 10, _name = "") : __
 			draw_text_transformed_color(x,y, value, xScale, yScale, angle, color, color, color, color, alpha )
 			draw_set_halign(-1)
 			draw_set_valign(-1)
+		}
+		
+		if ENABLE_BIBFORTUNA {
+			if array_length(bib.activeFortuna) > 0{
+				drawBib()
+			}
+		}
+	}
+	
+	if ENABLE_BIBFORTUNA{
+		bib = new Bib() ;
+		static drawBib = function(){
+			bib.Draw()
+		} ;
+		static updateBib = function(){
+			bib.Update()
 		}
 	}
 }

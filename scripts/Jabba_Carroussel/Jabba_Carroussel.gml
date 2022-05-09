@@ -316,6 +316,8 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 			}
 		}
 	}
+	
+	//bib = new Bib()
 }
 
 function __CarousselItemElement(_sprite, _name, _pos, _owner) : JabbaGraphicElement(_sprite, _name) constructor {
