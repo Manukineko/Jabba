@@ -49,7 +49,9 @@ function JabbaCounterElement(_asset = defaultFont, _limit = 10, _name = "") : __
 		}
 		
 		if ENABLE_BIBFORTUNA {
-			if array_length(bib.activeFortuna) > 0{
+			
+			//if array_length(bib.activeFortuna) > 0{
+			if ds_list_size(bib.activeFortuna) > 0{
 				drawBib()
 			}
 		}

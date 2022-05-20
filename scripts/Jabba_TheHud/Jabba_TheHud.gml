@@ -246,6 +246,13 @@ function JabbaContainer(_viewport = 0) constructor {
 			}
 		}
 	}
+	
+	static CleanUp = function(){
+		var _i=0;repeat(array_length(elementsList)){
+			elementsList[_i].CleanUp()
+			_i++
+		}
+	}
 
 	/// @func FeedbackPlayer()
 	/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.

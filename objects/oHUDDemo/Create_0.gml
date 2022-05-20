@@ -23,6 +23,17 @@ timer.SetTimeFormat([JT.MIN, JT.SEC, JT.HUN])
 counter = hud.CreateCounterElement()
 counter.SetPosition(hud.center, hud.bottom-128)
 	.SetFeedback("fliponce")
+	
+counter.bib.CreateFortuna("test", [
+	method(undefined, function(){
+		show_debug_message("Je suis ")
+		state++
+	}),
+	method(undefined, function(){
+		show_debug_message("FORTUNA "+string(value))
+		state++
+	})
+])
 
 //GAUGE BAR with built-in shader (dissolve)
 mugshot = hud.CreateGraphicElement(sMugshot)
@@ -82,3 +93,13 @@ customOriginTest.SetOrigin(MiddleCenter)
 	.SetPosition(200,200)
 
 tourne = 0
+
+//bib fortuna test
+//counter.bib.CreateFortuna("test", [
+//		function(){
+//			show_debug_message("Je m'appelle")
+//		},
+//		function(){
+//			show_debug_message(value)
+//		}
+//	])

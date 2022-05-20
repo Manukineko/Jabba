@@ -1,94 +1,146 @@
 #macro ENABLE_BIBFORTUNA true
-//#macro __INIT_BIBFORTUNA bib = new Bib() ; static drawBib = function(){bib.Draw()} ; static updateBib = function(){bib.Update()}
+#macro INIT_BIBFORTUNA global.fortunaList = ds_map_create()
+INIT_BIBFORTUNA
+        
+ds_map_add(global.fortunaList, "spawnMalus", [
+    method(undefined,function(){
+            alpha = 0
+            yy = y
+			yend = y - 16
+            state = 1
+			time = 0
+			shutUp = false
+			show_debug_message("[Fortuna"+string(index)+"] Initialisation")
+    }),
+    method(undefined,function(){
+			time += 0.05
+            y = tween(yy, yend, time, EASE.OUT_QUART)
+            alpha = tween(0, 1, time*4, EASE.IN_QUART)
+            show_debug_message("[Fortuna"+string(index)+"] Animate "+string(time))
+            if y = yend{
+                state = 2
+                
+            }
+    }),
+    method(undefined,function(){
+    	time += 0.05
+    	alpha = tween(1, 0, time, EASE.IN_QUART);
+    	if alpha <= 0 {
+    		state = 3;
+    		show_debug_message("[Fortuna"+string(index)+"] Animate END")
+    	} 
+    })
+])
+
 
 function Bib() constructor {
     
     owner = other
-	
-    activeFortuna = []
+
+    activeFortuna = ds_list_create()
+    cleaningList = ds_queue_create()
+    fortunaTold = false
     
-    
-    
-    CreateFortuna = function(_name, _array){
-        var _fortuna = new Fortuna(owner, , ,_array)
-        variable_struct_set(self, _name, _fortuna)
+    static CreateFortuna = function(_name, _array, _self = self){
+    	
+    	ds_map_add(global.fortunaList, _name,  _array)
+      
     }
     
-    TellFortuna = function(_name, _value){
-        var _fsm = variable_struct_get(self, _name)
-        var _fortuna = new Fortuna(owner, self, _fsm, _value)
-        array_push(activeFortuna, _fortuna)
-		_fortuna.index = array_length(activeFortuna)-1
-    }
+    static TellFortuna = function(_name, _value){
     
-    spawnMalus = [
-        function(_self){
-            _self.alpha = 0
-            _self.yy = owner.y
-			_self.yend = owner.y - 16
-            _self.state = 1
-			_self.time = 0
-            //Tween(InstanceVar("alpha"), 1, 50, ["type", te_quartic_in])
-        },
-        function(_self){
-			_self.time += 0.05
-            _self.y = tween(_self.yy, _self.yend, _self.time, EASE.OUT_QUART)
-            if _self.y = _self.yend{
-                _self.state = 2
-            }
-        }]
+        var _fortuna = new Fortuna(owner, self, _name, _value)
+        ds_list_add(activeFortuna, _fortuna)
+		_fortuna.index = ds_list_size(activeFortuna)-1
+    }
     
     static Update = function(){
-        var _i = 0; repeat(array_length(activeFortuna)){
-            activeFortuna[_i]._update()
+        var _i = 0; repeat(ds_list_size(activeFortuna)){
+            activeFortuna[| _i]._update()
+            _i++
         }
     }
     
     static Draw = function(){
-        var _i = 0; repeat(array_length(activeFortuna)){
-            activeFortuna[_i]._draw()
+        var _i = 0; repeat(ds_list_size(activeFortuna)){
+            activeFortuna[| _i]._draw()
+            _i++
         }
+    }
+    
+    static CleanUp = function(){
+    	if fortunaTold{
+        	
+        	var _i = 0; repeat(ds_list_size(activeFortuna)){
+    			if activeFortuna[| _i].shutUp{
+    				delete activeFortuna[| _i]
+					ds_queue_enqueue(cleaningList, _i)
+    			}
+				_i ++
+        	}
+			
+			while !ds_queue_empty(cleaningList){
+        		var _q = ds_queue_dequeue(cleaningList)
+        		ds_list_delete(activeFortuna, _q)
+    			show_debug_message("[Fortuna"+string(_q)+"] has shut up !")
+        	}
+			fortunaTold = false
+    	}
     }
 }
 
 function Fortuna(_element, _bib, _array, _value, _type = asset_font) constructor{
-    state = 0
-    value = _value
-    x = _element.x
-    y = _element.y
-    bib = _bib
-    //asset
-    //alpha
-    //color
+    state = 0;
+    value = _value;
+    x = _element.x;
+    y = _element.y;
+    fnt = fJabbaFont
+    color = c_white
+    alpha = 1
+    halign = fa_left
+    valign = fa_top
     
-   static __cleanup = function(_me = self){
-        
-		array_delete(bib.activeFortuna, index,1)
-		delete _me
+    shutUp = false
+    
+    bib = _bib;
+    list = global.fortunaList
+    var _a = ds_map_find_value(list, _array);
+    fsm = _a
+    
+	
+    
+    static __getFortunaFSM = function(_array){
+    	var _fsm = [], _a = ds_map_find_value(global.fortunaList, _array);
+    	array_copy(_fsm, 0, _a , 0, array_length(_a));
+    	return _fsm;
+    }
+    
+   static __cleanup = function(){
+        show_debug_message("[Fortuna"+string(index)+"] send for cleaning")
+        bib.fortunaTold = true
+		shutUp = true
 		
    }
-    array_push(_array, __cleanup)
+    array_push(fsm, __cleanup)
     
-    fsm = _array
+    
     
     static _update = function(_state = state, _me = self){
-        fsm[_state](_me)
-    }
+	
+		fsm[_state](_me)
+		
+	}
     
 	if _type = asset_font{
         static _draw = function(_x = x, _y = y){
-            draw_text(x,y,value)
+        	
+        	draw_set_font(fnt)
+			draw_set_halign(halign)
+			draw_set_valign(valign)
+			draw_text_color(x,y,value,color,color,color,color, alpha)
+			draw_set_halign(fa_left)
+			draw_set_valign(fa_top)
+			draw_set_font(-1)
         }
     }
-   //static _defineDraw = function(_type){
-   //    if _type = asset_font{
-   //        return function(){
-   //            draw_text(x,y,value)
-   //        }
-   //    }
-   //}
-   //
-   //_draw = _defineDraw(_type)
 }
-
-//playerHud.harmonicCounter.TellFortuna("spawnMalus")

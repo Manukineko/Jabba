@@ -128,7 +128,7 @@ function __baseElement() constructor{
 					switch(animate){
 						case 0: 
 							xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
-							if xScale <= 0 {animate = 1; time = 0;}
+						if xScale <= 0 {animate = 1; time = 0;}
 						break;
 						case 1: 
 							xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
@@ -142,14 +142,20 @@ function __baseElement() constructor{
 		}
 	}
 	
-	//Internal tween functions shamelessly taken from Simon Milfred's (awesome) Bless Hay Gaming Utils pack (https://blesshaygaming.itch.io/bhg-utils). seriously, check it out.
-	__tweenFunctions = {
-		Tween_LerpTime : method(other,function(_originalValue, _targetValue, _lerpAmount, _timeFactor) {
-	
-			var _val = lerp( _originalValue, _targetValue, 1 - power( 1 -_lerpAmount, _timeFactor));
-			return _val;
-	
-		}),
+	if ENABLE_BIBFORTUNA{
+		bib = new Bib() ;
+		
+		static drawBib = function(){
+			bib.Draw()
+		}
+
+		static updateBib = function(){
+			bib.Update()
+		}
+		
+		static cleanUpBib = function(){
+			bib.CleanUp()
+		}
 	}
 	
 	//internal - this will set the variable stored in a feedback struct ("params" member)
@@ -450,11 +456,20 @@ function __baseElement() constructor{
 		}
 		
 		if ENABLE_BIBFORTUNA {
-			if array_length(bib.activeFortuna) > 0{
+			//if array_length(bib.activeFortuna) > 0{
+			if ds_list_size(bib.activeFortuna) > 0{
 				updateBib()
 			}
 		}
 		
+	}
+	
+	//For now, only used with BibFortuna extension.
+	//Will use it when I'll need to clean the element
+	static CleanUp = function(){
+		if ENABLE_BIBFORTUNA {
+			cleanUpBib()
+		}
 	}
 	
 	/// @func SetFeedback(feedback)
@@ -469,18 +484,8 @@ function __baseElement() constructor{
 		
 	}
 	
-	if ENABLE_BIBFORTUNA{
-		bib = new Bib() ;
-		
-		static drawBib = function(){
-			bib.Draw()
-		}
-
-		static updateBib = function(){
-			bib.Update()
-		}
-	}
-	/*** BROKEN ***/
+	
+	/*** BROKEN ***
 	/// @func AddFeedback
 	/// @desc Add a User-Defined feedback 
 	/// @param {string} name The name of the custom feedback
@@ -496,7 +501,7 @@ function __baseElement() constructor{
 	//	variable_struct_set(__feedbacks, _name, _struct)
 	//	
 	//	return self
-	//}
+	//}**/
 }
 #endregion
 

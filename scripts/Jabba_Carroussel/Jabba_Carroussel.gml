@@ -44,7 +44,7 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 			func: function(){
 				if runFeedback{
 					time += 0.1
-					radius = tween(32, 0, time, EASE.SMOOTHSTEP )
+				radius = tween(32, 0, time, EASE.SMOOTHSTEP )
 					changeRadius(radius, radius)
 					if time = 1 {runFeedback = false}
 				}
@@ -53,7 +53,7 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 			changeRadius : method(other, function(_a, _b){
 				//SetRadius(width + _a, height + _b)
 				wRadius = width + _a
-				hRadius = height + _b
+			hRadius = height + _b
 				//SetRadius(_wr, _hr)
 			})
 		}
@@ -111,7 +111,7 @@ function JabbaCarousselElement(_name = "") : __baseElement() constructor {
 		__itemsProcessStep = 0; repeat(2){
 		var _i = 0; repeat(carousselSize){
 			switch(__itemsProcessStep){
-				//start to calculate ITEMS' position & co
+			//start to calculate ITEMS' position & co
 				case 0 :
 					drawOrder[_i] = ds_priority_delete_min(_prio)
 					_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
