@@ -4,11 +4,11 @@
 /// @desc a simple counter. it will display the value with a feedback when it changes.
 /// @param {int}limit
 /// @param {string} name
-function JabbaCounterElement(_asset = defaultFont, _limit = 10, _name = "") : __fontTypeElement__() constructor{
+function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement__() constructor{
 	
 	name = _name
 	limit = _limit
-	asset = _asset
+	asset = fJabbaFont
 	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"

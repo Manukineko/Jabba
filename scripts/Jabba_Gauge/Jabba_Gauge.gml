@@ -1,15 +1,16 @@
 #region GAUGE ELEMENT
 // An element that displa a value as a gauge bar (life bar, stamina bar, etc)
 
-function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() constructor{
+function JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader = "dissolve", _name = "Gauge Bar") : __spriteTypeElement__() constructor{
 	
 	#macro shaderParams activeShaderData.init
 	
-	shader = jabbaShaderDissolve
-	asset = sJabbaGaugeBar
-	mask = sJabbaGaugeBarMask
-	width = sprite_get_width(asset)
-	height = sprite_get_height(asset)
+	//shader = jabbaShaderDissolve
+	activeShaderName = _shader
+	asset = _asset//sJabbaGaugeBar
+	mask = _mask//sJabbaGaugeBarMask
+	width = sprite_get_width(_asset)
+	height = sprite_get_height(_asset)
 	maxValue = _maxValue
 	tolerance = 0
 	inverse = true
@@ -48,8 +49,9 @@ function JabbaGaugeBarElement(_maxValue, _name = "") : __spriteTypeElement__() c
 		}
 	}
 	
-	activeShaderData = _shaders.dissolve
-	activeShaderName = "dissolve"
+	activeShaderData = variable_struct_get(_shaders, activeShaderName)
+	//activeShaderData = _shaders.dissolve
+	//activeShaderName = "dissolve"
 	
 	AddShader = function (_name, _shader, _init, _set ){
 		var _struct = {}

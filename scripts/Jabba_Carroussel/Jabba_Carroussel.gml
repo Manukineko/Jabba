@@ -1,6 +1,6 @@
 #region CAROUSSEL ELEMENT
 // An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
-function JabbaCarousselElement(_name = "") : __baseElement() constructor {
+function JabbaCarousselElement(_name = "Carroussel") : __baseElement() constructor {
 	
 	itemsList = []
 	activeItem = undefined

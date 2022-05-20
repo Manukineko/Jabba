@@ -1,6 +1,6 @@
 #region TIMER ELEMENT
 //An element that will split and display a time.
-function JabbaTimerElement(_name = "") : __fontTypeElement__() constructor{
+function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 	
 	//Time Unit to use to set the time format
 	enum JT{

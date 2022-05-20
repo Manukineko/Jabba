@@ -1,7 +1,3 @@
-#macro defaultName "element "+ string(elementsListSize)
-#macro defaultFont fJabbaFont
-#macro defaultBitmapFont 
-
 #region JABBA CONTAINER
 /// @func Jabba
 /// @desc Constructor for the HUD container. This is completly optional if you want to manage yours yourself
@@ -87,7 +83,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateCounterElement()
 	/// @desc create a Count element constructor and store it in the HUD
-	static CreateCounterElement = function(_limit, _index = undefined, _name = defaultName){
+	static CreateCounterElement = function(_limit, _name = "Counter", _index = undefined){
 		var _element = new JabbaCounterElement(_limit, _name)
 
 		with(__theHud){
@@ -99,8 +95,8 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateQuotaCounterElement()
 	/// @desc create a Quota Element constructor and store it in the HUD	
-	static CreateQuotaCounterElement = function(_index = undefined, _name = defaultName){
-		var _element = new JabbaQuotaCounterElement(_name)
+	static CreateQuotaCounterElement = function(_name = "Quota Counter", _digitsLimit = 9, _index = undefined){
+		var _element = new JabbaQuotaCounterElement(_name, _digitsLimit)
 
 		with(__theHud){
 			__addElement(_element, _index)
@@ -111,8 +107,8 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateQuotaCounterExtElement()
 	/// @desc create an Extended Quota Element constructor and store it in the HUD	
-	static CreateQuotaCounterExtElement = function(_index = undefined, _name = defaultName){
-		var _element = new JabbaQuotaCounterExtElement(_name)
+	static CreateQuotaCounterExtElement = function(_name = "Quota Counter EXT", _digitsLimit = 9, _index = undefined){
+		var _element = new JabbaQuotaCounterExtElement(_name, _digitsLimit)
 
 		with(__theHud){
 			__addElement(_element, _index)
@@ -123,7 +119,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	
 	/// @func CreateTimerElement()
 	/// @desc create a Timer element constructor and store it in the HUD	
-	static CreateTimerElement = function(_index = undefined, _name = defaultName){
+	static CreateTimerElement = function(_name = "Timer", _index = undefined){
 		var _element = new JabbaTimerElement(_name)
 		with(__theHud){
 			__addElement(_element, _index)
@@ -133,8 +129,8 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @func CreateGaugeBarElement(maxValue)
 	/// @desc create a Timer element constructor
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
-	static CreateGaugeBarElement = function(_maxValue, _index = undefined, _name = defaultName){
-		var _element = new JabbaGaugeBarElement(_maxValue, _name)
+	static CreateGaugeBarElement = function(_maxValue, _asset, _mask, _shader,  _name = "Gauge Bar", _index = undefined){
+		var _element = new JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader, _name)
 		with(__theHud){
 			__addElement(_element, _index)
 		}
@@ -144,7 +140,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @func CreateCarrouselElement()
 	/// @desc create an empty Caroussel Element constructor
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
-	static CreateCarrouselElement = function(_index = undefined, _name = defaultName){
+	static CreateCarrouselElement = function(_name = "Caroussel", _index = undefined){
 		var _element = new JabbaCarousselElement(_name)
 		with(__theHud){
 			__addElement(_element, _index)
@@ -155,7 +151,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @func CreateGraphicElement()
 	/// @desc create a sprite Element constructor
 	/// @param {sprite} sprite
-	static CreateGraphicElement = function(_sprite, _index = undefined, _name = defaultName){
+	static CreateGraphicElement = function(_sprite, _name = "Graphic", _index = undefined){
 		var _element = new JabbaGraphicElement(_sprite, _name)
 		with(__theHud){
 			__addElement(_element, _index)

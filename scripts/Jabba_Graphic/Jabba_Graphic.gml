@@ -1,6 +1,6 @@
 #region SPRITE ELEMENT
 
-function JabbaGraphicElement(_sprite, _name = "") : __spriteTypeElement__() constructor{
+function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__() constructor{
 	
 	#macro TopLeft [0,0]
 	#macro TopCenter [0,0.5]

@@ -1,6 +1,7 @@
 #region HUDELEMENT - the base constructor for all elements
 
-
+#macro JabbaFontDefault fJabbaFont
+#macro JabbaBitmapFontDefault JabbaFont
 
 function __baseElement() constructor{
 	

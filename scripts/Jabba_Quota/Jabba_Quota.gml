@@ -1,11 +1,14 @@
 #region QUOTA COUNTER
 // An Element that will change color when a quota is reached
-function JabbaQuotaCounterElement(_quota,_asset = defaultFont, _digitsLimit = 9, _name = "") : JabbaCounterElement() constructor{
+/// @func JabbaQuotaCounterElement
+/// @param {string} name default: defaultName macro
+/// @param {int} DigitsLimit default: 9 (hundred million)
+function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) : JabbaCounterElement() constructor{
 	
 	name = _name
-	asset = _asset
+	asset = fJabbaFont
 	digitsLimit = _digitsLimit
-	quota = _quota
+	quota = 0
 	counterValueLimit = (power(10, digitsLimit)) - 1
 	colorQuotaReached = c_red
 	colorCounterDefault = c_white
@@ -67,12 +70,14 @@ function JabbaQuotaCounterElement(_quota,_asset = defaultFont, _digitsLimit = 9,
 #region QUOTA COUNTER EXT
 /// @func JabbaQuotaCounterExtElement
 /// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
-function JabbaQuotaCounterExtElement(_name = "") : __spriteTypeElement__() constructor{
+/// @param {string} name default: defaultName macro
+/// @param {int} DigitsLimit default: 9 (hundred million)
+function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, ) : __spriteTypeElement__() constructor{
   
     valueLength = 0
     quota = 0
     
-    digitsLimit = 9
+    digitsLimit = _digitsLimit
     valueDigits = array_create(digitsLimit, 0)
     quotaDigits = array_create(digitsLimit, 0)
     
