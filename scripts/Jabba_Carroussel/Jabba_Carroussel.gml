@@ -74,14 +74,14 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 			name : _name,
 			item : _item
 		}
-		//if _pos = undefined{
+		if _pos = undefined{
 			array_push(itemsList,_itemStruct)
 			carousselSize = array_length(itemsList)
 			return
-		//}
+		}
 		//ROLLBACK : not allow custom position in the list
-		//itemsList[_pos] = _itemStruct
-		//carousselSize = array_length(itemsList)
+		itemsList[_pos] = _itemStruct
+		carousselSize = array_length(itemsList)
 		
 	}
 	__feedbackGetParams = function(){
@@ -103,17 +103,21 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 		rotation -= angle_difference(rotation, value * (360/carousselSize)*(carousselSize - 1)) / (rotationSpeed * room_speed)
 		var _prio = ds_priority_create()
 		var _i = 0; repeat(carousselSize){
+			//add the item to the priority based on its position on the radius
 			ds_priority_add(_prio, itemsList[_i], lengthdir_y(hRadius/2, (rotation-90) + _i * (360/carousselSize) ))
+			
 			_i++
 			
 		}
 		var _x,_y,_fade, _scale
 		__itemsProcessStep = 0; repeat(2){
-		var _i = 0; repeat(carousselSize){
+		var _i = 0; repeat(carousselSize){ 
+			
 			switch(__itemsProcessStep){
 			//start to calculate ITEMS' position & co
 				case 0 :
 					drawOrder[_i] = ds_priority_delete_min(_prio)
+					
 					_x = lengthdir_x(wRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
 					_y = lengthdir_y(hRadius/2, (rotation-90) + drawOrder[_i][$ "ID"] * (360/carousselSize) )
 					_fade = clamp(-sin(pi/180 * (rotation + ((360/carousselSize) * drawOrder[_i][$ "ID"]) -90)),fadeMin,1)
@@ -123,7 +127,7 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 				break;
 				//Then call the Update for each. Feedback will kick in as well
 				case 1 :
-					drawOrder[_i][$ "item"].Update()
+						drawOrder[_i][$ "item"].Update()
 				break;
 			}
 			_i++
@@ -179,7 +183,6 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 		if _targetItem{
 			
 			var _i = 0; repeat(carousselSize){
-			
 				with(itemsList[_i][$ "item"]){
 					
 					var _feedback = variable_struct_get(__feedbacks, _effect)
@@ -308,9 +311,11 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 		
 		if !isHidden {
 			
-			var _i=0;repeat(array_length(itemsList)){
+			var _i=0;repeat(carousselSize){
 				
-				if drawOrder[_i] != 0 drawOrder[_i][$ "item"].Draw()
+				if drawOrder[_i] != undefined{
+					drawOrder[_i][$ "item"].Draw()
+				}
 				_i++
 				
 			}

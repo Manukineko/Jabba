@@ -1,16 +1,6 @@
 #region SPRITE ELEMENT
 
 function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__() constructor{
-	
-	#macro TopLeft [0,0]
-	#macro TopCenter [0,0.5]
-	#macro TopRight [0,1]
-	#macro MiddleLeft [0.5, 0]
-	#macro MiddleCenter [0.5, 0.5]
-	#macro MiddleRight [0.5, 1]
-	#macro BottomLeft [1, 0]
-	#macro BottomCenter [1, 0.5]
-	#macro BottomRight [1, 1]
 
 	asset = _sprite
 	width = sprite_get_width(_sprite)

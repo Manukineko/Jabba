@@ -1,6 +1,12 @@
 #region GAUGE ELEMENT
 // An element that displa a value as a gauge bar (life bar, stamina bar, etc)
-
+/// @func JabbaGaugeBarElement
+/// @desc An element that will fill a gauge with a dissolve shader (default)
+/// @param {int} maxValue the maximum value of the gauge
+/// @param {sprite} sprite The sprite to dissolve
+/// @param {sprite} mask The mask to use in the shader
+/// @param {shader} shader The shader to use [default: jabbaShaderDissolve]
+/// @param {string} name the name of this element [default : "Gauge Bar"]
 function JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader = "dissolve", _name = "Gauge Bar") : __spriteTypeElement__() constructor{
 	
 	#macro shaderParams activeShaderData.init

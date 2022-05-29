@@ -62,6 +62,14 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
     static SetFont = function(_font){
     	asset = _font
     }
+    
+    if ENABLE_BIBFORTUNA {
+			
+			//if array_length(bib.activeFortuna) > 0{
+			if ds_list_size(bib.activeFortuna) > 0{
+				drawBib()
+			}
+		}
 }
 #endregion
 
@@ -219,6 +227,25 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
         		_i--
         	}
 		}
+		
+		if ENABLE_BIBFORTUNA {
+			
+			//if array_length(bib.activeFortuna) > 0{
+			if ds_list_size(bib.activeFortuna) > 0{
+				drawBib()
+			}
+		}
     })
+    
+    if ENABLE_BIBFORTUNA{
+		bib = new Bib() ;
+		static drawBib = function(){
+			bib.Draw()
+		} ;
+		static updateBib = function(){
+			bib.Update()
+		}
+	}
+    
 }
 #endregion

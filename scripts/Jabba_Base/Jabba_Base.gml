@@ -1,11 +1,8 @@
 #region HUDELEMENT - the base constructor for all elements
 
-#macro JabbaFontDefault fJabbaFont
-#macro JabbaBitmapFontDefault JabbaFont
-
 function __baseElement() constructor{
 	
-	//Public Variables
+	//Public Common Variables
 	//you can access those variables but it should be better to use the profided functions, as some manage some stuffs automatically.
 	name = ""
 	x = 0
@@ -27,13 +24,14 @@ function __baseElement() constructor{
 	alpha = 1
 	frame = 0
 	value = 0
-	asset = undefined
-	type = asset_unknown
-	isHidden = false
-	isReach = false
-	hasFeedback = true
+	
+	asset = undefined //The main asset (Font or Sprite)
+	type = asset_unknown //The type of asset (automatically set in __fontTypeElement__() constructor)
+	isHidden = false //
+	isReach = false // The moment it is set to true depends of the Element
+	hasFeedback = true //Check if the Element has a Feedback attached.
 	//runFeedback = false
-	feedback = function(){}
+	feedback = function(){} //Will store the active feedback behavior
 	
 	
 	//Private variable
@@ -143,6 +141,7 @@ function __baseElement() constructor{
 		}
 	}
 	
+	// Add additional method if BibFortuna is enable
 	if ENABLE_BIBFORTUNA{
 		bib = new Bib() ;
 		
@@ -157,9 +156,22 @@ function __baseElement() constructor{
 		static cleanUpBib = function(){
 			bib.CleanUp()
 		}
+		
+		/// @func SetBidPosition
+		/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
+		/// @param {real} x position relative to Element x [Default : 0]
+		/// @param {real} y position relative to Element y [Default : 0]
+		static SetBibPosition = function(_x = 0, _y = 0){
+			bib.x = x + _x
+			bib.y = y + _y
+			
+			return self
+		}
 	}
 	
-	//internal - this will set the variable stored in a feedback struct ("params" member)
+	// internal functions
+	/// @func __feedbackGetParams 
+	/// @desc this will set the variable stored in a feedback struct ("params" member)
 	static __feedbackGetParams = function(){
 		
 		var _params = __feedbacks[$ __activeFeedback]
@@ -167,6 +179,8 @@ function __baseElement() constructor{
 		
 	}
 	
+	/// @func __update
+	/// @desc Internal update method. Trigger update for Feedback, Origin, Position, Rotation, Scale, Alpha and Radius (for the Caroussel)
 	static __update = function(){
 		if (__feedbackUpdated){
 			__feedbackGetParams();
@@ -253,9 +267,10 @@ function __baseElement() constructor{
 	}
 	
 	//Public functions
+	
 	/// @func SetValue
-	/// @desc set the value to read from
-	/// @params {relative to element} value the value to read
+	/// @desc set the value to display by the Element
+	/// @params {} value the value to read
 	/// @params {bool} play the element feedback (default : true)
 	static SetValue = function(_value, _triggerFeedback = true){
 		value = _value
@@ -267,10 +282,12 @@ function __baseElement() constructor{
 		}
 	}
 	
-	/// @func SetPosition
-	/// @desc set the position.
-	/// @params {real} x
-	/// @params {real} y
+	/// @func SetOrigin
+	/// @desc set the Origin. It is a CUSTOM origin as it won't change the xoffset and yoffset variables set for a sprite in the IDE.
+	/// @desc You can use the macro provided in Jabba_Config for the First Parameter if you want a quick setup.
+	/// @desc If you don't call that method, the Custom Origin is set from the Asset x/y offset set in the IDE by default.
+	/// @params {real or macro} x The x Origin for the Element's Asset or one of the macro in Jabba_Config
+	/// @params {real} y The y Origin for the Element's asset [Optional - default: auto]
 	/// [NOTE] Could set a way to choose between SET and ADD ?
 	static SetOrigin = function(_xOrigin, _yOrigin = undefined){
 		
@@ -288,6 +305,10 @@ function __baseElement() constructor{
 	
 	}
 	
+	/// @func SetPosition
+	/// @desc Set the Element's Position
+	/// @param {real} x
+	/// @param {real} y
 	static SetPosition = function(_x, _y){
 		x = _x
 		y = _y
@@ -297,6 +318,9 @@ function __baseElement() constructor{
 		return self
 	}
 	
+	/// @func SetRotation
+	/// @desc Set the angle for the Element. It's based on the Custom Origin
+	/// @param {real} angle
 	static SetRotation = function(_angle){
 		angle = _angle
 		__rotationUpdated = true
@@ -305,18 +329,11 @@ function __baseElement() constructor{
 		return self
 	
 	}
-	//static SetPosition = function(_x, _y){
 	
-	//    x = _x;
-	//    y = _y;
-	//    
-	//    return self
-	//}
-	
-	/// @func SetScale(xScale, yScale)
+	/// @func SetScale
 	/// @desc Set the scale of the element. You can omit the second parameter if you want yScale to be the same as xScale. Take the flipping value in account.
-	/// @param {real} xScale or Scale
-	///	@param {real} yScale If omitted, it will get the same value as xScale
+	/// @param {real} xScale or Scale 
+	///	@param {real} yScale [Optional] If omitted, it will get the same value as xScale
 	static SetScale = function(_xScale, _yScale = undefined){
 		
 		if is_undefined(_yScale){
@@ -331,14 +348,13 @@ function __baseElement() constructor{
 		
 	}
 	
-	/// @func SetScaleX(xScale)
-	/// @desc set the size on the x axis, taking in account the flipping value
+	/// @func SetScaleX
+	/// @desc Scale on the X Axis
 	/// @param {real} xScale
 	static SetScaleX = function(_xScale){
 		
 		xScale = _xScale;
 		
-		//xScale = xScale * xFlip
 		__scaleUpdated = true;
 		__anyUpdated = true;
 		
@@ -346,14 +362,13 @@ function __baseElement() constructor{
 		
 	}
 	
-	/// @func SetScaleY(yScale)
-	/// @desc set the size on the y axis, taking in account the flipping value
+	/// @func SetScaleY
+	/// @desc Scale on the Y Axis
 	/// @param {real} yScale
 	static SetScaleY = function(_yScale){
 	
 		yScale = _yScale
 	
-		//yScale = yScale * yFlip
 		__scaleUpdated = true;
 		__anyUpdated = true;
 		
@@ -376,14 +391,12 @@ function __baseElement() constructor{
 		
 		__scaleUpdated = true;
 		__anyUpdated = true;
-		//xScale = xScale*_xFlip
-		//yScale = yScale*_yFlip
 		
 		return self
 		
 	}
 	
-	/// @func ToggleFlipX()
+	/// @func ToggleFlipX
 	/// @desc flip the element on the x axis. xScale variable will be updated as well.
 	static ToggleFlipX = function(){
 		xFlip = sign(xScale * -1)
@@ -397,7 +410,7 @@ function __baseElement() constructor{
 	}
 	
 	/// @func ToggleFlipY()
-	/// @desc flip the element on the x axis. yScale variable will be updated as well.
+	/// @desc flip the element on the y axis. yScale variable will be updated as well.
 	static ToggleFlipY = function(){
 		yFlip = sign(yScale * -1)
 		
@@ -430,7 +443,7 @@ function __baseElement() constructor{
 	}
 	
 	/// @func ToggleHide
-	/// @desc toggle the element's isHidden variable to bypass drawing
+	/// @desc toggle the visibility of the element's. The Element won't be drawn, even if its Alpha value is set to 1.
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
@@ -438,7 +451,7 @@ function __baseElement() constructor{
 		return self
 	}
 	
-	/// @func Hide(bool)
+	/// @func Hide
 	/// @desc Hide or show the element
 	/// @param {bool} bool
 	static Hide = function(_bool){
@@ -447,35 +460,9 @@ function __baseElement() constructor{
 		return self
 	}
 	
-	static Update = function(){
-		if (hasFeedback){
-			feedback();
-		}
-		
-		if (__anyUpdated){
-			__update();
-		}
-		
-		if ENABLE_BIBFORTUNA {
-			//if array_length(bib.activeFortuna) > 0{
-			if ds_list_size(bib.activeFortuna) > 0{
-				updateBib()
-			}
-		}
-		
-	}
-	
-	//For now, only used with BibFortuna extension.
-	//Will use it when I'll need to clean the element
-	static CleanUp = function(){
-		if ENABLE_BIBFORTUNA {
-			cleanUpBib()
-		}
-	}
-	
-	/// @func SetFeedback(feedback)
-	/// @desc set the feedback that will be played when the value changes
-	/// @params {string} feedback name of the feedback as a steing (default : popout)
+	/// @func SetFeedback
+	/// @desc set the feedback that will be played when the displayed value changes.
+	/// @params {string} feedback name of the feedback as a string (default : popout)
 	static SetFeedback = function(_effect){
 		var _feedback = variable_struct_get(__feedbacks, _effect)
 		feedback = _feedback.func
@@ -484,7 +471,6 @@ function __baseElement() constructor{
 		return self
 		
 	}
-	
 	
 	/*** BROKEN ***
 	/// @func AddFeedback
@@ -503,16 +489,60 @@ function __baseElement() constructor{
 	//	
 	//	return self
 	//}**/
+	
+	/// @func Update
+	/// @desc [Standalone Only] Must be called in the End Step Event if you use this Element as a standalone or outside a JabbaContainer.
+	static Update = function(){
+		if (hasFeedback){
+			feedback();
+		}
+		
+		if (__anyUpdated){
+			__update();
+		}
+		
+		// Bib Fortunal will be updated as well
+		if ENABLE_BIBFORTUNA {
+			//if array_length(bib.activeFortuna) > 0{
+			if ds_list_size(bib.activeFortuna) > 0{
+				updateBib()
+			}
+		}
+		
+	}
+	
+	//For now, only used with BibFortuna extension.
+	//Will use it when I'll need to clean the element
+	
+	/// @func CleanUp
+	/// @desc [Standalone & Bib Fortuna] You must called this method if you use Bib Fortuna and use this Element as a Standalone or outside a Jabba COntainer.
+	/// @desc Recommand to put it in the Begin Step Event or after drawing ended.
+	/// @param {type} variable
+	static CleanUp = function(){
+		if ENABLE_BIBFORTUNA {
+			cleanUpBib()
+		}
+	}
+	
 }
 #endregion
 
 #region FONT TYPE SUB-ELEMENT
+
+// Set additional variable and value for Font Type Element (Counter, Timer and Quota)
 function __fontTypeElement__() : __baseElement() constructor{
 	type = asset_font
+	
+	static SetFont = function(_asset){
+		asset = _asset
+		
+		return self
+	}
 }
 #endregion
 
 #region SPRITE TYPE SUB-ELEMENT
+// Set additional variable and value for Sprite Type Element (Gauge, Graphic and QuotaExt)
 function __spriteTypeElement__() : __baseElement() constructor{
 	type = asset_sprite
 }
@@ -520,6 +550,7 @@ function __spriteTypeElement__() : __baseElement() constructor{
 #endregion
 
 #region MISC FUNCTIONS
+//Those functions can be used for yourself but should NEVER be removed (or it explode a second time)
 
 /// @func ArraySum
 /// @desc add all value of an array.

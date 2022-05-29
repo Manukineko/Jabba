@@ -2,15 +2,6 @@
 //An element that will split and display a time.
 function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 	
-	//Time Unit to use to set the time format
-	enum JT{
-		DAYS,
-		HOURS,
-		MIN,
-		SEC,
-		HUN
-	}
-	
 	//time = 568954
 	asset = fJabbaFont
 	timeLimit = 0
@@ -127,11 +118,13 @@ function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 			_str = _str+string(timeDigit[timeFormat[_i]])
 			if (_i = _l-1) {
 				__string = _str; 
-				return
+				return self
 			}
 			_str = _str+timeSeparator
 			_i++
 		}
+		
+		return self
 	}
 	
 	/// @func Draw()

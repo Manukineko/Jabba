@@ -22,7 +22,7 @@ timer.SetTimeFormat([JT.MIN, JT.SEC, JT.HUN])
 
 counter = hud.CreateCounterElement(10)
 counter.SetPosition(hud.center, hud.bottom-128)
-	.SetFeedback("fliponce")
+	.SetFeedback("fliponce").SetBibPosition(,)
 	
 counter.bib.CreateFortuna("test", [
 	method(undefined, function(){
@@ -81,7 +81,7 @@ caroussel.SetPosition(hud.center, hud.bottom-128)
 	.SetDepth(0.8)
 	.SetDrawDistance(0.5)
 	.SetRotation(45)
-	.AddItem(sItem1, "item J" )
+	.AddItem(sItem1, "item J")
 caroussel.AddItem(sItem2, "item A1")
 caroussel.AddItem(sItem3, "item B1")
 caroussel.AddItem(sItem4, "item B2")

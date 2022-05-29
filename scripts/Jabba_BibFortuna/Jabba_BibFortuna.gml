@@ -1,4 +1,3 @@
-#macro ENABLE_BIBFORTUNA true
 #macro INIT_BIBFORTUNA global.fortunaList = ds_map_create()
 INIT_BIBFORTUNA
         
@@ -36,6 +35,8 @@ ds_map_add(global.fortunaList, "spawnMalus", [
 function Bib() constructor {
     
     owner = other
+    x = other.x
+    y = other.y
 
     activeFortuna = ds_list_create()
     cleaningList = ds_queue_create()
@@ -90,15 +91,16 @@ function Bib() constructor {
 }
 
 function Fortuna(_element, _bib, _array, _value, _type = asset_font) constructor{
+	
     state = 0;
     value = _value;
-    x = _element.x;
-    y = _element.y;
+    x = _bib.x;
+    y = _bib.y;
     fnt = fJabbaFont
     color = c_white
     alpha = 1
-    halign = fa_left
-    valign = fa_top
+    halign = fa_center
+    valign = fa_middle
     
     shutUp = false
     
