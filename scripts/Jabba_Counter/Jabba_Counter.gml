@@ -1,20 +1,24 @@
-// A simple element that will play a feedback when a value change. Basically, it just display a string.
-#region COUNTER ELEMENT
 /// @func JabbaCounterElement(_limit, _name)
-/// @desc a simple counter. it will display the value with a feedback when it changes.
-/// @param {int}limit
-/// @param {string} name
+/// @desc a simple counter. it will display the value with a feedback when the value changes.
+/// @param {int}limit The value limit from which the counter won't update.
+/// @param {string} name Giving a name to the Element helps for debugging but can be also used to display it's name in a tutorial.
 function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement__() constructor{
 	
 	name = _name
 	limit = _limit
 	asset = fJabbaFont
+	halign = fa_center
+	valign = fa_middle
 	
 	feedback = __feedbacks.popout.func
 	__activeFeedback = "popout"
 	
-	halign = fa_center
-	valign = fa_middle
+	
+	// static SetLimit = function(_limit){
+	// 	limit = _limit
+		
+	// 	return self
+	// }
 	
 	/// @func SetTextAlign()
 	/// @desc Set the alignement of the text (GML constant fa_*)
@@ -26,12 +30,6 @@ function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement
 		
 		__originUpdated = true
 		__anyUpdated = true
-		
-		return self
-	}
-	
-	static SetLimit = function(_limit){
-		limit = _limit
 		
 		return self
 	}

@@ -1,8 +1,10 @@
-#region HUDELEMENT - the base constructor for all elements
 
+/// @func __baseElement
+/// @desc [Internal] The Base Constructor for all Jabba Element
+/// @param {type} variable
 function __baseElement() constructor{
 	
-	//Public Common Variables
+#region /***************************** Public Common Variables  *********************************/
 	//you can access those variables but it should be better to use the profided functions, as some manage some stuffs automatically.
 	name = ""
 	x = 0
@@ -32,9 +34,9 @@ function __baseElement() constructor{
 	hasFeedback = true //Check if the Element has a Feedback attached.
 	//runFeedback = false
 	feedback = function(){} //Will store the active feedback behavior
+#endregion /*********************************************************************************/	
 	
-	
-	//Private variable
+#region /***************************** Private Common Variables *********************************/
 	__activeFeedback = "none"
 	__anyUpdated = false
 	__positionUpdated = false
@@ -140,36 +142,9 @@ function __baseElement() constructor{
 	
 		}
 	}
-	
-	// Add additional method if BibFortuna is enable
-	if ENABLE_BIBFORTUNA{
-		bib = new Bib() ;
-		
-		static drawBib = function(){
-			bib.Draw()
-		}
+#endregion
 
-		static updateBib = function(){
-			bib.Update()
-		}
-		
-		static cleanUpBib = function(){
-			bib.CleanUp()
-		}
-		
-		/// @func SetBidPosition
-		/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
-		/// @param {real} x position relative to Element x [Default : 0]
-		/// @param {real} y position relative to Element y [Default : 0]
-		static SetBibPosition = function(_x = 0, _y = 0){
-			bib.x = x + _x
-			bib.y = y + _y
-			
-			return self
-		}
-	}
-	
-	// internal functions
+#region /*****************************  Private Common Methods  *********************************/
 	/// @func __feedbackGetParams 
 	/// @desc this will set the variable stored in a feedback struct ("params" member)
 	static __feedbackGetParams = function(){
@@ -265,8 +240,37 @@ function __baseElement() constructor{
 		
 		__anyUpdated = false;
 	}
-	
-	//Public functions
+#endregion
+
+
+#region /*****************************  Public Common Methods   *********************************/	
+	// Add additional method if BibFortuna is enable
+	if ENABLE_BIBFORTUNA{
+		bib = new Bib() ;
+		
+		static drawBib = function(){
+			bib.Draw()
+		}
+
+		static updateBib = function(){
+			bib.Update()
+		}
+		
+		static cleanUpBib = function(){
+			bib.CleanUp()
+		}
+		
+		/// @func SetBidPosition
+		/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
+		/// @param {real} x position relative to Element x [Default : 0]
+		/// @param {real} y position relative to Element y [Default : 0]
+		static SetBibPosition = function(_x = 0, _y = 0){
+			bib.x = x + _x
+			bib.y = y + _y
+			
+			return self
+		}
+	}
 	
 	/// @func SetValue
 	/// @desc set the value to display by the Element
@@ -527,6 +531,7 @@ function __baseElement() constructor{
 }
 #endregion
 
+
 #region FONT TYPE SUB-ELEMENT
 
 // Set additional variable and value for Font Type Element (Counter, Timer and Quota)
@@ -634,7 +639,6 @@ function CountDigit (_value){
 	
 	return _n = 0 ? 1 : _n
 }
-#endregion
 
 function value_wrap_selector(_current, _delta, _list) {
 	
@@ -753,3 +757,5 @@ function floor_ext(_value, _size){
 	_size = 1-_size
 	return floor(_value/_size) * _size
 }
+
+#endregion

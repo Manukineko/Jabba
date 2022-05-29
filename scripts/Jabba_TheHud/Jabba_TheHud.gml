@@ -1,13 +1,16 @@
-#region JABBA CONTAINER
-/// @func Jabba
+/// @func JabbaContainer
 /// @desc Constructor for the HUD container. This is completly optional if you want to manage yours yourself
-/// @desc The container has a Margin feature you can use in order to quickly set the position of each Element.
+/// @desc The container has a grid feature you can use in order to quickly set the position of each Element.
 /// @params {Int} viewport the viewport to assign the HUD to (in case of splitscreen) - Default: viewport[0]
 /// [TODO] Groups. Abilities to group elements together so they can be manipulate together (position, rotation, etc)
 function JabbaContainer(_viewport = 0) constructor {
 	
-	x = x
-	y = y
+	owner = other
+	
+	width = view_get_wport(_viewport)
+	height = view_get_hport(_viewport)
+	x = view_get_xport(_viewport)
+	y = view_get_yport(_viewport)
 	
 	// Array holding all the Elements
 	elementsList = [];
@@ -15,48 +18,38 @@ function JabbaContainer(_viewport = 0) constructor {
 	isHidden = false
 	viewport = _viewport
 	
-	width = view_get_wport(_viewport)
-	height = view_get_hport(_viewport)
-	x = view_get_xport(_viewport)
-	y = view_get_yport(_viewport)
 	
-	margin = {}
-	with(margin){
-		top = 0
-		left = 0
-		bottom = 0
-		right = 0
+	
+	
+	//grids Feature
+	margin = {
+		top : 0,
+		left : 0,
+		bottom : 0,
+		right : 0
 	}
 	
+	// Set a Grid with 9-points that you can refer later when you position an Element, using `myContainer.top`
 	top = view_get_yport(_viewport) + margin.top
 	left = view_get_xport(_viewport) + margin.left
 	middle = height/2
 	center = width/2
 	bottom = height - margin.bottom
 	right = width - margin.right
-	//
-	var _owner = other;
-	__theHud = {};
-	with (__theHud){
-		owner = _owner;
-		// Internal function to add an element in Jabba's elements list
-		__addElement = method(other, function(_element, _index){
-			var _list = elementsList
-			
-			with (__theHud){
-				if is_undefined(_index){
-					array_push(_list, _element)
-				}
-				else{
-					array_set(_list, _index, _element)	
-				}
-				other.elementsListSize = array_length(_list)
-				return _element
-			}
-		})
+	
+#region	/**************************** Internal Methods **********************************/
+	/// @func __addElement
+	/// @desc [Internal] Add an Element to the elementsList array and increment the elementsListSize
+	/// @param {struct} Element from the Element Constructors function
+	static __addElement = function(_element){
+		array_push(elementsList, _element)
+		elementsListSize++
+		return _element
 	}
-		
-	static __setAnchor = function(){
+	
+	/// @func __setGrid
+	/// @desc Set a 4-cells (or 9-Points) Grid based on the Margins. 
+	static __setGrid = function(){
 	
 		top 	= view_get_yport(viewport) + margin.top
 		left	= view_get_xport(viewport) + margin.left
@@ -65,9 +58,9 @@ function JabbaContainer(_viewport = 0) constructor {
 		bottom	= height - margin.bottom
 		right	= width - margin.right
 	}
+#endregion /*****************************************************************/
 	
-	
-	//Public Methods
+#region /****************************  Public Methods  **********************************/ 
 	//Each have a Name and Index optional parameter.
 	
 	/// @func CreateCounterElement()
@@ -75,11 +68,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	static CreateCounterElement = function(_limit, _name = "Counter", _index = undefined){
 		var _element = new JabbaCounterElement(_limit, _name)
 
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
-		//
+		return __addElement(_element)
 	}
 	
 	/// @func CreateQuotaCounterElement()
@@ -87,11 +76,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	static CreateQuotaCounterElement = function(_name = "Quota Counter", _digitsLimit = 9, _index = undefined){
 		var _element = new JabbaQuotaCounterElement(_name, _digitsLimit)
 
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
-		//
+		return	__addElement(_element)
 	}
 	
 	/// @func CreateQuotaCounterExtElement()
@@ -99,31 +84,25 @@ function JabbaContainer(_viewport = 0) constructor {
 	static CreateQuotaCounterExtElement = function(_name = "Quota Counter EXT", _digitsLimit = 9, _index = undefined){
 		var _element = new JabbaQuotaCounterExtElement(_name, _digitsLimit)
 
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
-		//
+		return	__addElement(_element)
+
+
 	}
 	
 	/// @func CreateTimerElement()
 	/// @desc create a Timer element constructor and store it in the HUD	
 	static CreateTimerElement = function(_name = "Timer", _index = undefined){
 		var _element = new JabbaTimerElement(_name)
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
+		return	__addElement(_element)
+
 	}
 	/// @func CreateGaugeBarElement(maxValue)
 	/// @desc create a Timer element constructor
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
 	static CreateGaugeBarElement = function(_maxValue, _asset, _mask, _shader,  _name = "Gauge Bar", _index = undefined){
 		var _element = new JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader, _name)
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
+		return	__addElement(_element)
+
 	}
 	
 	/// @func CreateCarrouselElement()
@@ -131,21 +110,16 @@ function JabbaContainer(_viewport = 0) constructor {
 	/// @param {real} maxValue the maximum value (In order to calculate the bar progression)
 	static CreateCarrouselElement = function(_name = "Caroussel", _index = undefined){
 		var _element = new JabbaCarousselElement(_name)
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
+		return	__addElement(_element)
 	}
 	
 	/// @func CreateGraphicElement()
-	/// @desc create a sprite Element constructor
+	/// @desc create a simple Sprite Element
 	/// @param {sprite} sprite
 	static CreateGraphicElement = function(_sprite, _name = "Graphic", _index = undefined){
 		var _element = new JabbaGraphicElement(_sprite, _name)
-		with(__theHud){
-			__addElement(_element, _index)
-		}
-		return _element
+		return	__addElement(_element)
+
 	}
 	
 	/// @func SetMargin
@@ -169,19 +143,21 @@ function JabbaContainer(_viewport = 0) constructor {
 			
 		}
 		
-		with(margin){
-			top = _top
-			left = _left
-			bottom = _bottom
-			right = _right
-		}
+		margin.top = _top
+		margin.left = _left
+		margin.bottom = _bottom
+		margin.right = _right
 		
-		__setAnchor()
+		// Recalculate the Grid
+		__setGrid()
 		
 		return self
 		
 	}
 	
+	/// @func SetViewport
+	/// @desc Change the viewport assign to the Jabba Container
+	/// @param {int} viewportID
 	static SetViewport = function(_viewport){
 		viewport = _viewport
 		
@@ -190,14 +166,15 @@ function JabbaContainer(_viewport = 0) constructor {
 		x = view_get_xport(_viewport)
 		y = view_get_yport(_viewport)
 		
-		__setAnchor()
+		//Recalculate the Grid
+		__setGrid()
 		
 		return self
 		
 	}
 	
 	/// @func ToggleHide()
-	/// @desc toggle the element's isHidden variable to bypass drawing
+	/// @desc toggle all the element's visibility. Drawing is bypassed.
 	static ToggleHide = function(){
 		
 		isHidden = !isHidden
@@ -206,7 +183,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	}
 	
 	/// @func Hide()
-	/// @desc Hide or Unhide the whole HUD
+	/// @desc Hide or Unhide the whole HUD. Drawning is bypassed
 	/// @param {bool} boolean
 	static Hide = function(_bool){
 		isHidden = _bool
@@ -214,6 +191,8 @@ function JabbaContainer(_viewport = 0) constructor {
 		return self
 	}
 	
+	/// @func Update
+	/// @desc Update all the Elements. Must be called each step.
 	static Update = function(){
 		var _i=0;repeat(array_length(elementsList)){
 			elementsList[_i].Update()
@@ -222,7 +201,7 @@ function JabbaContainer(_viewport = 0) constructor {
 	}
 	
 	/// @func Draw()
-	/// @desc Draw all the elements if their internal isHidden variable is true
+	/// @desc Draw all the elements if their internal isHidden variable is true. Must be called in the Draw GUI Event.
 	static Draw = function(){
 		if !isHidden{
 			var _i=0;repeat(array_length(elementsList)){
@@ -232,22 +211,14 @@ function JabbaContainer(_viewport = 0) constructor {
 		}
 	}
 	
+	/// @func CleanUp
+	/// @desc [Bib Fortuna] If you use Bib Fortuna, you must call it after drawing (Begin Step or Post Draw)
 	static CleanUp = function(){
 		var _i=0;repeat(array_length(elementsList)){
 			elementsList[_i].CleanUp()
 			_i++
 		}
 	}
-
-	/// @func FeedbackPlayer()
-	/// @desc it will play whatever automatic feedback setup in an element - MUST BE executed each frame if you want Jabba to manage this feature for you.
-	static FeedbackPlayer = function(){
-		var _i=0;repeat(array_length(elementsList)){
-			elementsList[_i].feedback()
-			_i++
-		}
-	}
-	
 	
 }
 #endregion
