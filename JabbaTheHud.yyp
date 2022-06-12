@@ -29,6 +29,7 @@
     {"id":{"name":"sMugshotFrame","path":"sprites/sMugshotFrame/sMugshotFrame.yy",},"order":3,},
     {"id":{"name":"Jabba_BibFortuna","path":"scripts/Jabba_BibFortuna/Jabba_BibFortuna.yy",},"order":10,},
     {"id":{"name":"Jabba_Config","path":"scripts/Jabba_Config/Jabba_Config.yy",},"order":4,},
+    {"id":{"name":"Jabba_Feedback","path":"scripts/Jabba_Feedback/Jabba_Feedback.yy",},"order":3,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},

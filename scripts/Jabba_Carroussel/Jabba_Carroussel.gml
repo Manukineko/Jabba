@@ -1,29 +1,30 @@
 #region CAROUSSEL ELEMENT
-// An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
-function JabbaCarousselElement(_name = "Carroussel") : __baseElement() constructor {
+/// @func JabbaCarousselElement
+/// @desc An element that show and animate a caroussel composed of several item sprite (eg Command Ring in Secret of Mana)
+/// @param {string} name The name of the Element [Optional - default : Caroussel]
+function JabbaCarousselElement(_name = "Caroussel") : __baseElement() constructor {
 	
+	name = _name
 	itemsList = []
 	activeItem = undefined
-	carousselSize = 0
-	rotation = 0
-	rotationSpeed = 0.1
+	colorBlendDefault = c_white
+	colorBlendActive = c_yellow
 	radius = 1
-	//__activeFeedback = "popout"
-	//feedback = __feedback.popout.func
-	
 	wRadius = 128
 	hRadius = 128
 	fadeMin = .8
 	scaleMin = .8
+	carousselSize = 0
+	rotation = 0
+	rotationSpeed = 0.1
 	drawOrder = []
-	colorBlendDefault = c_white
-	colorBlendActive = c_yellow
 	hasFeedback = true
 	itemHasFeedback = true
 	initFeedback = false // set the feedback's variables
+	
 	__itemsProcessStep = 0
 	
-	//Private
+	//Feedbacks are specific to the Caroussel Element.
 	__feedbacks = {
 		
 		none : {
@@ -53,7 +54,7 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 			changeRadius : method(other, function(_a, _b){
 				//SetRadius(width + _a, height + _b)
 				wRadius = width + _a
-			hRadius = height + _b
+				hRadius = height + _b
 				//SetRadius(_wr, _hr)
 			})
 		}
@@ -61,7 +62,11 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 
 	show_debug_message(__feedbacks)
 	
+	/// @func __add
 	/// @desc add an item to the caroussel in the itemlist
+	/// @param sprite the sprite to use for the new item
+	/// @param name the new item's name
+	/// @param position 
 	__add = function( _sprite, _name, _pos){
 		var _item = new __CarousselItemElement(_sprite, _name, carousselSize, self)
 
@@ -318,6 +323,11 @@ function JabbaCarousselElement(_name = "Carroussel") : __baseElement() construct
 				}
 				_i++
 				
+			}
+		}
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Draw()
 			}
 		}
 	}

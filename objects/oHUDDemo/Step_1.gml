@@ -1,1 +1,2 @@
 hud.CleanUp()
+test.CleanUp()

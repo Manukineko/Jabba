@@ -1,45 +1,34 @@
 #region QUOTA COUNTER
-// An Element that will change color when a quota is reached
+
 /// @func JabbaQuotaCounterElement
-/// @param {string} name default: defaultName macro
-/// @param {int} DigitsLimit default: 9 (hundred million)
+/// @desc [Type: Font] An Element that will change color when the set Quota is reached.
+/// @desc [Default Color - Quota Not Reached : White, Quota Reached : Red]
+/// @param {string} name [Optional - default: Quota Counter]
+/// @param {int} DigitsLimit [Optional - default: 9 (hundred million)] This will lock the Counter to the set number of digits with "9" even if the value goes beyond
 function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) : JabbaCounterElement() constructor{
 	
 	name = _name
-	asset = fJabbaFont
-	digitsLimit = _digitsLimit
-	quota = 0
-	counterValueLimit = (power(10, digitsLimit)) - 1
-	colorQuotaReached = c_red
-	colorCounterDefault = c_white
+	asset = JabbaFontDefault	//the default font
+	digitsLimit = _digitsLimit	//the number of digits to lock the counter to
+	quota = 0					// The quota to reach
+	colorQuota = c_red			// Color to use when the Quota is reached
+	colorNormal = c_white		// Color to use by default
+	height = string_height(value)
+	width = string_width(value)
+	
+	__counterValueLimit = (power(10, digitsLimit)) - 1 //the variable formating the value to number of "9" when DigitsLimit is reached.
 	__activeFeedback = "popout"
 	
-	/// @func SetQuota(quota, counterLimit)
-	/// @desc Set the quota to compare the value to.
-	/// @param {real} quota
-	/// @param {real} counterLimit Set the maximum unit to display. This is mandatory in order to calculate the position neatly
-	static SetQuota = function(_quota){
-    	//counter internal unit limit (it won't count past the number of unit)
-        quota = _quota;
-        
-        return self
-    }
-    
-    static SetDigitsLimit = function(_digitsLimit){
-    	digitsLimit = _digitsLimit
-        
-        //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
-        var _cvl = (power(10, digitsLimit)) - 1
-        counterValueLimit = _cvl
-        
-        return self
-    }
-    
-    static SetValue = function(_value){
+	/// @func SetValue
+	/// @desc Set the Value to compare the Quota to.
+	/// @desc The method auto-update the width and height of the Element.
+	/// @desc [Quota is reached] Turn the isReach value to true, change the Color's Element and trigger the attached Feedback 
+	/// @param {int} value
+	static SetValue = function(_value){
     	value = _value
     	height = string_height(value)
 		width = string_width(value)
-    	
+
     	if value >= quota{
     		if !isReach{
     			if hasFeedback{
@@ -54,140 +43,116 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
     		if (isReach) isReach = false
     	}
     	
-    	color = value >= quota ? colorQuotaReached : colorCounterDefault
+    	color = value >= quota ? colorQuota : colorNormal
     	
     	return self
     }
-    
-    static SetFont = function(_font){
-    	asset = _font
-    }
-    
-    if ENABLE_BIBFORTUNA {
-			
-			//if array_length(bib.activeFortuna) > 0{
-			if ds_list_size(bib.activeFortuna) > 0{
-				drawBib()
-			}
-		}
-}
-#endregion
-
-
-// An EXTENDED version of the Quota Counter Element that use sprite as its font. It allow to progressively change the color of each unit individually
-#region QUOTA COUNTER EXT
-/// @func JabbaQuotaCounterExtElement
-/// @desc An extended Quota Counter using sprite as font and allowing to color each digit independently progressively as the quota is reached.
-/// @param {string} name default: defaultName macro
-/// @param {int} DigitsLimit default: 9 (hundred million)
-function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, ) : __spriteTypeElement__() constructor{
-  
-    valueLength = 0
-    quota = 0
-    
-    digitsLimit = _digitsLimit
-    valueDigits = array_create(digitsLimit, 0)
-    quotaDigits = array_create(digitsLimit, 0)
-    
-    counterValueLimit = undefined
-    
-	colorQuotaReached = c_red
-	colorCounterDefault = c_white
-	digitsColor = array_create(digitsLimit, colorCounterDefault)
 	
-	matchingDigit = array_create(digitsLimit,false)
-	
-	asset = JabbaFont
-	spriteFontFrame = []
-	spriteFontWidth = sprite_get_width(asset)
-	letterSpacing = 2 
-	
-	feedback = __feedbacks.popout.func
-	__activeFeedback = "popout"
-    
-    /// @func SetSpriteFont(sprite)
-    /// @desc The spritesheet used for the font
-    /// @params {sprite} sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
-    static SetSpriteFont = function(_sprite){
-			asset = _sprite
-			
-			spriteFontWidth = sprite_get_width(asset)
-			
-			return self
-    }
-	
-	/// @func SetTextColor(defaultColor, goalColor)
-	/// @desc Set the regular color and the color for when the quota is reached
-	/// @params {color} defaultColor
-	/// @params {color} goalColor The color to change when the quota is reached
-	static SetTextColor = function(_defaultColor, _goalColor ){
+	/// @func SetQuota
+	/// @desc Set the Quota to compare the Value to.
+	/// @param {int} quota
+	static SetQuota = function(_quota){
+    	//counter internal unit limit (it won't count past the number of unit)
+    	if !is_numeric(_quota) show_error("The set Quota value is not a NUMBER", true)
+    	if !is_int(_quota) show_error("The set Quota value is not an INTEGRER", true)
     	
-    	colorCounterDefault = _defaultColor
-    	colorQuotaReached = _goalColor
+        quota = _quota;
+        
+        return self
+    }
+    
+    /// @func SetDigitsLimit
+    /// @desc Set the number of Digits allowed
+    /// @param {int} Limit
+    static SetDigitsLimit = function(_digitsLimit){
+    	digitsLimit = _digitsLimit
+        
+        //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
+        var _cvl = (power(10, digitsLimit)) - 1
+        __counterValueLimit = _cvl
+        
+        return self
+    }
+    
+    /// @func SetTextColor
+	/// @desc Set the Default Color and the Reached Color
+	/// @params {color} normalColor
+	/// @params {color} quotaColor The color to change when the quota is reached
+	static SetTextColor = function(_normalColor, _quotaColor ){
+    	
+    	colorNormal = _normalColor
+    	colorQuota = _quotaColor
 		
 	}
     
-    /// @func SetQuota(quota, counterLimit)
-    /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
-    /// @params {integrer} quota the quota value to reach
-    /// @params {integrer} The Digit limit to display (default : 9 (100 000 000) )
-    static SetQuota = function(_quota = 1000, _limit = 9){
-    	//quota to reach
-    	//counter internal unit limit (it won't count past the number of unit)
-        quota = _quota;
-        digitsLimit = _limit
-        
-        var _digitNumber, divLimit
-        
-        //trick to build the number of quota Digits dynamically
-        //I count the number of characters and use that to resize the digit array
-        
-        
-        array_resize(quotaDigits, digitsLimit)
-        	//quotaDigits = array_create(digitsLimit, 0)
-        
-        //resize the value digits array
-        array_resize(valueDigits, digitsLimit)
-        	//valueDigits = array_create(digitsLimit, 0)
-        
-        //resize the color array
-        array_resize(digitsColor, digitsLimit)
-        	//digitsColor = array_create(digitsLimit, colorCounterDefault)
-        
-        //resize the matching digit array
-        array_resize(matchingDigit, digitsLimit)
-        	//matchingDigit = array_create(digitsLimit,false)
-        
-        //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
-        var _cvl = (power(10, digitsLimit)) - 1//string_repeat("9", digitsLimit)
-        counterValueLimit = _cvl
-        
-        
-        //Build the quota Array to be compared with the value
-        quotaDigits = SplitPowerOfTenToArray(quota, digitsLimit)
-        
-        return self
-        
+    /// @func SetFont
+    /// @desc Set the Font to use to display the Value
+    /// @param {font} Font
+    static SetFont = function(_font){
+    	if asset_type(_font) != font show_error("The Asset set for the Quota Counter is not a FONT", true)
+    	asset = _font
     }
     
-   /// @func SetValue(value)
+  //  if ENABLE_BIBFORTUNA {
+			
+		// 	//if array_length(bib.activeFortuna) > 0{
+		// 	if ds_list_size(bib.activeFortuna) > 0{
+		// 		drawBib()
+		// 	}
+		// }
+}
+#endregion
+
+#region QUOTA COUNTER EXT
+/// @func JabbaQuotaCounterExtElement
+/// @desc [Type : Sprite] An EXTENDED version of the Quota Counter Element that use sprite as its font. It allow to progressively change the color of each unit individually
+/// @desc [Default Color - Quota Not Reached : White, Quota Reached : Red]
+/// @param {string} name [Optional - default: Quota Counter EXT]
+/// @param {int} DigitsLimit [Optional - default: 9 (hundred million)]
+function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, ) : __spriteTypeElement__() constructor{
+  
+    name = _name					
+    asset = JabbaFont				//the default font
+    digitsLimit = _digitsLimit		//the number of digits to lock the counter to
+    quota = 0						// The quota to reach
+    colorQuota = c_red				// Color to use when the Quota is reached
+	colorNormal = c_white			// Color to use by default
+	width = sprite_get_width(asset)
+	height = sprite_get_height(asset)
+	letterSpacing = 2				// The space between two letters (sprite)
+    valueLength = 0					// The Length of the value's string
+    
+#region /***************************** Private Variables **********************************/
+    __valueDigits = array_create(digitsLimit, 0)
+    __quotaDigits = array_create(digitsLimit, 0)
+    __counterValueLimit = (power(10, digitsLimit)) - 1
+	__digitsColor = array_create(digitsLimit, colorNormal)
+	__matchingDigit = array_create(digitsLimit,false)
+	__spriteFontFrame = []
+	
+	feedback = __feedbacks.popout.func
+	__activeFeedback = "popout"
+#endregion /********************************************************************************/
+
+	
+	/// @func SetValue(value)
    /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
    /// @params {integrer} value
    /// //[TODO] Add feedback system per DIGITS
     static SetValue = function(_value){
     	
     	//Clamp the value from 0 to the limit set for the counter.
-    	value = clamp(_value, 0, counterValueLimit)
+    	value = clamp(_value, 0, __counterValueLimit)
     	valueLength = CountDigit(value)//string_length(string(value))
     	
     	//Split the value by Units until we reach the limit and store it in an array
-    	valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
-    	spriteFontFrame = SplitByDigitsToArray(value, digitsLimit)
+    	__valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
+    	__spriteFontFrame = SplitByDigitsToArray(value, digitsLimit)
     	
 		if value > quota {
 			var _i=0; repeat(digitsLimit){
-				array_set(digitsColor, _i, colorQuotaReached)
-				array_set(matchingDigit, _i, true)
+				array_set(__digitsColor, _i, colorQuota)
+				array_set(__matchingDigit, _i, true)
 				_i++
 			}
 			if !isReach{
@@ -201,51 +166,111 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
 			var _i=0; repeat(digitsLimit){
 				var _iprev = _i - 1
 				if (_iprev >= 0){
-					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i] && matchingDigit[_iprev])
+					__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i] && __matchingDigit[_iprev])
 					
 				}
 				else{
-					matchingDigit[_i] = (valueDigits[_i] >= quotaDigits[_i])
+					__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i])
 				}
 				
-				digitsColor[_i] = matchingDigit[_i] = true ? colorQuotaReached : colorCounterDefault 
+				__digitsColor[_i] = __matchingDigit[_i] = true ? colorQuota : colorNormal 
 				_i++
 			}
 			
 			if isReach isReach = false
-    }
+    	}
 			
+	}
+	
+	/// @func SetQuota
+    /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
+    /// @params {integrer} quota the quota value to reach
+    /// @params {integrer} The Digit limit to display (default : 9 (100 000 000) )
+    static SetQuota = function(_quota){
+    	//quota to reach
+    	//counter internal unit limit (it won't count past the number of unit)
+        quota = _quota;
+        
+        var _digitNumber, divLimit
+        
+        //trick to build the number of quota Digits dynamically
+        //Count the number of characters and use that to resize the digit array
+        
+        array_resize(__quotaDigits, digitsLimit)
+        	//__quotaDigits = array_create(digitsLimit, 0)
+        
+        //resize the value digits array
+        array_resize(__valueDigits, digitsLimit)
+        	//__valueDigits = array_create(digitsLimit, 0)
+        
+        //resize the color array
+        array_resize(__digitsColor, digitsLimit)
+        	//__digitsColor = array_create(digitsLimit, colorNormal)
+        
+        //resize the matching digit array
+        array_resize(__matchingDigit, digitsLimit)
+        	//__matchingDigit = array_create(digitsLimit,false)
+   
+        //Build the quota Array to be compared with the value
+        __quotaDigits = SplitPowerOfTenToArray(quota, digitsLimit)
+        
+        return self
+        
+    }
+    
+    /// @func SetDigitsLimit
+    /// @desc Set the number of Digits allowed
+    /// @param {int} Limit
+    static SetDigitsLimit = function(_digitsLimit){
+    	digitsLimit = _digitsLimit
+        
+        //set the value limit based on the digit limit in pure arcade fashion e.g 9999999
+        var _cvl = (power(10, digitsLimit)) - 1
+        __counterValueLimit = _cvl
+        
+        return self
+    }
+    
+    /// @func SetSpriteFont
+    /// @desc Use a spritesheet for the font
+    /// @desc The methods auto-calculate the width and height of the Element
+    /// @params {spritesheet} Sprite Must be a spritesheet where each digit are a frame, starting from 0 to 9 (unless you want some funny behavior)
+    static SetSpriteFont = function(_sprite){
+			asset = _sprite
+			
+			width = sprite_get_width(asset)
+			height = sprite_get_height(asset)
+			
+			return self
+    }
+	
+	/// @func SetTextColor
+	/// @desc Set the Default Color and the Reached Color
+	/// @params {color} normalColor
+	/// @params {color} quotaColor The color to change when the quota is reached
+	static SetTextColor = function(_normalColor, _quotaColor ){
+    	
+    	colorNormal = _normalColor
+    	colorQuota = _quotaColor
+		
 	}
     
     /// @func Draw()
     /// @desc Draw the element
-    static Draw = method(self, function(){
+    static Draw = function(){
        //Beware of scary out-of-bound error : DigitLimit is higher that the Indexes in those arrays, so minus ONE it needs to be. BRRR. Scary.
 		if !isHidden{
         	var _i=digitsLimit-1; repeat(valueLength){
-        		draw_sprite_ext(asset, spriteFontFrame[_i], x+((spriteFontWidth+letterSpacing)*_i), y, xScale, yScale, angle, digitsColor[_i], 1 )
+        		draw_sprite_ext(asset, __spriteFontFrame[_i], x+((width+letterSpacing)*_i), y, xScale, yScale, angle, __digitsColor[_i], 1 )
         		_i--
         	}
 		}
 		
-		if ENABLE_BIBFORTUNA {
-			
-			//if array_length(bib.activeFortuna) > 0{
-			if ds_list_size(bib.activeFortuna) > 0{
-				drawBib()
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Draw()
 			}
 		}
-    })
-    
-    if ENABLE_BIBFORTUNA{
-		bib = new Bib() ;
-		static drawBib = function(){
-			bib.Draw()
-		} ;
-		static updateBib = function(){
-			bib.Update()
-		}
-	}
-    
+    }
 }
 #endregion

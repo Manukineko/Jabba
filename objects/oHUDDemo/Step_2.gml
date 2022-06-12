@@ -9,3 +9,4 @@ customOriginTest.SetRotation(tourne)
 //gaugeBar.SetRotation(tourne)
 
 hud.Update()
+test.Update()

@@ -1,37 +1,3 @@
-#macro INIT_BIBFORTUNA global.fortunaList = ds_map_create()
-INIT_BIBFORTUNA
-        
-ds_map_add(global.fortunaList, "spawnMalus", [
-    method(undefined,function(){
-            alpha = 0
-            yy = y
-			yend = y - 16
-            state = 1
-			time = 0
-			shutUp = false
-			show_debug_message("[Fortuna"+string(index)+"] Initialisation")
-    }),
-    method(undefined,function(){
-			time += 0.05
-            y = tween(yy, yend, time, EASE.OUT_QUART)
-            alpha = tween(0, 1, time*4, EASE.IN_QUART)
-            show_debug_message("[Fortuna"+string(index)+"] Animate "+string(time))
-            if y = yend{
-                state = 2
-                
-            }
-    }),
-    method(undefined,function(){
-    	time += 0.05
-    	alpha = tween(1, 0, time, EASE.IN_QUART);
-    	if alpha <= 0 {
-    		state = 3;
-    		show_debug_message("[Fortuna"+string(index)+"] Animate END")
-    	} 
-    })
-])
-
-
 function Bib() constructor {
     
     owner = other
@@ -44,7 +10,7 @@ function Bib() constructor {
     
     static CreateFortuna = function(_name, _array, _self = self){
     	
-    	ds_map_add(global.fortunaList, _name,  _array)
+    	ds_map_add(global.__jabbaBibFortunaList, _name,  _array)
       
     }
     
@@ -105,14 +71,14 @@ function Fortuna(_element, _bib, _array, _value, _type = asset_font) constructor
     shutUp = false
     
     bib = _bib;
-    list = global.fortunaList
+    list = global.__jabbaBibFortunaList
     var _a = ds_map_find_value(list, _array);
     fsm = _a
     
 	
     
     static __getFortunaFSM = function(_array){
-    	var _fsm = [], _a = ds_map_find_value(global.fortunaList, _array);
+    	var _fsm = [], _a = ds_map_find_value(global.__jabbaBibFortunaList, _array);
     	array_copy(_fsm, 0, _a , 0, array_length(_a));
     	return _fsm;
     }

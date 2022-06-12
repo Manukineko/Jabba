@@ -1,18 +1,25 @@
 #macro JABBA_VERSION "0.4.1"
 #macro JABBA_CREATOR_MOOD "Not Very Confident"
-var _s = ENABLE_BIBFORTUNA ? "ON" : "OFF"
 show_debug_message("You're using JABBA version "+JABBA_VERSION + " - Created by a "+JABBA_CREATOR_MOOD+ " Manukineko")
-show_debug_message("BibFortuna for Jabba is " + string(_s ))
 
 // Change this if you want different Default Fonts
 #macro JabbaFontDefault fJabbaFont
 #macro JabbaBitmapFontDefault JabbaFont
 
-//BIB FORTUNA Extension
-#macro ENABLE_BIBFORTUNA true
-
 //DO NOT MODIFY ANYTHING AFTER THIS LINE (It will explode)
 // __________________________________________________________ <- THIS LINE, THERE !
+
+//Element Type
+enum ELEMENT{
+	BASE,
+	COUNTER,
+	QUOTA,
+	TIMER,
+	GAUGE,
+	CAROUSSEL,
+	GRAPHIC,
+	TEXT
+}
 
 // Base Element Type Sprite
 //Virtual Origin Template
@@ -35,3 +42,93 @@ show_debug_message("BibFortuna for Jabba is " + string(_s ))
 		SEC,
 		HUN
 	}
+
+__Jabba_Initialize()
+function __Jabba_Initialize() {
+	
+	global.__jabbaFeedbacksList = ds_map_create()
+	//Jabba Feedback List HERE
+	
+	ds_map_add(global.__jabbaFeedbacksList, "highlight", [
+		method(undefined, function(){
+			state++;
+			time = 0
+			owner.SetColor(c_red)
+		}),
+		method(undefined, function(){
+			time++
+			if time > 15{
+				Complete()
+				owner.SetColor(color)
+			} else time++
+		}),
+	])
+	
+	ds_map_add(global.__jabbaFeedbacksList, "popout", [
+		method(undefined, function(){
+			scale = 2
+			time = 0
+			state++
+		}),
+		method(undefined, function(){
+			time += 0.1
+			scale = tween(2,1,time,EASE.INOUT_CUBIC)
+			owner.SetScale(scale, scale)
+			if scale <= 1 {
+				Complete()
+			}
+		})
+	])
+	ds_map_add(global.__jabbaFeedbacksList, "flipOnce", [
+		method(undefined, function(){
+			time = 0
+			xscale = 1
+			maxscale = 1
+			state++
+		}),	
+		method(undefined, function(){
+			xscale = tween(maxscale,0, time, EASE.OUT_CUBIC)
+			if xscale <= 0 {state++ ; time = 0;}
+			time += 0.1
+			owner.SetScale(xscale,1)
+		}),
+		method(undefined, function(){
+			xscale = tween(0,maxscale, time, EASE.OUT_CUBIC);
+			if xscale >= 1 {Complete()}
+			time += 0.1
+			owner.SetScale(xscale,1)
+		})
+	])
+	
+	global.__jabbaBibFortunaList = ds_map_create()
+	ds_map_add(global.__jabbaBibFortunaList, "spawnMalus", [
+    method(undefined,function(){
+            alpha = 0
+            yy = y
+			yend = y - 16
+            state = 1
+			time = 0
+			shutUp = false
+			show_debug_message("[Fortuna"+string(index)+"] Initialisation")
+    }),
+    method(undefined,function(){
+			time += 0.05
+            y = tween(yy, yend, time, EASE.OUT_QUART)
+            alpha = tween(0, 1, time*4, EASE.IN_QUART)
+            show_debug_message("[Fortuna"+string(index)+"] Animate "+string(time))
+            if y = yend{
+                state = 2
+                
+            }
+    }),
+    method(undefined,function(){
+    	time += 0.05
+    	alpha = tween(1, 0, time, EASE.IN_QUART);
+    	if alpha <= 0 {
+    		state = 3;
+    		show_debug_message("[Fortuna"+string(index)+"] Animate END")
+    	} 
+    })
+])
+	
+}  

@@ -37,6 +37,11 @@ function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__
 		if !isHidden {
 			draw_sprite_ext(asset, frame, x, y, xScale, yScale, angle, color, alpha)
 		}
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Draw()
+			}
+		}
 	}
 }
 

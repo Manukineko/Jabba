@@ -3,8 +3,8 @@ if !instance_exists(oEditor){
 	    value += irandom(100)
 	    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
 	    
-	    counter.SetValue(combo)
-	    counter.bib.TellFortuna("spawnMalus", "+"+string(random(5)) )
+	    test.SetValue(combo)
+	    test.bib.TellFortuna("spawnMalus", "+"+string(random(5)) )
 	    //value = clamp(value, 0, 9999)
 	    
 	}
@@ -40,6 +40,7 @@ quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
 //gaugeBar.SetValue(life)
 timer.SetTime(get_timer()/1000)
+
 //caroussel.Update()
 
 //currentTime = get_timer()

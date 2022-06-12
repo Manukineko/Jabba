@@ -1,28 +1,25 @@
-#region GAUGE ELEMENT
-// An element that displa a value as a gauge bar (life bar, stamina bar, etc)
 /// @func JabbaGaugeBarElement
-/// @desc An element that will fill a gauge with a dissolve shader (default)
-/// @param {int} maxValue the maximum value of the gauge
-/// @param {sprite} sprite The sprite to dissolve
-/// @param {sprite} mask The mask to use in the shader
+/// @desc [Type : Sprite] An Element that will fill a gauge with a dissolve shader (default). Like Life Bar, Stamina bar, etc
+/// @param {int} maxValue the maximum value of the gauge [default : 100]
+/// @param {sprite} sprite The sprite to dissolve [default : sJabbaGaugeBar]
+/// @param {sprite} mask The mask to use in the shader [default : sJabbaGaugeBarMask]
 /// @param {shader} shader The shader to use [default: jabbaShaderDissolve]
 /// @param {string} name the name of this element [default : "Gauge Bar"]
-function JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader = "dissolve", _name = "Gauge Bar") : __spriteTypeElement__() constructor{
+function JabbaGaugeBarElement(_maxValue = 100, _asset = sJabbaGaugeBar, _mask = sJabbaGaugeBarMask, _shader = "dissolve", _name = "Gauge Bar") : __spriteTypeElement__() constructor{
 	
 	#macro shaderParams activeShaderData.init
 	
-	//shader = jabbaShaderDissolve
+	maxValue = _maxValue
+	asset = _asset
+	mask = _mask
 	activeShaderName = _shader
-	asset = _asset//sJabbaGaugeBar
-	mask = _mask//sJabbaGaugeBarMask
 	width = sprite_get_width(_asset)
 	height = sprite_get_height(_asset)
-	maxValue = _maxValue
 	tolerance = 0
 	inverse = true
+	
 	_valueNormalized = 0
 	var _self = self
-	
 	_shaders = {
 		dissolve : {
 			///!\ Only for buit-in shader : store reference of the constructor variables to use them in the ShaderSet function below. Enjoy scoping XD
@@ -55,31 +52,12 @@ function JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader = "dissolve", _n
 		}
 	}
 	
+	//set the shader by default at initialisation
 	activeShaderData = variable_struct_get(_shaders, activeShaderName)
-	//activeShaderData = _shaders.dissolve
-	//activeShaderName = "dissolve"
 	
-	AddShader = function (_name, _shader, _init, _set ){
-		var _struct = {}
-		with(_struct){
-			shaderScript = _shader
-			init = _init
-			shaderSet = method(other,_set)
-		}
-		
-		variable_struct_set(_shaders, _name, _struct)
-		
-		return self
-		
-	}
-	
-	SetShader = function(_name){
-		activeShaderData = variable_struct_get(_shaders, _name)
-		activeShaderName = _name
-	}
 	
 	/// @func SetValue
-	/// @desc Set the value use to manipulate the gauge
+	/// @desc Set the value use to fill the gauge
 	/// @param {real} value
 	/// @param {boolean} triggerFeedback If the element's feedback is to be triggered when the gauge is filled (/!\ Subject to change)
 	static SetValue = function(_value, _feedbackTrigger){
@@ -100,13 +78,49 @@ function JabbaGaugeBarElement(_maxValue, _asset, _mask, _shader = "dissolve", _n
 		}
 	}
 	
+	/// @func AddShader
+	/// @desc Add a custom shader to the shader list. /!\ HIGHLY EXPERIMENTAL
+	/// @param {string} name The name of the shader
+	/// @param {shader} shader the shader script
+	/// @param {function} Init	The init function (starting value)
+	/// @param {function} ShaderSet The code to draw the shader (must include shader_set() and shader_reset() )
+	AddShader = function (_name, _shader, _init, _set ){
+		var _struct = {}
+		with(_struct){
+			shaderScript = _shader
+			init = _init
+			shaderSet = method(other,_set)
+		}
+		
+		variable_struct_set(_shaders, _name, _struct)
+		
+		return self
+		
+	}
+	
+	/// @func SetShader
+	/// @desc Select and set the shader to use with the gauge
+	/// @param {string} name the name of the shader (not the shader script)
+	SetShader = function(_name){
+		activeShaderData = variable_struct_get(_shaders, _name)
+		activeShaderName = _name
+	}
+	
+	
+	
 	/// @func Draw()
-	/// @desc Draw the element
+	/// @desc Draw the element. Bypassed if isHidden is true.
 	static Draw = function(){
 		if !isHidden{
 			
 			activeShaderData.shaderSet(_valueNormalized)
 		
+		}
+		
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Draw()
+			}
 		}
 	}
 }

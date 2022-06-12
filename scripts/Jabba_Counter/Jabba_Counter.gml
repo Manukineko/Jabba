@@ -35,8 +35,8 @@ function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement
 	}
 	
 	/// @func Draw()
-	/// @desc Draw the element
-	 Draw = function(){
+	/// @desc Draw the element. Bypassed if isHidden is false
+	static Draw = function(){
 		if !isHidden{
 			draw_set_font(asset)
 			draw_set_halign(halign)
@@ -46,22 +46,10 @@ function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement
 			draw_set_valign(-1)
 		}
 		
-		if ENABLE_BIBFORTUNA {
-			
-			//if array_length(bib.activeFortuna) > 0{
-			if ds_list_size(bib.activeFortuna) > 0{
-				drawBib()
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Draw()
 			}
-		}
-	}
-	
-	if ENABLE_BIBFORTUNA{
-		bib = new Bib() ;
-		static drawBib = function(){
-			bib.Draw()
-		} ;
-		static updateBib = function(){
-			bib.Update()
 		}
 	}
 }

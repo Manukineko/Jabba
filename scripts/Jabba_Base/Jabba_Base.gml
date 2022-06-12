@@ -1,7 +1,6 @@
 
 /// @func __baseElement
 /// @desc [Internal] The Base Constructor for all Jabba Element
-/// @param {type} variable
 function __baseElement() constructor{
 	
 #region /***************************** Public Common Variables  *********************************/
@@ -28,7 +27,8 @@ function __baseElement() constructor{
 	value = 0
 	
 	asset = undefined //The main asset (Font or Sprite)
-	type = asset_unknown //The type of asset (automatically set in __fontTypeElement__() constructor)
+	assetType = asset_unknown //The type of asset (automatically set in __fontTypeElement__() constructor)
+	elementType = ELEMENT.BASE
 	isHidden = false //
 	isReach = false // The moment it is set to true depends of the Element
 	hasFeedback = true //Check if the Element has a Feedback attached.
@@ -46,6 +46,7 @@ function __baseElement() constructor{
 	__originUpdated = false
 	__alphaUpdated = false
 	__feedbackUpdated = false
+	bib = new Bib() ;
 	
 	var _self = self
 	
@@ -181,11 +182,11 @@ function __baseElement() constructor{
 					case fa_bottom : _yo = height; break;
 				}
 			}
-			if type = asset_sprite{
+			if assetType = asset_sprite{
 				_xo = sprite_get_xoffset(asset)
 				_yo = sprite_get_yoffset(asset)
 			}
-			else if type = asset_font{
+			else if assetType = asset_font{
 				switch(halign){
 					case fa_left : _xo = 0; break;
 					case fa_center : _xo = (width/2); break;
@@ -245,32 +246,6 @@ function __baseElement() constructor{
 
 #region /*****************************  Public Common Methods   *********************************/	
 	// Add additional method if BibFortuna is enable
-	if ENABLE_BIBFORTUNA{
-		bib = new Bib() ;
-		
-		static drawBib = function(){
-			bib.Draw()
-		}
-
-		static updateBib = function(){
-			bib.Update()
-		}
-		
-		static cleanUpBib = function(){
-			bib.CleanUp()
-		}
-		
-		/// @func SetBidPosition
-		/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
-		/// @param {real} x position relative to Element x [Default : 0]
-		/// @param {real} y position relative to Element y [Default : 0]
-		static SetBibPosition = function(_x = 0, _y = 0){
-			bib.x = x + _x
-			bib.y = y + _y
-			
-			return self
-		}
-	}
 	
 	/// @func SetValue
 	/// @desc set the value to display by the Element
@@ -316,6 +291,8 @@ function __baseElement() constructor{
 	static SetPosition = function(_x, _y){
 		x = _x
 		y = _y
+		//SetBibPosition(_x,_y)
+		
 		__positionUpdated = true
 		__anyUpdated = true
 		
@@ -494,6 +471,28 @@ function __baseElement() constructor{
 	//	return self
 	//}**/
 	
+	
+	//static drawBib = function(){
+	//	bib.Draw()
+	//}
+	//static updateBib = function(){
+	//	bib.Update()
+	//}
+	//static cleanUpBib = function(){
+	//	bib.CleanUp()
+	//}
+	/// @func SetBibPosition
+	/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
+	/// @param {real} x position relative to Element x [Default : 0]
+	/// @param {real} y position relative to Element y [Default : 0]
+	static SetBibPosition = function(_x = 0, _y = 0){
+		bib.x = x + _x
+		bib.y = y + _y
+		
+		return self
+	}
+	
+	
 	/// @func Update
 	/// @desc [Standalone Only] Must be called in the End Step Event if you use this Element as a standalone or outside a JabbaContainer.
 	static Update = function(){
@@ -505,13 +504,13 @@ function __baseElement() constructor{
 			__update();
 		}
 		
-		// Bib Fortunal will be updated as well
-		if ENABLE_BIBFORTUNA {
-			//if array_length(bib.activeFortuna) > 0{
-			if ds_list_size(bib.activeFortuna) > 0{
-				updateBib()
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				Update()
 			}
 		}
+		
+	
 		
 	}
 	
@@ -523,20 +522,39 @@ function __baseElement() constructor{
 	/// @desc Recommand to put it in the Begin Step Event or after drawing ended.
 	/// @param {type} variable
 	static CleanUp = function(){
-		if ENABLE_BIBFORTUNA {
-			cleanUpBib()
+		with(bib){
+			if ds_list_size(activeFortuna) > 0{
+				CleanUp()
+			}
 		}
 	}
 	
+	//if ENABLE_BIBFORTUNA{
+	//	bib = new Bib() ;
+	//	
+	//	/// @func DrawBib
+	//	/// @desc Draw the Element's Bib
+	//	static drawBib = function(){
+	//		bib.Draw()
+	//	}
+	//	
+	//	/// @func UpdateBib
+	//	/// @desc Update the Bib and all its Fortuna
+	//	static updateBib = function(){
+	//		bib.Update()
+	//	}
+	//}
+	
 }
 #endregion
+
 
 
 #region FONT TYPE SUB-ELEMENT
 
 // Set additional variable and value for Font Type Element (Counter, Timer and Quota)
 function __fontTypeElement__() : __baseElement() constructor{
-	type = asset_font
+	assetType = asset_font
 	
 	static SetFont = function(_asset){
 		asset = _asset
@@ -549,7 +567,7 @@ function __fontTypeElement__() : __baseElement() constructor{
 #region SPRITE TYPE SUB-ELEMENT
 // Set additional variable and value for Sprite Type Element (Gauge, Graphic and QuotaExt)
 function __spriteTypeElement__() : __baseElement() constructor{
-	type = asset_sprite
+	assetType = asset_sprite
 }
 
 #endregion
@@ -756,6 +774,10 @@ function round_ext(_value, _size){
 function floor_ext(_value, _size){
 	_size = 1-_size
 	return floor(_value/_size) * _size
+}
+
+function is_int(_value){
+	return floor(_value) = _value ? true : false
 }
 
 #endregion
