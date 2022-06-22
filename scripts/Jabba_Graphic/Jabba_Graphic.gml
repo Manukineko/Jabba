@@ -1,6 +1,6 @@
 #region SPRITE ELEMENT
 
-function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__() constructor{
+function JabbaGraphicElement(_sprite, _name = "Graphic",_hud = undefined) : __spriteTypeElement__() constructor{
 
 	asset = _sprite
 	width = sprite_get_width(_sprite)
@@ -8,8 +8,7 @@ function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__
 	xFlip = 1
 	yFlip = 1
 	
-	//feedback = __feedbacks.popout.func
-	//__activeFeedback = "popout"
+	if !is_undefined(_hud) __addToHud(_hud)
 	
 	static SetOffset = function(_x, _y = undefined){
 		
@@ -27,10 +26,10 @@ function JabbaGraphicElement(_sprite, _name = "Graphic") : __spriteTypeElement__
 		return self
 	}
 	
-	static SetColor = function(_color){
-		color = _color
-		
-		return self
+	static FeedbackPlay = function(){
+		if enableFeedback{
+			__feedbackPlayOnValue()
+		}
 	}
 	
 	static Draw = function(){

@@ -2,9 +2,10 @@ if !instance_exists(oEditor){
 	if keyboard_check_pressed(vk_space){
 	    value += irandom(100)
 	    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
-	    
-	    test.SetValue(combo)
-	    test.bib.TellFortuna("spawnMalus", "+"+string(random(5)) )
+	    mugshot.FeedbackPlay()
+	    counter.SetValue(combo)
+	    //test.SetValue(combo)
+	    //test.bib.TellFortuna("spawnMalus", "+"+string(random(5)) )
 	    //value = clamp(value, 0, 9999)
 	    
 	}
@@ -12,13 +13,13 @@ if !instance_exists(oEditor){
 	    life++
 	    life = min(life,100)
 		gaugeBar.SetValue(life)
-		gaugeBarCustomShader.SetValue(life)
+		//gaugeBarCustomShader.SetValue(life)
 	}
 	if keyboard_check(vk_down){
 	    life--
 	    life = max(life,0)
 		gaugeBar.SetValue(life)
-		gaugeBarCustomShader.SetValue(life)
+		//gaugeBarCustomShader.SetValue(life)
 	}
 	if keyboard_check_pressed(ord("H")){
 	    hud.ToggleHide()
@@ -38,7 +39,6 @@ if !instance_exists(oEditor){
 
 quotaSimple.SetValue(value)
 quotaExt.SetValue(value)
-//gaugeBar.SetValue(life)
 timer.SetTime(get_timer()/1000)
 
 //caroussel.Update()

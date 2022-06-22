@@ -5,12 +5,14 @@
 /// @desc [Default Color - Quota Not Reached : White, Quota Reached : Red]
 /// @param {string} name [Optional - default: Quota Counter]
 /// @param {int} DigitsLimit [Optional - default: 9 (hundred million)] This will lock the Counter to the set number of digits with "9" even if the value goes beyond
-function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) : JabbaCounterElement() constructor{
+/// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
+
+function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hud = undefined) : JabbaCounterElement() constructor{
 	
 	name = _name
 	asset = JabbaFontDefault	//the default font
 	digitsLimit = _digitsLimit	//the number of digits to lock the counter to
-	quota = 0					// The quota to reach
+	limit = 0					// The quota to reach
 	colorQuota = c_red			// Color to use when the Quota is reached
 	colorNormal = c_white		// Color to use by default
 	height = string_height(value)
@@ -18,6 +20,27 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
 	
 	__counterValueLimit = (power(10, digitsLimit)) - 1 //the variable formating the value to number of "9" when DigitsLimit is reached.
 	__activeFeedback = "popout"
+	
+	if !is_undefined(_hud) __addToHud(_hud)
+	
+	static __feedbackPlayOnReach = function(){
+		if !isReach{
+			if __isReach(){
+				isReach = true
+				if enableFeedback{
+					with(feedback){
+						if !run run = true
+					}
+				}
+				color = colorQuota
+			}
+		}else{
+			if !__isReach() {
+				isReach = false
+				color = colorNormal
+			}
+		}
+	}
 	
 	/// @func SetValue
 	/// @desc Set the Value to compare the Quota to.
@@ -28,22 +51,8 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
     	value = _value
     	height = string_height(value)
 		width = string_width(value)
-
-    	if value >= quota{
-    		if !isReach{
-    			if hasFeedback{
-    				//__feedbackUpdated = true
-    				//__anyUpdated = true
-    				__feedbackGetParams()
-    			}
-    			isReach = true
-    		}
-    	}
-    	else{
-    		if (isReach) isReach = false
-    	}
-    	
-    	color = value >= quota ? colorQuota : colorNormal
+		
+		__feedbackPlayOnReach()
     	
     	return self
     }
@@ -56,7 +65,7 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
     	if !is_numeric(_quota) show_error("The set Quota value is not a NUMBER", true)
     	if !is_int(_quota) show_error("The set Quota value is not an INTEGRER", true)
     	
-        quota = _quota;
+        limit = _quota;
         
         return self
     }
@@ -109,12 +118,14 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, ) :
 /// @desc [Default Color - Quota Not Reached : White, Quota Reached : Red]
 /// @param {string} name [Optional - default: Quota Counter EXT]
 /// @param {int} DigitsLimit [Optional - default: 9 (hundred million)]
-function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, ) : __spriteTypeElement__() constructor{
+/// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
+
+function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, _hud = undefined) : __spriteTypeElement__() constructor{
   
     name = _name					
     asset = JabbaFont				//the default font
     digitsLimit = _digitsLimit		//the number of digits to lock the counter to
-    quota = 0						// The quota to reach
+    limit = 0						// The quota to reach
     colorQuota = c_red				// Color to use when the Quota is reached
 	colorNormal = c_white			// Color to use by default
 	width = sprite_get_width(asset)
@@ -130,8 +141,8 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
 	__matchingDigit = array_create(digitsLimit,false)
 	__spriteFontFrame = []
 	
-	feedback = __feedbacks.popout.func
-	__activeFeedback = "popout"
+	if !is_undefined(_hud) __addToHud(_hud)
+	
 #endregion /********************************************************************************/
 
 	
@@ -149,16 +160,21 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
     	__valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
     	__spriteFontFrame = SplitByDigitsToArray(value, digitsLimit)
     	
-		if value > quota {
+		if value > limit {
 			var _i=0; repeat(digitsLimit){
 				array_set(__digitsColor, _i, colorQuota)
 				array_set(__matchingDigit, _i, true)
 				_i++
 			}
 			if !isReach{
-    			if hasFeedback{
-    				__feedbackGetParams()
-    			}
+    			if enableFeedback{
+					with(feedback){
+						if run {
+							__reset()
+						}
+						else run = true
+					}
+				}
     			isReach = true
     		}
 		}
@@ -189,7 +205,7 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
     static SetQuota = function(_quota){
     	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
-        quota = _quota;
+        limit = _quota;
         
         var _digitNumber, divLimit
         
@@ -212,7 +228,7 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
         	//__matchingDigit = array_create(digitsLimit,false)
    
         //Build the quota Array to be compared with the value
-        __quotaDigits = SplitPowerOfTenToArray(quota, digitsLimit)
+        __quotaDigits = SplitPowerOfTenToArray(limit, digitsLimit)
         
         return self
         

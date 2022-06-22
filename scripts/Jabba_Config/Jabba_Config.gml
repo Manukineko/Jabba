@@ -49,18 +49,44 @@ function __Jabba_Initialize() {
 	global.__jabbaFeedbacksList = ds_map_create()
 	//Jabba Feedback List HERE
 	
-	ds_map_add(global.__jabbaFeedbacksList, "highlight", [
+	ds_map_add(global.__jabbaFeedbacksList, "none", [
+		method(undefined, function(){
+			return
+		})
+	])
+	
+	ds_map_add(global.__jabbaFeedbacksList, "flash", [
 		method(undefined, function(){
 			state++;
 			time = 0
-			owner.SetColor(c_red)
+			color = c_red
+			owner.ChangeColor(color)
 		}),
 		method(undefined, function(){
-			time++
+			//time++
 			if time > 15{
 				Complete()
-				owner.SetColor(color)
+				owner.ChangeColor()
 			} else time++
+		}),
+	])
+	ds_map_add(global.__jabbaFeedbacksList, "highlightItem", [
+		method(undefined, function(){
+			state++;
+			time = 0
+			val = true
+		}),
+		method(undefined, function(){
+			if owner.caroussel.activeItem.ID = owner.ID{
+				if val{
+					owner.ChangeColor(owner.caroussel.colorBlendActive)
+					val = false
+				}
+			}
+			else{
+				owner.ChangeColor(owner.caroussel.colorBlendDefault)
+				Complete()
+			}
 		}),
 	])
 	
@@ -97,6 +123,27 @@ function __Jabba_Initialize() {
 			if xscale >= 1 {Complete()}
 			time += 0.1
 			owner.SetScale(xscale,1)
+		})
+	])
+	ds_map_add(global.__jabbaFeedbacksList, "radiusPopout", [
+		method(undefined, function(){
+			radius = 32
+			animate = true
+			time = 0
+			state++
+		}),
+		method(undefined, function(){
+			if animate{
+				time += 0.1
+				radius = tween(32,0,time,EASE.SMOOTHSTEP)
+				owner.wRadius = owner.width + radius
+				owner.hRadius = owner.height + radius
+				//owner.SetRadius(owner.width+radius, owner.height+radius)
+				if time = 1 {
+					Complete()
+					animate = false
+				}
+			}
 		})
 	])
 	

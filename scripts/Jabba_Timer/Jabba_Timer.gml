@@ -3,10 +3,12 @@
 /// @desc [Type : Font] An Element to display a time
 /// @desc [Time Units] Highest : Days, Smallest : Hundredth
 /// @param {string} name [Optional - default: Timer]
-function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
+/// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
+
+function JabbaTimerElement(_name = "Timer", _hud = undefined) : __fontTypeElement__() constructor{
 	
 	asset = JabbaFontDefault
-	timeLimit = 0
+	limit = 0
 	timeSeparator = ":"
 	halign = fa_center
 	valign = fa_middle
@@ -36,6 +38,8 @@ function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 	__timeUnit[JT.HUN] = function(_time){
 	  return (_time div 10) mod 100
 	}
+	
+	if !is_undefined(_hud) __addToHud(_hud)
 	
 	//This is to set the Unit we need to display.
 	//The goal would be to :
@@ -115,6 +119,18 @@ function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 	static SetTime = function(_time){
 		value = _time
 		
+		if enableFeedback{
+			__feedbackPlayOnReach()
+		}
+		//if __isReach() && enableFeedback{
+		//	with(feedback){
+		//		if run {
+		//			__reset()
+		//		}
+		//		else run = true
+		//	}
+		//}
+		
 		__timeDigit = __getFormat(_time)
 		
 		var _leadingZero, _str ="", _l = array_length(__timeFormat)
@@ -134,6 +150,10 @@ function JabbaTimerElement(_name = "Timer") : __fontTypeElement__() constructor{
 		}
 		
 		return self
+	}
+	
+	static SetTimeLimit = function(_time){
+		limit = _time
 	}
 	
 	/// @func Draw()

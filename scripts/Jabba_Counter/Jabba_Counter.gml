@@ -2,7 +2,9 @@
 /// @desc a simple counter. it will display the value with a feedback when the value changes.
 /// @param {int}limit The value limit from which the counter won't update.
 /// @param {string} name Giving a name to the Element helps for debugging but can be also used to display it's name in a tutorial.
-function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement__() constructor{
+/// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
+
+function JabbaCounterElement(_limit = 10, _name = "Counter", _hud = undefined) : __fontTypeElement__() constructor{
 	
 	name = _name
 	limit = _limit
@@ -10,15 +12,15 @@ function JabbaCounterElement(_limit = 10, _name = "Counter") : __fontTypeElement
 	halign = fa_center
 	valign = fa_middle
 	
-	feedback = __feedbacks.popout.func
-	__activeFeedback = "popout"
-	
+	if !is_undefined(_hud) __addToHud(_hud)
 	
 	// static SetLimit = function(_limit){
 	// 	limit = _limit
 		
 	// 	return self
 	// }
+	
+	
 	
 	/// @func SetTextAlign()
 	/// @desc Set the alignement of the text (GML constant fa_*)

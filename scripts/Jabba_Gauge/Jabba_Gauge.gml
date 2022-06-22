@@ -5,11 +5,13 @@
 /// @param {sprite} mask The mask to use in the shader [default : sJabbaGaugeBarMask]
 /// @param {shader} shader The shader to use [default: jabbaShaderDissolve]
 /// @param {string} name the name of this element [default : "Gauge Bar"]
-function JabbaGaugeBarElement(_maxValue = 100, _asset = sJabbaGaugeBar, _mask = sJabbaGaugeBarMask, _shader = "dissolve", _name = "Gauge Bar") : __spriteTypeElement__() constructor{
+/// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
+
+function JabbaGaugeBarElement(_maxValue = 100, _asset = sJabbaGaugeBar, _mask = sJabbaGaugeBarMask, _shader = "dissolve", _name = "Gauge Bar", _hud = undefined) : __spriteTypeElement__() constructor{
 	
 	#macro shaderParams activeShaderData.init
 	
-	maxValue = _maxValue
+	limit = _maxValue
 	asset = _asset
 	mask = _mask
 	activeShaderName = _shader
@@ -17,6 +19,8 @@ function JabbaGaugeBarElement(_maxValue = 100, _asset = sJabbaGaugeBar, _mask = 
 	height = sprite_get_height(_asset)
 	tolerance = 0
 	inverse = true
+	
+	if !is_undefined(_hud) __addToHud(_hud)
 	
 	_valueNormalized = 0
 	var _self = self
@@ -62,20 +66,16 @@ function JabbaGaugeBarElement(_maxValue = 100, _asset = sJabbaGaugeBar, _mask = 
 	/// @param {boolean} triggerFeedback If the element's feedback is to be triggered when the gauge is filled (/!\ Subject to change)
 	static SetValue = function(_value, _feedbackTrigger){
 		
-		value = min(_value, maxValue)
-		_valueNormalized = value/maxValue
+		value = min(_value, limit)
+		_valueNormalized = value/limit
 		hasFeedback = _feedbackTrigger
 		
-		//what a mess. Nothing make sens here.
-		if hasFeedback && runFeedback{
-			if value >= maxValue{
-				value = maxValue
-				//__feedbackUpdated = true
-				__feedbackGetParams()
-				runFeedback = false
-			}
-			else runFeedback = true
+		if enableFeedback{
+			__feedbackPlayOnReach()
 		}
+		
+		
+	
 	}
 	
 	/// @func AddShader

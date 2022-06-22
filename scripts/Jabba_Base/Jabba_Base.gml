@@ -22,18 +22,21 @@ function __baseElement() constructor{
 	scale = 1
 	angle = 0
 	color = c_white
+	defaultColor = undefined
 	alpha = 1
 	frame = 0
 	value = 0
 	
+	mode = undefined
 	asset = undefined //The main asset (Font or Sprite)
 	assetType = asset_unknown //The type of asset (automatically set in __fontTypeElement__() constructor)
 	elementType = ELEMENT.BASE
 	isHidden = false //
 	isReach = false // The moment it is set to true depends of the Element
 	hasFeedback = true //Check if the Element has a Feedback attached.
+	enableFeedback = true
 	//runFeedback = false
-	feedback = function(){} //Will store the active feedback behavior
+	//feedback = function(){} //Will store the active feedback behavior
 #endregion /*********************************************************************************/	
 	
 #region /***************************** Private Common Variables *********************************/
@@ -46,114 +49,126 @@ function __baseElement() constructor{
 	__originUpdated = false
 	__alphaUpdated = false
 	__feedbackUpdated = false
+	
+	feedback = new __feedbackPlayer()
 	bib = new Bib() ;
 	
-	var _self = self
 	
-	//A list of global built-in feedback.
-	//Each element can also have their own feedbacks
-	__feedbacks = {
-		
-		owner : _self,
-
-		none : {
-			func : method(other, function(){}),
-			init : method(other, function(){}),
-		},
-		
-		highlight : {
-			runFeedback : false,
-			//colorActive : colorBlendActive,
-			//colorInactive : colorBlendDefault,
-			value : false,
-			
-			init : function(){
-				runFeedback = true
-				getCarrousselVar()
-			},
-			
-			func : function(){
-				if runFeedback{
-					//var _previous = activeItem
-					//_previous[$ "item"].SetColor(colorBlendDefault)
-					//itemsList[value][$ "item"].SetColor(colorBlendActive)
-				
-					runFeedback = false
-				}
-			},
-			callbackInternalUpdate : method(self, function(_a,_b){
-				
-			}),
-			getCarrousselVar : method(self, function(){})
-			
-		},
-		
-		//inflate shortly the element
-		popout : {
-			scale : 1,
-			time : 0,
-			
-			init : function(){
-				time = 0
-				//scale = 2//["scale", 2]
-			},
-			func : function(){
-				time += 0.1
-				scale = tween(2,1, time, EASE.INOUT_CUBIC)
-				callbackInternalUpdate(scale, scale)
-					
-			},
-			
-			callbackInternalUpdate : method(self, function(_a,_b){
-				SetScale(_a,_b)
-			})
-		},
-		fliponce : {
-			animate : 0,
-			time : 0,
-			runFeedback : false,
-			xScale : xScale,
-			maxScale: xScale,
-			
-			init : function(){
-				self.runFeedback = true
-				self.animate = 0
-				self.time = 0
-			},
-			flipMe : method(self, function(_arg){
-				SetScale(_arg,1)
-			}),
-			func : function(){
-			
-				if runFeedback{
-					time += 0.1
-					switch(animate){
-						case 0: 
-							xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
-						if xScale <= 0 {animate = 1; time = 0;}
-						break;
-						case 1: 
-							xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
-							if xScale >= 1 {runFeedback = false;}
-						break;
-					}
-					flipMe(xScale);
-				}
-			}
 	
-		}
+	static __addToHud = function(_hud){
+		var _h = variable_instance_get(other, _hud)
+		array_push(_h.elementsList, self)
+		_h.elementsListSize++
 	}
+	
+	var _self = self
+
+#region TO DELETE	
+	// //A list of global built-in feedback.
+	// //Each element can also have their own feedbacks
+	// __feedbacks = {
+		
+	// 	owner : _self,
+
+	// 	none : {
+	// 		func : method(other, function(){}),
+	// 		init : method(other, function(){}),
+	// 	},
+		
+	// 	highlight : {
+	// 		runFeedback : false,
+	// 		//colorActive : colorBlendActive,
+	// 		//colorInactive : colorBlendDefault,
+	// 		value : false,
+			
+	// 		init : function(){
+	// 			runFeedback = true
+	// 			getCarrousselVar()
+	// 		},
+			
+	// 		func : function(){
+	// 			if runFeedback{
+	// 				//var _previous = activeItem
+	// 				//_previous[$ "item"].SetColor(colorBlendDefault)
+	// 				//itemsList[value][$ "item"].SetColor(colorBlendActive)
+				
+	// 				runFeedback = false
+	// 			}
+	// 		},
+	// 		callbackInternalUpdate : method(self, function(_a,_b){
+				
+	// 		}),
+	// 		getCarrousselVar : method(self, function(){})
+			
+	// 	},
+		
+	// 	//inflate shortly the element
+	// 	popout : {
+	// 		scale : 1,
+	// 		time : 0,
+			
+	// 		init : function(){
+	// 			time = 0
+	// 			//scale = 2//["scale", 2]
+	// 		},
+	// 		func : function(){
+	// 			time += 0.1
+	// 			scale = tween(2,1, time, EASE.INOUT_CUBIC)
+	// 			callbackInternalUpdate(scale, scale)
+					
+	// 		},
+			
+	// 		callbackInternalUpdate : method(self, function(_a,_b){
+	// 			SetScale(_a,_b)
+	// 		})
+	// 	},
+	// 	fliponce : {
+	// 		animate : 0,
+	// 		time : 0,
+	// 		runFeedback : false,
+	// 		xScale : xScale,
+	// 		maxScale: xScale,
+			
+	// 		init : function(){
+	// 			self.runFeedback = true
+	// 			self.animate = 0
+	// 			self.time = 0
+	// 		},
+	// 		flipMe : method(self, function(_arg){
+	// 			SetScale(_arg,1)
+	// 		}),
+	// 		func : function(){
+			
+	// 			if runFeedback{
+	// 				time += 0.1
+	// 				switch(animate){
+	// 					case 0: 
+	// 						xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
+	// 					if xScale <= 0 {animate = 1; time = 0;}
+	// 					break;
+	// 					case 1: 
+	// 						xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
+	// 						if xScale >= 1 {runFeedback = false;}
+	// 					break;
+	// 				}
+	// 				flipMe(xScale);
+	// 			}
+	// 		}
+	
+	// 	}
+	//}
+#endregion
 #endregion
 
 #region /*****************************  Private Common Methods  *********************************/
-	/// @func __feedbackGetParams 
-	/// @desc this will set the variable stored in a feedback struct ("params" member)
-	static __feedbackGetParams = function(){
+	// /// @func __feedbackGetParams 
+	// /// @desc this will set the variable stored in a feedback struct ("params" member)
+	// static __feedbackGetParams = function(){
 		
-		var _params = __feedbacks[$ __activeFeedback]
-		_params.init()
+	// 	var _params = __feedbacks[$ __activeFeedback]
+	// 	_params.init()
 		
-	}
+	// }
 	
 	/// @func __update
 	/// @desc Internal update method. Trigger update for Feedback, Origin, Position, Rotation, Scale, Alpha and Radius (for the Caroussel)
@@ -241,6 +256,37 @@ function __baseElement() constructor{
 		
 		__anyUpdated = false;
 	}
+
+	static __isReach = function(_mode = 1){
+			switch _mode{
+				case 0 : return value <= limit
+				break
+				case 1 : return  value >= limit
+				break
+			}
+	}
+	
+	static __feedbackPlayOnReach = function(){
+		if !isReach{
+			if __isReach(){
+				isReach = true
+				with(feedback){
+					if !run run = true
+				}
+			}
+		}else{
+			if !__isReach() isReach = false
+		}
+	}
+	static __feedbackPlayOnValue = function(){
+		with(feedback){
+			if run {
+				__reset()
+			}
+			else run = true
+		}
+	}
+	
 #endregion
 
 
@@ -251,14 +297,14 @@ function __baseElement() constructor{
 	/// @desc set the value to display by the Element
 	/// @params {} value the value to read
 	/// @params {bool} play the element feedback (default : true)
-	static SetValue = function(_value, _triggerFeedback = true){
+	static SetValue = function(_value, _enableFeedback = true){
 		value = _value
-		hasFeedback = _triggerFeedback
-		if hasFeedback{
-			__feedbackUpdated = true
-			__anyUpdated = true
-			//__feedbackGetParams()
+		enableFeedback = _enableFeedback
+		if enableFeedback{
+			__feedbackPlayOnValue()
 		}
+		
+		return self
 	}
 	
 	/// @func SetOrigin
@@ -288,13 +334,21 @@ function __baseElement() constructor{
 	/// @desc Set the Element's Position
 	/// @param {real} x
 	/// @param {real} y
-	static SetPosition = function(_x, _y){
-		x = _x
-		y = _y
-		//SetBibPosition(_x,_y)
+	/// @param {bool} relative Similar to the "relative" checkbox in GML Visual (jump_to_point)
+	static SetPosition = function(_x, _y, _relative = false){
 		
 		__positionUpdated = true
 		__anyUpdated = true
+		
+		if _relative{
+			x += _x
+			y += _y
+			return self
+		}
+		
+		x = _x
+		y = _y
+		//SetBibPosition(_x,_y)
 		
 		return self
 	}
@@ -412,15 +466,38 @@ function __baseElement() constructor{
 		
 	}
 	
-	/// @func SetColor(color)
-	/// @desc Set the color
+	/// @func SetDefaultColor(color)
+	/// @desc Set the default color. Set it when you use feedbacks ou want to temporarly change the element's color. To change the color, use the ChangeColor() method
 	/// @param {integrer} color
-	static SetColor = function(_color){
+	static SetDefaultColor = function(_color){
+		if defaultColor = undefined{
+			color = _color
+		}
+		
+		defaultColor = _color
+		
+		return self
+		
+	}
+	
+	/// @func ChangeColor
+	/// @desc change the active color. Use this to change the color of the element.
+	/// @param {constant} color
+	static ChangeColor = function(_color = undefined){
+		
+		if is_undefined(_color){
+			color = defaultColor
+			return self
+		}
+		
+		if is_undefined(defaultColor){
+			show_debug_message("[JABBA WARNING] DefaultColor has been SET with ColorChange() for Element "+name+" (Please use SetDefaultColor to SET the defaultColor)")
+			defaultColor = color
+		}
 		
 		color = _color
 		
 		return self
-		
 	}
 	
 	/// @func ToggleHide
@@ -444,13 +521,10 @@ function __baseElement() constructor{
 	/// @func SetFeedback
 	/// @desc set the feedback that will be played when the displayed value changes.
 	/// @params {string} feedback name of the feedback as a string (default : popout)
-	static SetFeedback = function(_effect){
-		var _feedback = variable_struct_get(__feedbacks, _effect)
-		feedback = _feedback.func
-		__activeFeedback = _effect
+	static SetFeedback = function(_name){
+		feedback.Set(_name)
 		
 		return self
-		
 	}
 	
 	/*** BROKEN ***
@@ -496,8 +570,8 @@ function __baseElement() constructor{
 	/// @func Update
 	/// @desc [Standalone Only] Must be called in the End Step Event if you use this Element as a standalone or outside a JabbaContainer.
 	static Update = function(){
-		if (hasFeedback){
-			feedback();
+		if (enableFeedback){
+			feedback.__play();
 		}
 		
 		if (__anyUpdated){
@@ -779,5 +853,6 @@ function floor_ext(_value, _size){
 function is_int(_value){
 	return floor(_value) = _value ? true : false
 }
+
 
 #endregion
