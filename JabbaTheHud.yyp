@@ -31,6 +31,7 @@
     {"id":{"name":"Jabba_Config","path":"scripts/Jabba_Config/Jabba_Config.yy",},"order":4,},
     {"id":{"name":"Jabba_Feedback","path":"scripts/Jabba_Feedback/Jabba_Feedback.yy",},"order":3,},
     {"id":{"name":"Jabba_Group","path":"scripts/Jabba_Group/Jabba_Group.yy",},"order":4,},
+    {"id":{"name":"Jabba_Effects","path":"scripts/Jabba_Effects/Jabba_Effects.yy",},"order":4,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},

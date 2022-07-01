@@ -3,7 +3,7 @@ if !instance_exists(oEditor){
 	    value += irandom(100)
 	    combo = value_wrap_selector(combo,+1,[0,1,2,3,4,5])
 	    mugshot.FeedbackPlay()
-	    counter.SetValue(combo)
+	    counter.SetValue(combo, false).FeedbackPlay()
 	    //test.SetValue(combo)
 	    //test.bib.TellFortuna("spawnMalus", "+"+string(random(5)) )
 	    //value = clamp(value, 0, 9999)
@@ -19,6 +19,7 @@ if !instance_exists(oEditor){
 	    life--
 	    life = max(life,0)
 		gaugeBar.SetValue(life)
+		value -= irandom(100)
 		//gaugeBarCustomShader.SetValue(life)
 	}
 	if keyboard_check_pressed(ord("H")){
@@ -35,6 +36,12 @@ if !instance_exists(oEditor){
 	    item = value_wrap_selector(item, +1, [0,1,2,3,4])
 	    caroussel.SetValue(item)
 	}
+	//if keyboard_check(vk_left){
+	//	group.SetPosition(-2,0,true)
+	//}
+	//if keyboard_check(vk_right){
+	//	group.SetPosition(2,0,true)
+	//}
 }
 
 quotaSimple.SetValue(value)

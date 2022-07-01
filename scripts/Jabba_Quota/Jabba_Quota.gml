@@ -9,6 +9,7 @@
 
 function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hud = undefined) : JabbaCounterElement() constructor{
 	
+	elementType = ELEMENT.QUOTA
 	name = _name
 	asset = JabbaFontDefault	//the default font
 	digitsLimit = _digitsLimit	//the number of digits to lock the counter to
@@ -18,16 +19,17 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
 	height = string_height(value)
 	width = string_width(value)
 	
+	__reachTo = -1
 	__counterValueLimit = (power(10, digitsLimit)) - 1 //the variable formating the value to number of "9" when DigitsLimit is reached.
 	__activeFeedback = "popout"
 	
 	if !is_undefined(_hud) __addToHud(_hud)
 	
-	static __feedbackPlayOnReach = function(){
+	static __feedbackPlayOnReach = function(_mode = 1){
 		if !isReach{
-			if __isReach(){
+			if __isReach(_mode){
 				isReach = true
-				if enableFeedback{
+				if feedbackIsEnabled{
 					with(feedback){
 						if !run run = true
 					}
@@ -35,7 +37,7 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
 				color = colorQuota
 			}
 		}else{
-			if !__isReach() {
+			if !__isReach(_mode) {
 				isReach = false
 				color = colorNormal
 			}
@@ -47,12 +49,15 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
 	/// @desc The method auto-update the width and height of the Element.
 	/// @desc [Quota is reached] Turn the isReach value to true, change the Color's Element and trigger the attached Feedback 
 	/// @param {int} value
-	static SetValue = function(_value){
-    	value = _value
+	/// @param {bool} autofeedback if the feedback should play automatically or not
+	static SetValue = function(_value, _autofeedback = true){
+    	value = clamp(_value, 0, __counterValueLimit)
     	height = string_height(value)
 		width = string_width(value)
 		
-		__feedbackPlayOnReach()
+		if feedbackIsEnabled{
+			__feedbackPlayOnReach(__reachTo)
+		}
     	
     	return self
     }
@@ -60,12 +65,14 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
 	/// @func SetQuota
 	/// @desc Set the Quota to compare the Value to.
 	/// @param {int} quota
-	static SetQuota = function(_quota){
+	/// @param {real} direction [default: 1 (higher)] - if the quota to reach is higher : 1 or lower: 0 than the value to monitor 
+	static SetQuota = function(_quota, _direction = 1){
     	//counter internal unit limit (it won't count past the number of unit)
     	if !is_numeric(_quota) show_error("The set Quota value is not a NUMBER", true)
     	if !is_int(_quota) show_error("The set Quota value is not an INTEGRER", true)
     	
         limit = _quota;
+        __reachTo = _direction
         
         return self
     }
@@ -102,13 +109,14 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
     	asset = _font
     }
     
-  //  if ENABLE_BIBFORTUNA {
-			
-		// 	//if array_length(bib.activeFortuna) > 0{
-		// 	if ds_list_size(bib.activeFortuna) > 0{
-		// 		drawBib()
-		// 	}
-		// }
+    /// @func FeedbackPlay
+	/// @desc [On Reach] Play the Feedback assign to the Element when the value reach the limit
+	static FeedbackPlay = function(){
+		if feedbackIsEnabled{
+			__feedbackPlayOnReach(__reachTo)
+		}
+	}
+    
 }
 #endregion
 
@@ -121,7 +129,8 @@ function JabbaQuotaCounterElement(_name = "Quota Counter", _digitsLimit = 9, _hu
 /// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
 
 function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit = 9, _hud = undefined) : __spriteTypeElement__() constructor{
-  
+	
+	elementType = ELEMENT.QUOTA
     name = _name					
     asset = JabbaFont				//the default font
     digitsLimit = _digitsLimit		//the number of digits to lock the counter to
@@ -132,8 +141,10 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
 	height = sprite_get_height(asset)
 	letterSpacing = 2				// The space between two letters (sprite)
     valueLength = 0					// The Length of the value's string
+   
     
 #region /***************************** Private Variables **********************************/
+    __reachTo = -1					// the direction to reach : downward or backward to use in the __isReach() method
     __valueDigits = array_create(digitsLimit, 0)
     __quotaDigits = array_create(digitsLimit, 0)
     __counterValueLimit = (power(10, digitsLimit)) - 1
@@ -144,13 +155,79 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
 	if !is_undefined(_hud) __addToHud(_hud)
 	
 #endregion /********************************************************************************/
-
 	
+	/// @desc assigne the QuotaColor to all the Units
+	static __setFullReach = function(){
+		var _i=0; repeat(digitsLimit){
+			array_set(__digitsColor, _i, colorQuota)
+			array_set(__matchingDigit, _i, true)
+			_i++
+		}
+	}
+	
+	/// @desc Determine the check regarding the chosen limit direction (higher or lower)
+	static __digitIsReach = function(_mode, _ind, _i, _iprev){
+		var _a
+		switch (_ind){
+			case 0 : _a = [(__valueDigits[_i] <= __quotaDigits[_i] && __matchingDigit[_iprev]), (__valueDigits[_i] >= __quotaDigits[_i] && __matchingDigit[_iprev])]
+			break
+			case 1 : _a = [(__valueDigits[_i] <= __quotaDigits[_i]), (__valueDigits[_i] >= __quotaDigits[_i])]
+		}
+		
+		return _a[_mode]
+	}
+	
+	/// @desc Determine which unit can be lit
+	static __setProgressiveReach = function(){
+		var _i=0; repeat(digitsLimit){
+			var _iprev = _i - 1
+			
+			if (_iprev >= 0){
+				
+				__matchingDigit[_i] = __digitIsReach(__reachTo, 0,  _i, _iprev)
+				//__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i] && __matchingDigit[_iprev])
+					
+			}
+			else{
+				__matchingDigit[_i] = __digitIsReach(__reachTo,1, _i, _iprev)
+				//__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i])
+			}
+				
+			__digitsColor[_i] = __matchingDigit[_i] = true ? colorQuota : colorNormal 
+			_i++
+		}
+			
+		if isReach isReach = false
+	}
+	
+	/// @desc Play the feedback on reach
+	static __feedbackPlayOnReach = function(_mode = 1, _autofeedback){
+		
+		if __isReach(_mode){
+			if !isReach{
+				__setFullReach()
+				
+				if _autofeedback{
+					if feedbackIsEnabled{
+						with(feedback){
+							if !run run = true
+						}
+					}
+				}
+			isReach = true
+			}
+		}else{
+			__setProgressiveReach()
+			isReach = false	
+		} 
+		
+	}
+		
 	/// @func SetValue(value)
    /// @desc Set the value to compare to the quota. The function will trigger a boolean and colored the text if the quota is reached.
    /// @params {integrer} value
    /// //[TODO] Add feedback system per DIGITS
-    static SetValue = function(_value){
+    static SetValue = function(_value, _autofeedback = true){
     	
     	//Clamp the value from 0 to the limit set for the counter.
     	value = clamp(_value, 0, __counterValueLimit)
@@ -160,52 +237,19 @@ function JabbaQuotaCounterExtElement(_name = "Quota Counter EXT", _digitsLimit =
     	__valueDigits = SplitPowerOfTenToArray(value, digitsLimit)
     	__spriteFontFrame = SplitByDigitsToArray(value, digitsLimit)
     	
-		if value > limit {
-			var _i=0; repeat(digitsLimit){
-				array_set(__digitsColor, _i, colorQuota)
-				array_set(__matchingDigit, _i, true)
-				_i++
-			}
-			if !isReach{
-    			if enableFeedback{
-					with(feedback){
-						if run {
-							__reset()
-						}
-						else run = true
-					}
-				}
-    			isReach = true
-    		}
-		}
-		else{
-			var _i=0; repeat(digitsLimit){
-				var _iprev = _i - 1
-				if (_iprev >= 0){
-					__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i] && __matchingDigit[_iprev])
-					
-				}
-				else{
-					__matchingDigit[_i] = (__valueDigits[_i] >= __quotaDigits[_i])
-				}
-				
-				__digitsColor[_i] = __matchingDigit[_i] = true ? colorQuota : colorNormal 
-				_i++
-			}
-			
-			if isReach isReach = false
-    	}
-			
+    	__feedbackPlayOnReach(__reachTo, _autofeedback)
+
 	}
 	
 	/// @func SetQuota
     /// @desc Set the quota value to be reached. You can set a limit to the number of digit. If the value goes above it, it will be ignored.
     /// @params {integrer} quota the quota value to reach
-    /// @params {integrer} The Digit limit to display (default : 9 (100 000 000) )
-    static SetQuota = function(_quota){
+	/// @param {real} direction [default: 1 (higher)] - if the limit to reach is higher : 1 or lower: 0 than the value to monitor 
+    static SetQuota = function(_quota, _direction = 1){
     	//quota to reach
     	//counter internal unit limit (it won't count past the number of unit)
         limit = _quota;
+        __reachTo = _direction
         
         var _digitNumber, divLimit
         

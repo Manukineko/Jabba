@@ -7,6 +7,7 @@
 
 function JabbaTimerElement(_name = "Timer", _hud = undefined) : __fontTypeElement__() constructor{
 	
+	elementType = ELEMENT.TIMER
 	asset = JabbaFontDefault
 	limit = 0
 	timeSeparator = ":"
@@ -20,6 +21,7 @@ function JabbaTimerElement(_name = "Timer", _hud = undefined) : __fontTypeElemen
 	__getFormat = undefined
 	__createText = undefined
 	__string = undefined
+	__reachTo = -1
 	
 	//Create an array of function to convert time from
 	//milliseconde to every time units
@@ -116,20 +118,14 @@ function JabbaTimerElement(_name = "Timer", _hud = undefined) : __fontTypeElemen
 	/// @func SetTime
 	/// @desc Set the time to update and format into a string that will be display
 	/// @param {integrer} Time in millisecondes
-	static SetTime = function(_time){
+	static SetTime = function(_time, _autofeedback = true){
 		value = _time
 		
-		if enableFeedback{
-			__feedbackPlayOnReach()
+		if _autofeedback{
+			if feedbackIsEnabled{
+				__feedbackPlayOnReach(__reachTo)
+			}
 		}
-		//if __isReach() && enableFeedback{
-		//	with(feedback){
-		//		if run {
-		//			__reset()
-		//		}
-		//		else run = true
-		//	}
-		//}
 		
 		__timeDigit = __getFormat(_time)
 		
@@ -152,8 +148,23 @@ function JabbaTimerElement(_name = "Timer", _hud = undefined) : __fontTypeElemen
 		return self
 	}
 	
-	static SetTimeLimit = function(_time){
+	/// @func SetTimeLimit
+	/// @desc Set the Time limit for the auto-feedback
+	/// @param {int} time in milliseconds
+	/// @param {real} direction [default: 1 (higher)] - if the limit to reach is higher : 1 or lower: 0 than the value to monitor 
+	static SetTimeLimit = function(_time, _direction = 1){
 		limit = _time
+		__reachTo = _direction
+		
+		return self
+	}
+	
+	/// @func FeedbackPlay
+	/// @desc [On Reach] Play the Feedback assign to the Element
+	static FeedbackPlay = function(){
+		if feedbackIsEnabled{
+			__feedbackPlayOnReach()
+		}
 	}
 	
 	/// @func Draw()

@@ -1,7 +1,8 @@
 #region SPRITE ELEMENT
 
 function JabbaGraphicElement(_sprite, _name = "Graphic",_hud = undefined) : __spriteTypeElement__() constructor{
-
+	
+	elementType = ELEMENT.GRAPHIC
 	asset = _sprite
 	width = sprite_get_width(_sprite)
 	height = sprite_get_height(_sprite)
@@ -10,6 +11,11 @@ function JabbaGraphicElement(_sprite, _name = "Graphic",_hud = undefined) : __sp
 	
 	if !is_undefined(_hud) __addToHud(_hud)
 	
+	
+	/// @func SetOffset
+	/// @desc Modify the offset of the Element's sprite. Same as changing the sprite's origin in the IDE.
+	/// @param {int} xoffset
+	/// @param {int} yoffset - optional if you use one of the macro provided in JabbaConfig in the xoffset parameter
 	static SetOffset = function(_x, _y = undefined){
 		
 		var _xoff, _yoff
@@ -26,8 +32,10 @@ function JabbaGraphicElement(_sprite, _name = "Graphic",_hud = undefined) : __sp
 		return self
 	}
 	
+	/// @func FeedbackPlay
+	/// @desc [On Value] Play the Feedback assign to the Element
 	static FeedbackPlay = function(){
-		if enableFeedback{
+		if feedbackIsEnabled{
 			__feedbackPlayOnValue()
 		}
 	}

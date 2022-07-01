@@ -5,6 +5,7 @@
 /// @param {string} JabbaContainer The name of the JabbaContainer (a struct)
 function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseElement() constructor {
 	
+	elementType = ELEMENT.CAROUSSEL
 	name = _name
 	itemsList = []
 	activeItem = undefined
@@ -19,48 +20,12 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 	rotation = 0
 	rotationSpeed = 0.1
 	drawOrder = []
-	itemEnableFeedback = true
+	itemFeedbackIsEnabled = true
 	initFeedback = false // set the feedback's variables
 	
 	__itemsProcessStep = 0
 	
 	if !is_undefined(_hud) __addToHud(_hud)
-	
-	//Feedbacks are specific to the Caroussel Element.
-	//__feedbacks = {
-	//	
-	//	none : {
-	//		func : function(){},
-	//		init : function(){}
-	//	},
-	//	popout : {
-	//		radius : 0,
-	//		time : 0,
-	//		runFeedback : false,
-	//		
-	//		
-	//		init : function(){
-	//			self.time = 0
-	//			self.runFeedback = true
-	//			self.radius = 32
-	//		},
-	//		func: function(){
-	//			if runFeedback{
-	//				time += 0.1
-	//				radius = tween(32, 0, time, EASE.SMOOTHSTEP )
-	//				changeRadius(radius, radius)
-	//				if time = 1 {runFeedback = false}
-	//			}
-	//				
-	//		},
-	//		changeRadius : method(other, function(_a, _b){
-	//			//SetRadius(width + _a, height + _b)
-	//			wRadius = width + _a
-	//			hRadius = height + _b
-	//			//SetRadius(_wr, _hr)
-	//		})
-	//	}
-	//}
 	
 	/// @func __add
 	/// @desc add an item to the caroussel in the itemlist
@@ -89,16 +54,6 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 		carousselSize = array_length(itemsList)
 		
 	}
-//__feedbackGetParams = function(){
-//	
-//	var _params = __feedbacks[$ __activeFeedback]//[$ "params"]
-//	_params.init()
-//	//var _i=0; repeat(array_length(_params)/2){
-//	//	variable_struct_set(self, _params[_i], _params[_i+1])
-//	//	_i += 2
-//	//}
-//	
-//}
 	
 	/// @desc calculate the position of each item in the caroussel
 	__buildItem = function(){
@@ -149,33 +104,29 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 	/// @desc set the value to read from
 	/// @params {relative to element} value the value to read
 	/// @params {bool} play the element feedback (default : true)
-	static SetValue = function(_value, _triggerFeedback = true){
+	static SetValue = function(_value, _autofeedback = true){
 		
 		value = _value
-		limit = value
 		activeItem = itemsList[value][$ "item"]
-		//hasFeedback = _triggerFeedback
-		initFeedback = _triggerFeedback
-		runFeedback = _triggerFeedback
 		
-			if initFeedback{
-				
-				
-				if __isReach() && enableFeedback{
-					with(feedback){
-						if run {
-							__reset()
-						}
-						else run = true
-					}
-				}
-				if itemEnableFeedback{
-					activeItem.SetValue()//run = true
-				}
-				
-				initFeedback = false
-				
+		if _autofeedback{	
+			if feedbackIsEnabled{
+				__feedbackPlayOnValue()
 			}
+			if itemFeedbackIsEnabled{
+				activeItem.FeedbackPlay()
+			}
+		}
+	}
+	
+	/// @func ItemFeedbackPlay
+	/// @desc Play the feedback assign to the items of the caroussel
+	static ItemFeedbackPlay = function(){
+		if itemFeedbackIsEnabled{
+			activeItem.FeedbackPlay()
+		}
+		
+		return self
 	}
 	
 	/// @func AddItem(name, sprite)
@@ -198,7 +149,7 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 			var _i = 0; repeat(carousselSize){
 				with(itemsList[_i][$ "item"]){
 					feedback.Set(_name)
-					enableFeedback = true
+					feedbackIsEnabled = true
 					
 				}
 				
@@ -211,34 +162,6 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 		
 		return self
 	}
-	
-	//static SetFeedback = function(_effect, _targetItem = false){
-	//	
-	//	if _targetItem{
-	//		
-	//		var _i = 0; repeat(carousselSize){
-	//			with(itemsList[_i][$ "item"]){
-	//				
-	//				var _feedback = variable_struct_get(__feedbacks, _effect)
-	//				feedback = _feedback.func
-	//				__activeFeedback = _effect
-	//				hasFeedback = true
-	//				
-	//			}
-	//			
-	//			_i++
-	//		}
-	//		return self
-	//	}
-	//		
-	//	var _feedback = variable_struct_get(__feedbacks, _effect)
-	//	feedback = _feedback.func
-	//	__activeFeedback = _effect
-	//	
-	//	
-	//	return self
-	//	
-	//}
 	
 	/// @func SetRadius(width, height)
 	/// @desc Set the radius of the caroussel. If the Height is omitted, it will be set to the Width value (caroussel would be a perfect circle)
@@ -297,12 +220,10 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 	}
 	
 	
-	
+	/// @func Update
+	/// @desc Update the Caroussel - Must be executed each step
 	static Update = function(){
-		//if (hasFeedback){
-		//	feedback();
-		//}
-		if (enableFeedback){
+		if (feedbackIsEnabled){
 			feedback.__play();
 		}
 		
@@ -314,7 +235,7 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 	}
 	
 	/// @func Draw()
-	/// @desc Draw the caroussel
+	/// @desc Draw the caroussel - Must be executed each step
 	static Draw = function(){
 		
 		if !isHidden {
@@ -338,12 +259,18 @@ function JabbaCarousselElement(_name = "Caroussel", _hud = undefined) : __baseEl
 	//bib = new Bib()
 }
 
+/// @func __CarousselItemElement
+/// @desc Internal - GraphicElement Item
+/// @param {sprite} sprite
+/// @param {string} name
+/// @param {real} index
+/// @param {int} parent caroussel
 function __CarousselItemElement(_sprite, _name, _pos, _owner) : JabbaGraphicElement(_sprite, _name) constructor {
 	caroussel = _owner
 	ID = _pos
 	
 	static SetValue = function(){
-		if __isReach && enableFeedback{
+		if __isReach && feedbackIsEnabled{
 			with(feedback){
 				if run {
 					__reset()

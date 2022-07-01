@@ -1,6 +1,7 @@
 
 tourne += 0.5
 
+//group.SetRotation(point_direction(group.xo,group.yo,mouse_x, mouse_y))
 //counter.SetRotation(tourne)
 //quotaSimple.SetRotation(tourne)
 //quotaExt.SetRotation(tourne)

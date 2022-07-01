@@ -1,7 +1,7 @@
 item = 0
 combo = 0
 life = 0
-value = 0
+value = 1000
 
 hud = new JabbaContainer(viewportID)
 hud.SetMargin(16)
@@ -10,20 +10,23 @@ hud.SetMargin(16)
 //test.SetPosition(hud.center, hud.middle ).SetBibPosition(,).SetFeedback("flash")
 
 quotaSimple = new JabbaQuotaCounterElement("Quota", 9, "hud")
-quotaSimple.SetQuota(2500)
+quotaSimple.SetQuota(0, 0)
 	.SetPosition(hud.right-32, 64)
 	.SetTextAlign(fa_center, fa_middle)
 	.SetOrigin(MiddleCenter)
+	.SetFeedback("popout")
 
 quotaExt = new JabbaQuotaCounterExtElement("Quota Ext", 9 ,"hud")//hud.CreateQuotaCounterExtElement()
-quotaExt.SetQuota(2500)
+quotaExt.SetQuota(501,0)
 	.SetPosition(hud.right-128, 32)
+	.SetFeedback("popout")
 
 //
 timer = new JabbaTimerElement("Timer", "hud")//hud.CreateTimerElement()
 timer.SetTimeFormat([JT.MIN, JT.SEC, JT.HUN])
 	.SetPosition(hud.center, 32)
 	.SetTimeLimit(3000)
+	.SetFeedback("popout")
 //
 counter = new JabbaCounterElement(10, , "hud")
 counter.SetPosition(hud.center, hud.bottom-128)
@@ -42,12 +45,15 @@ counter.SetPosition(hud.center, hud.bottom-128)
 //
 ////GAUGE BAR with built-in shader (dissolve)
 mugshot = new JabbaGraphicElement(sMugshot, "Mugshot", "hud")
-mugshot.SetPosition(hud.left+34, hud.top+34).SetFeedback("flash")
-gaugeBar = new JabbaGaugeBarElement(100, sJabbaGaugeBar, sJabbaGaugeBarMask, ,"Gauge Bar", "hud")
-gaugeBar.SetPosition(hud.left+70,hud.top+58).SetFeedback("flash")
+mugshot.SetPosition(hud.left+65, hud.top+65).SetOrigin(MiddleCenter).SetFeedback("flash")
+gaugeBar = new JabbaGaugeBarElement(100, sJabbaGaugeBar, sJabbaGaugeBarMask,"Gauge Bar", "hud")
+gaugeBar.SetPosition(hud.left+65,hud.top+65).SetOrigin(-20,-8).SetFeedback("flash")
 	.SetDefaultColor(c_orange)
 mugshotFrame = new JabbaGraphicElement(sMugshotFrame, "Mugshot Frame", "hud")
-mugshotFrame.SetPosition(hud.left+32, hud.top+32)
+mugshotFrame.SetPosition(hud.left+64, hud.top+64).SetOrigin(17,17)
+
+//group = new JabbaGroup()
+//group.AddMember([mugshot,gaugeBar,mugshotFrame])
 //
 ////GAUGE BAR with custom Shader (well, example is the same code than the built-in dissolve)
 //mugshotCustomShader = hud.CreateGraphicElement(sMugshot, "Mugshot Custom")
@@ -85,13 +91,12 @@ caroussel.SetPosition(hud.center, hud.bottom-128)
 	.SetRadius(128,64)
 	.SetDepth(0.8)
 	.SetDrawDistance(0.5)
-	.SetRotation(45)
 	.AddItem(sItem1, "item J")
 caroussel.AddItem(sItem2, "item A1")
 caroussel.AddItem(sItem3, "item B1")
 caroussel.AddItem(sItem4, "item B2")
 caroussel.AddItem(sItem5, "item A2")
-caroussel.SetFeedback("radiusPopout").SetFeedback("highlightItem", true)
+caroussel.SetFeedback("CarousselBounce").SetFeedback("popout", true)
 
 //customOriginTest = hud.CreateGraphicElement(sItem1, "Sprite with custom origin")
 //customOriginTest.SetOrigin(MiddleCenter)

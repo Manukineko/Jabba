@@ -33,10 +33,8 @@ function __baseElement() constructor{
 	elementType = ELEMENT.BASE
 	isHidden = false //
 	isReach = false // The moment it is set to true depends of the Element
-	hasFeedback = true //Check if the Element has a Feedback attached.
-	enableFeedback = true
-	//runFeedback = false
-	//feedback = function(){} //Will store the active feedback behavior
+	feedbackIsEnabled = true
+	
 #endregion /*********************************************************************************/	
 	
 #region /***************************** Private Common Variables *********************************/
@@ -48,9 +46,8 @@ function __baseElement() constructor{
 	__radiusUpdated = false
 	__originUpdated = false
 	__alphaUpdated = false
-	__feedbackUpdated = false
 	
-	feedback = new __feedbackPlayer()
+	feedback = new __feedbackPlayer(elementType)
 	bib = new Bib() ;
 	
 	
@@ -63,140 +60,16 @@ function __baseElement() constructor{
 	
 	var _self = self
 
-#region TO DELETE	
-	// //A list of global built-in feedback.
-	// //Each element can also have their own feedbacks
-	// __feedbacks = {
-		
-	// 	owner : _self,
-
-	// 	none : {
-	// 		func : method(other, function(){}),
-	// 		init : method(other, function(){}),
-	// 	},
-		
-	// 	highlight : {
-	// 		runFeedback : false,
-	// 		//colorActive : colorBlendActive,
-	// 		//colorInactive : colorBlendDefault,
-	// 		value : false,
-			
-	// 		init : function(){
-	// 			runFeedback = true
-	// 			getCarrousselVar()
-	// 		},
-			
-	// 		func : function(){
-	// 			if runFeedback{
-	// 				//var _previous = activeItem
-	// 				//_previous[$ "item"].SetColor(colorBlendDefault)
-	// 				//itemsList[value][$ "item"].SetColor(colorBlendActive)
-				
-	// 				runFeedback = false
-	// 			}
-	// 		},
-	// 		callbackInternalUpdate : method(self, function(_a,_b){
-				
-	// 		}),
-	// 		getCarrousselVar : method(self, function(){})
-			
-	// 	},
-		
-	// 	//inflate shortly the element
-	// 	popout : {
-	// 		scale : 1,
-	// 		time : 0,
-			
-	// 		init : function(){
-	// 			time = 0
-	// 			//scale = 2//["scale", 2]
-	// 		},
-	// 		func : function(){
-	// 			time += 0.1
-	// 			scale = tween(2,1, time, EASE.INOUT_CUBIC)
-	// 			callbackInternalUpdate(scale, scale)
-					
-	// 		},
-			
-	// 		callbackInternalUpdate : method(self, function(_a,_b){
-	// 			SetScale(_a,_b)
-	// 		})
-	// 	},
-	// 	fliponce : {
-	// 		animate : 0,
-	// 		time : 0,
-	// 		runFeedback : false,
-	// 		xScale : xScale,
-	// 		maxScale: xScale,
-			
-	// 		init : function(){
-	// 			self.runFeedback = true
-	// 			self.animate = 0
-	// 			self.time = 0
-	// 		},
-	// 		flipMe : method(self, function(_arg){
-	// 			SetScale(_arg,1)
-	// 		}),
-	// 		func : function(){
-			
-	// 			if runFeedback{
-	// 				time += 0.1
-	// 				switch(animate){
-	// 					case 0: 
-	// 						xScale = tween(maxScale,0, time, EASE.OUT_CUBIC)
-	// 					if xScale <= 0 {animate = 1; time = 0;}
-	// 					break;
-	// 					case 1: 
-	// 						xScale = tween(0,maxScale, time, EASE.OUT_CUBIC);
-	// 						if xScale >= 1 {runFeedback = false;}
-	// 					break;
-	// 				}
-	// 				flipMe(xScale);
-	// 			}
-	// 		}
-	
-	// 	}
-	//}
-#endregion
 #endregion
 
 #region /*****************************  Private Common Methods  *********************************/
-	// /// @func __feedbackGetParams 
-	// /// @desc this will set the variable stored in a feedback struct ("params" member)
-	// static __feedbackGetParams = function(){
-		
-	// 	var _params = __feedbacks[$ __activeFeedback]
-	// 	_params.init()
-		
-	// }
 	
 	/// @func __update
 	/// @desc Internal update method. Trigger update for Feedback, Origin, Position, Rotation, Scale, Alpha and Radius (for the Caroussel)
 	static __update = function(){
-		if (__feedbackUpdated){
-			__feedbackGetParams();
-			
-			__feedbackUpdated = false;
-		}
 		
 		if (__originUpdated){
 			var _xo = 0, _yo = 0
-			if asset_get_type(asset) = asset_sprite{
-				_xo = sprite_get_xoffset(asset)
-				_yo = sprite_get_yoffset(asset)
-			}
-			else if asset_get_type(asset) = asset_font{
-				switch(halign){
-					case fa_left : _xo = 0; break;
-					case fa_center : _xo = (width/2); break;
-					case fa_right : _xo = width; break;
-				}
-				switch(valign){
-					case fa_top : _yo = 0; break;
-					case fa_middle : _yo = (height/2); break;
-					case fa_bottom : _yo = height; break;
-				}
-			}
 			if assetType = asset_sprite{
 				_xo = sprite_get_xoffset(asset)
 				_yo = sprite_get_yoffset(asset)
@@ -216,13 +89,23 @@ function __baseElement() constructor{
 			xOrigin = -_xo + xOrigin;
 			yOrigin = -_yo + yOrigin;
 			
+			//To redo Later
+			//var _a = point_direction(_xo,_yo,xOrigin,yOrigin)
+			//xOrigin = _xo + cos(_a) * xOrigin + cos(_a + pi / 2) * yOrigin
+			//yOrigin = _yo + sin(_a) * xOrigin + sin(_a + pi / 2) * yOrigin
+			
 			__originUpdated = false;
 		}
 		if (__positionUpdated){
-			xx = x - xOrigin//xx
-			yy = y - yOrigin//yy
+			xx = x - xOrigin
+			yy = y - yOrigin
 			x = xx
 			y = yy
+			
+			//To redo Later
+			// var _a = point_direction(x,y,xOrigin,yOrigin)
+			// xx = x + cos(_a) * xOrigin + cos(_a + pi / 2) * yOrigin
+			// yy = y + sin(_a) * xOrigin + sin(_a + pi / 2) * yOrigin
 			
 			__positionUpdated = false;
 		}
@@ -232,6 +115,12 @@ function __baseElement() constructor{
 			var _s = dsin(angle);
 			x = xx - _c * xOrigin - _s * yOrigin
 			y = yy - _c * yOrigin + _s * xOrigin
+			//x = xx + _c * xOrigin - _s * yOrigin
+			//y = yy + _s * xOrigin + _c * yOrigin
+			
+			//To redo Later
+			//x = xx + dcos(angle) * xOrigin + dcos(angle + pi / 2) * yOrigin
+			//y = yy + dsin(angle) * xOrigin + dsin(angle + pi / 2) * yOrigin
 			
 			__rotationUpdated = false;
 		}
@@ -256,26 +145,31 @@ function __baseElement() constructor{
 		
 		__anyUpdated = false;
 	}
-
+	
+	/// @func __isReach()
+	/// @desc Internal method to determine if the value has reach the limit
+	/// @param {int} direction 0 = downward : the limit is lower than the value. 1 = upward : The limit is higher than the value
 	static __isReach = function(_mode = 1){
 			switch _mode{
 				case 0 : return value <= limit
 				break
 				case 1 : return  value >= limit
 				break
+				default : show_debug_message("isReach() direction is not defined")
+				break
 			}
 	}
 	
-	static __feedbackPlayOnReach = function(){
+	static __feedbackPlayOnReach = function(_mode = 1){
 		if !isReach{
-			if __isReach(){
+			if __isReach(_mode){
 				isReach = true
 				with(feedback){
 					if !run run = true
 				}
 			}
 		}else{
-			if !__isReach() isReach = false
+			if !__isReach(_mode) isReach = false
 		}
 	}
 	static __feedbackPlayOnValue = function(){
@@ -291,20 +185,29 @@ function __baseElement() constructor{
 
 
 #region /*****************************  Public Common Methods   *********************************/	
-	// Add additional method if BibFortuna is enable
 	
 	/// @func SetValue
 	/// @desc set the value to display by the Element
 	/// @params {} value the value to read
 	/// @params {bool} play the element feedback (default : true)
-	static SetValue = function(_value, _enableFeedback = true){
+	static SetValue = function(_value, _autofeedback = true){
 		value = _value
-		enableFeedback = _enableFeedback
-		if enableFeedback{
-			__feedbackPlayOnValue()
+		
+		if _autofeedback{
+			if feedbackIsEnabled{
+				__feedbackPlayOnValue()
+			}
 		}
 		
 		return self
+	}
+	
+	/// @func FeedbackPlay
+	/// @desc [On Value] Play the feedback assign to the Element when the value change.
+	static FeedbackPlay = function(){
+		if feedbackIsEnabled{
+			__feedbackPlayOnValue()
+		}
 	}
 	
 	/// @func SetOrigin
@@ -527,34 +430,6 @@ function __baseElement() constructor{
 		return self
 	}
 	
-	/*** BROKEN ***
-	/// @func AddFeedback
-	/// @desc Add a User-Defined feedback 
-	/// @param {string} name The name of the custom feedback
-	/// @param {function} function The feedback behavior
-	/// @param {function} init An array of parameters as follow : ["variable 1", value 1, "variable 2", value 2, ...]
-	//static AddFeedback = function(_name, _function, _init){
-	//	var _struct = {}
-	//	with(_struct){
-	//		func = method(other,_function)
-	//		init = method(other, _init)
-	//	}
-	//	
-	//	variable_struct_set(__feedbacks, _name, _struct)
-	//	
-	//	return self
-	//}**/
-	
-	
-	//static drawBib = function(){
-	//	bib.Draw()
-	//}
-	//static updateBib = function(){
-	//	bib.Update()
-	//}
-	//static cleanUpBib = function(){
-	//	bib.CleanUp()
-	//}
 	/// @func SetBibPosition
 	/// @desc Set the Bib's Position relative to the Element Position [Default : 0 (Element Position)]
 	/// @param {real} x position relative to Element x [Default : 0]
@@ -570,7 +445,7 @@ function __baseElement() constructor{
 	/// @func Update
 	/// @desc [Standalone Only] Must be called in the End Step Event if you use this Element as a standalone or outside a JabbaContainer.
 	static Update = function(){
-		if (enableFeedback){
+		if (feedbackIsEnabled){
 			feedback.__play();
 		}
 		
@@ -588,7 +463,7 @@ function __baseElement() constructor{
 		
 	}
 	
-	//For now, only used with BibFortuna extension.
+	//For now, only used with BibFortuna
 	//Will use it when I'll need to clean the element
 	
 	/// @func CleanUp
@@ -602,22 +477,6 @@ function __baseElement() constructor{
 			}
 		}
 	}
-	
-	//if ENABLE_BIBFORTUNA{
-	//	bib = new Bib() ;
-	//	
-	//	/// @func DrawBib
-	//	/// @desc Draw the Element's Bib
-	//	static drawBib = function(){
-	//		bib.Draw()
-	//	}
-	//	
-	//	/// @func UpdateBib
-	//	/// @desc Update the Bib and all its Fortuna
-	//	static updateBib = function(){
-	//		bib.Update()
-	//	}
-	//}
 	
 }
 #endregion

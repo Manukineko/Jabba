@@ -6,6 +6,7 @@
 
 function JabbaCounterElement(_limit = 10, _name = "Counter", _hud = undefined) : __fontTypeElement__() constructor{
 	
+	elementType = ELEMENT.COUNTER
 	name = _name
 	limit = _limit
 	asset = fJabbaFont
@@ -14,12 +15,7 @@ function JabbaCounterElement(_limit = 10, _name = "Counter", _hud = undefined) :
 	
 	if !is_undefined(_hud) __addToHud(_hud)
 	
-	// static SetLimit = function(_limit){
-	// 	limit = _limit
-		
-	// 	return self
-	// }
-	
+	//feedbackEffects = global.__jabbaFeedbacksList_ALT[ELEMENT.COUNTER]
 	
 	
 	/// @func SetTextAlign()
